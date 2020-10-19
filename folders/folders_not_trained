@@ -1,0 +1,50 @@
+#size effects, 
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/60g/r3-333/cont1/
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/60g/r3-320atoms/
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/60g/r3/cont3/
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/60g/r3-80atoms/
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/60g/r3-111
+#intermediate pressure not included
+/gpfs/loomis/project/kklee/jd848/pv+hf/3k/solid1.5/r3-3k/
+/gpfs/loomis/project/kklee/jd848/pv+hf/3k/solid1.5/r1-3k
+#temperature not included
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k/r1-2100/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k/r1-939/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-2100/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-939/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-347/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-218/recal
+#temperature included, pressure not
+/gpfs/loomis/project/kklee/jd848/pv+hf/3k/300g/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/4k/300g/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/300g/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/ppv/1k/r1-738/recal
+/gpfs/loomis/project/kklee/jd848/ppv/1k/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/ppv/1k/r1-1078/recal
+/gpfs/loomis/project/kklee/jd848/ppv/1k/r1-939/recal
+/gpfs/loomis/project/kklee/jd848/ppv/1k/r1-1500/recal
+/gpfs/loomis/project/kklee/jd848/ppv/2k/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/ppv/2k/r1-1500/recal
+/gpfs/loomis/project/kklee/jd848/ppv/3k/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/ppv/3k/r1-1500/recal
+/gpfs/loomis/project/fas/kklee/jd848/ppv/3k/r1-1.1/recal
+/gpfs/loomis/project/kklee/jd848/ppv/4k/r1-518/recal
+/gpfs/loomis/project/kklee/jd848/ppv/4k/r1-1500/recal
+/gpfs/loomis/project/kklee/jd848/ppv/5k/r1-518/recal
+/gpfs/loomis/project/fas/kklee/jd848/ppv/4k/r1-1.1/recal
+/gpfs/loomis/project/kklee/jd848/ppv/10k/r1-519/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/10k/pv/r1-519/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/10k/pv/r1-218/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/10k/pv/r1-126/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/4000g/r1-347/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/4000g/r1-218/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/4000g/r1-126/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-347/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/1k-solid/r1-218/recal
+/gpfs/loomis/project/kklee/jd848/ppv/10k/r1-4000/recal:q!
+#extreme 4, I exclude the following
+/gpfs/loomis/project/kklee/jd848/ppv/10k/r1-1000/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/10k/pv/r1-1000/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/10k/r3-0.7-10k/recal
+/gpfs/loomis/project/kklee/jd848/pv+hf/5k/4000g/r3-347/recal

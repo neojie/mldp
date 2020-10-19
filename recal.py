@@ -169,7 +169,7 @@ def run_dsq(cwd,path):
     target_folder = os.path.join(path,'recal')
     if 'out' in os.listdir(target_folder):
         os.chdir(target_folder)
-        call("dsq --job-file out --mem-per-cpu 5g -t 08:00:00 -p scavenge --mail-type None --batch-file sub_script.sh\n",shell=True)
+        call("dsq --job-file out --cpus-per-task 24  --mem-per-cpu 4g -t 6:00:00 -p scavenge --mail-type None --batch-file sub_script.sh\n",shell=True)
         call("sbatch sub_script.sh", shell=True)
         os.chdir(cwd)
     
@@ -205,7 +205,7 @@ for path in paths:
 #        pass 
         print('*** SKIP',path,'has recal folder')
     else:
-        print('--> Build recal',path,'has recal folder')
+        print('--> Build recal',path)
         os.mkdir(os.path.join(path,'recal'))        
         XDATCAR = open(os.path.join(path,"XDATCAR"),'r')
         title   = XDATCAR.readline().rstrip('\r\n').rstrip('\n')

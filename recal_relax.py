@@ -184,7 +184,7 @@ def build_recal(path, tot_ele, sel_nsw):
     else:
         create_job(path,tot_ele,sel_nsw)
         dsq_jobs(path,sel_nsw)
-#        run_dsq(cwd,path)   
+        run_dsq(cwd,path)   
     
 import argparse
 parser = argparse.ArgumentParser()

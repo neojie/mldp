@@ -25,6 +25,11 @@ ax[0][1].set_yscale('log')
 ax[1][0].set_yscale('log')
 ax[1][1].set_yscale('log')
 
+ax[0][0].grid(True)
+ax[0][1].grid(True)
+ax[1][0].grid(True)
+ax[1][1].grid(True)
+
 ax[0][0].set_ylabel('tot')
 ax[0][1].set_ylabel('energy')
 ax[1][0].set_ylabel('force')

@@ -1,0 +1,37 @@
+SYSTEM = Pv
+
+Start parameter for this Run:
+  NWRITE =      2;   LPETIM=F    write-flag & timer
+  ISTART =      0    job   : 0-new  1-cont  2-samecut
+  LWAVE  =  .FALSE.
+  LCHARG  =  .FALSE.
+
+Electronic Relaxation
+  ENCUT  =   800.00 EV
+  NELM   =   70;
+  EDIFF  =   1E-06   stopping-criterion for ELM
+  MAXMIX =   50
+  LMAXMIX = 2
+#  NBANDS = 500
+Ionic Relaxation
+  NSW    = 0    number of steps for IOM
+  NBLOCK =      1;   KBLOCK =     1    inner block; outer block
+  ISYM   =      0
+  ISIF   =      2
+
+  POTIM  =   1.000       time-step for ion-motion
+  TEBEG  =   6000 ;   TEEND=6000 initial temperature
+  SMASS  =   0.00    Nose mass-parameter (am)
+  NPACO  =   104
+  APACO  =   10.4
+  GGA    =   PS
+
+DOS related values:
+  ISMEAR =     -1;   SIGMA  = 0.517039818 broadening in eV -4-tet -1-fermi 0-gaus
+
+Electronic Relaxation 2
+  #IALGO  =    48    algorithm
+  ALGO   = VeryFast
+  LREAL  =    A
+  
+ 
