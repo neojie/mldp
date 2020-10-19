@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jul 21 16:17:57 2020
-
+when Pressure is too high, VASP OUTPUT format for stress are incorrect!
 @author: jiedeng
 """
 import os
