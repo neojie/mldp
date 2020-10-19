@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jun 21 13:51:58 2020
-merge to 
+modify set.000 to x.000
 @author: jiedeng
+
 """
 from shared_functions import load_paths
 import os
@@ -48,7 +49,7 @@ if args.inputpath:
             else:
                 print(tmp[i], " abnormal")
 else:
-    out = [cwd]                    
+    out = [cwd]
 for path in out:
     print(path)
     files = os.listdir(path)
@@ -56,5 +57,5 @@ for path in out:
         if 'xset' in file:
             string = file.replace('xset','x')
             os.rename(os.path.join(path,file),os.path.join(path,string))
-            
+
 

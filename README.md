@@ -21,6 +21,8 @@ Rescale training
 9- stat.py
 10-post_stat.py
 
+pbs-lammps training
+job_array.py => like dsq
 
 
 order	code		function		arguments								ATTENTION	
