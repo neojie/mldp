@@ -184,10 +184,12 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputpath","-ip",help="input path file")
 parser.add_argument("--inputfile","-if",help="input files")
+parser.add_argument("--liquid_gap","-lg",type=int,default=1,help="data gap for liquid")
+parser.add_argument("--solid_gap","-sg",type=int,default=1,help="data gap for solid")
 
 args   = parser.parse_args()
 
-print(args.run_vasp)
+#print(args.run_vasp)
 cwd    = os.getcwd()
 if args.inputpath:
     print("Check files in {0}  ".format(args.inputpath))
@@ -204,7 +206,7 @@ else:
     print("No folders point are provided. Use default value folders")
     inputfile = os.path.join(cwd,'inputs')
     
-paths = load_paths(inputpath)
+#paths = load_paths(inputpath)
 for path in paths:
     print('###',path)
     # get basic info
@@ -243,7 +245,7 @@ for path in paths:
         ### create jobs
         ### if we pass the XDATCAR, it is hard to read code, because we need count
         XDATCAR.close()
-        sel_nsw = create_job(path,tot_nsw,tot_ele,is_liquid,liquid_frames = tot_nsw//1, solid_frames = tot_nsw//1)
+        sel_nsw = create_job(path,tot_nsw,tot_ele,is_liquid,liquid_frames = tot_nsw//args.liquid_gap, solid_frames = tot_nsw//args.solid_gap)
         
 #        dsq_jobs(path)
 #        run_dsq(cwd,path,sel_nsw)
