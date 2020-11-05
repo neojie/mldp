@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Jul 25 18:48:47 2020
-
+https://stackoverflow.com/questions/52403065/argparse-optional-boolean
 @author: jiedeng
 """
 
@@ -12,19 +12,32 @@ import argparse
 cwd    = os.getcwd()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--inputpath","-ip",help="input path file")
-parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
+parser.add_argument("--inputpath","-ip",help="input path file.\
+                    1-None, 1 folder, current folder\
+                    2-all all subfolders \
+                    3-file, folders stored at file")
 
+parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
+#parser.add_argument("--verbose","-v",type = bool, default = True, help="OUTCAR name")
+
+parser.add_argument('--verbose',"-v", default=True, action='store_false')
 args   = parser.parse_args()
 
-if args.inputpath:
-    print("Check files in {0}  ".format(args.inputpath))
-    inputpath = args.inputpath
-    paths = load_paths(inputpath)
-else:
+if not args.inputpath:
     print("No folders point are provided. Use current working path")
     inputpath = os.path.join(cwd)
     paths = [cwd]
+else:
+    if args.inputpath == 'all':
+        paths = []
+        print("check all sub folders at {0}".format(cwd))
+        for directory in os.listdir(cwd):
+            if os.path.isdir(directory):
+                paths.append(directory)
+    else:
+        print("Check files in {0}  ".format(args.inputpath))
+        inputpath = args.inputpath
+        paths = load_paths(inputpath)        
 
 
 def check(path):
@@ -61,9 +74,10 @@ def check(path):
                 good_nbands = True
                 
         if check_iter and check_nbands:
-            print("details")
-            print(nelm, iteration)
-            print(nbands, occupancy)
+            if args.verbose:
+                print("details")
+                print(nelm, iteration)
+                print(nbands, occupancy)
             return good_iter, good_nbands
     return good_iter, good_nbands  
 

@@ -3,6 +3,8 @@
 """
 Created on Sat Oct  3 12:26:28 2020
 https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
+
+TODO: add condition to stop running thread after reach the last step
 @author: jiedeng
 """
 
@@ -42,7 +44,7 @@ def foo():
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
               num_waiting_jobs,threshold, max_job_id, max_job_id+next_batch,time))
         nsw_range = '{0}-{1}'.format(max_job_id,max_job_id+next_batch)
-        call("python ~/script/dsq/recal_lmp_v2.py -r {0}".format(nsw_range),shell=True)
+        call("python ~/script/mldp/recal_lmp.py -r {0}".format(nsw_range),shell=True)
     elif num_waiting_jobs < threshold:
         print("{3}: # of waiting jobs: {0} > {1}, wait for another {2} sec(s)".format(
               num_waiting_jobs,threshold, time_gap,time))        
