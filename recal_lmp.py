@@ -56,7 +56,7 @@ from subprocess import call
 def run(cwd,target_path):
     os.chdir(target_path)
     sub_file = os.path.join(inputfile,'sub_vasp.sh')
-    call("qsub {0}".format(sub_file), shell=True)
+    call("/u/systems/UGE8.6.4/bin/lx-amd64/qsub {0}".format(sub_file), shell=True)
 #    call("bash {0}".format(sub_file), shell=True)
     os.chdir(cwd)
     
