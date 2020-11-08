@@ -203,8 +203,8 @@ if 'Pxx Pyy Pzz Pxy Pyz Pxz' in skip_header[1]:
     c_yz = autocorr(stress[:,4])
     c_zz = autocorr(stress[:,2])
 
-    corr = c_xy + c_xz + c_xy 
-    corr_2 = c_xy + c_xz + c_xy + autocorr(stress[:,0] - stress[:,1]) + autocorr(stress[:,1] - stress[:,2])
+    corr = (c_xy + c_xz + c_xy)/3
+    corr_2 = (c_xy + c_xz + c_xy + autocorr((stress[:,0] - stress[:,1])/2) + autocorr((stress[:,1] - stress[:,2])/2))/5
     
     fs2s       = 1e-15
 #    eV_A3_2_Pa = 160.21766208e9
