@@ -1,13 +1,18 @@
 import dpdata 
 import numpy as np
 import glob
-
+import argparse
+parser = argparse.ArgumentParser()
 #l1=dpdata.System('/Users/jiedeng/Documents/ml/deepmd-kit/my_example/tail_3.dump')
-l1=dpdata.System('dump.0',fmt='lammps/dump')
+parser.add_argument("--file","-f",type=str,default='dump.0',help="name of dump file,default dump.0")
+parser.add_argument("--sigma","-s",type=float,help="sigma = kb*T")
+
+args   = parser.parse_args()
+l1=dpdata.System(args.file,fmt='lammps/dump')
 
 l1.to_deepmd_npy('test')
 l1.to_deepmd_raw('test')
-sigma=0.344693
+sigma=args.sigma
 sets = glob.glob('test/*set*')
 for seti in sets:
     print(seti)
