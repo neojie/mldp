@@ -14,8 +14,9 @@ es = np.array(es)
 for dire in fs_dirs:
     tmp = np.loadtxt(dire)
     tmp = tmp[:,3:6]
-    yy =tmp.reshape((100,160,3))
-    zz = yy.reshape((100,480))
+    length = len(tmp)
+    yy =tmp.reshape((length//160,160,3))
+    zz = yy.reshape((length//160,480))
     fs.append(zz)    
 fs = np.array(fs)
 for dire in vs_dirs:
