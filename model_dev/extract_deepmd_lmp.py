@@ -10,7 +10,7 @@ parser.add_argument("--sigma","-s",type=float,help="sigma = kb*T")
 args   = parser.parse_args()
 l1=dpdata.System(args.file,fmt='lammps/dump')
 
-l1.to_deepmd_npy('test')
+l1.to_deepmd_npy('test',set_size=1000000,) # default set size is 5000
 l1.to_deepmd_raw('test')
 sigma=args.sigma
 sets = glob.glob('test/*set*')
