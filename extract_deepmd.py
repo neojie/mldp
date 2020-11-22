@@ -18,6 +18,7 @@ parser.add_argument("--inputpath","-ip",help="input path file")
 parser.add_argument("--batchsize","-bs",type = int, help="input path file")
 parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
 parser.add_argument("--deepmd","-d",type = str, default = 'deepmd', help="deepmd folder name")
+parser.add_argument("--idx","-id",type = str, help="idx file")
 
 args   = parser.parse_args()
 
@@ -85,6 +86,9 @@ def best_size(tot):
 
 def build_deepmd(path,nsw,outcar,deepmd):
     ls = LabeledSystem(outcar,fmt='outcar')
+    """
+    sub_ls = ls.sub_system(idx)
+    """
     deepmd = os.path.join(path,deepmd)
     if args.batchsize: 
         set_size = args.batchsize
