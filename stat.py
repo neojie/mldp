@@ -49,7 +49,7 @@ def stds(outcar,exclude_fraction=0.2):
     f_bar = np.sum(forces,axis=0)/len(forces)   
     f_dif = forces - f_bar
     d_F   = np.sqrt((f_dif**2).sum(axis = 1).sum(axis = 1)/atom_numbs[0]/3) #eqn 13
-    f_std = np.sqrt(sum(d_F**2)/len(d_F))
+    f_std = np.sqrt(sum(d_F**2)/len(d_F)) # => should be len(d_F) -1
     
     tmp_virial = tmp_virial[start:]
     vol = (np.cross(cells[0][0], cells[0][1])*cells[0][2]).sum()
