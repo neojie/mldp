@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Nov 24 10:48:49 2020
+consider test and recal are in different folder
+test resutls does not contain the orginal info
+This is not a optimal way of practice. 
+See analysis_recal.py for a better way
 
 @author: jiedeng
 """
