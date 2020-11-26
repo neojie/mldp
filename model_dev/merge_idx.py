@@ -19,7 +19,7 @@ idx = np.array([])
 for path in paths:
     print('start to merge {0}'.format(path))
     tmp=np.loadtxt(path).astype(int)
-    print('{0} has {1} indexs'.format(len(tmp)))
+    print('{0} has {1} indexs'.format(path,len(tmp)))
     idx = np.union1d(idx,tmp)
 
 print('final file {0} has {1} indexs'.format(args.out,len(idx)))
