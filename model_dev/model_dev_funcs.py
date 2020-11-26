@@ -108,10 +108,10 @@ def extract_org_nn_pred(test_folder,prefix,natoms=160):
 
     for dire in fs_dirs:
         tmp = np.loadtxt(dire)
-        tmp = tmp[:,3:6]
-        tmp2 = tmp[:,0:3]
-        length = len(tmp)
-        yy =tmp.reshape((length//natoms,natoms,3))
+        tmp2, tmp1  = tmp[:,:3], tmp[:,3:6]
+#        tmp2 = tmp[:,0:3]
+        length = len(tmp1)
+        yy =tmp1.reshape((length//natoms,natoms,3))
         zz = yy.reshape((length//natoms,natoms*3))
         yy2 =tmp2.reshape((length//natoms,natoms,3))
         zz2 = yy2.reshape((length//natoms,natoms*3))
@@ -121,9 +121,9 @@ def extract_org_nn_pred(test_folder,prefix,natoms=160):
     fs_org = np.array(fs_org)
     for dire in vs_dirs:
         tmp = np.loadtxt(dire)
-        tmp = tmp[:,9:]
-        tmp2 = tmp[:,:9]
-        vs.append(tmp)   
+        tmp2, tmp1 = tmp[:,:9], tmp[:,9:]
+#        tmp2 = tmp[:,:9]
+        vs.append(tmp1)   
         vs_org.append(tmp2) 
     vs = np.array(vs)
     vs_org = np.array(vs_org)

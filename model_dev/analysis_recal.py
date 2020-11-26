@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser()
 parser.add_argument("--test_folder","-tf",default='recal/deepmd',help="model test folder")
 parser.add_argument("--recal_foler","-rf",default='recal',help="recal folder")
-parser.add_argument("--model_prefix","-mp",default='re4-re5-re6-re7-re8',help="recal folder")
+parser.add_argument("--model_prefix","-mp",default='re4',help="recal folder")
 parser.add_argument("--energy_lower_cutoff","-elc",default=0.0044*2,type=float,help="lower cutoff for energy")
 parser.add_argument("--energy_upper_cutoff","-euc",default=0.2,type=float,help="upper cutoff for energy")
 parser.add_argument("--force_lower_cutoff","-fc",default=0.27,type=float,help="lower cutoff for force")
@@ -46,14 +46,14 @@ test_folder = args.test_folder
 recal_foler = args.recal_foler
 prefixs     = args.model_prefix.split('-')
 
-#test_folder = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/test'
-#recal_foler = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/recal'
+test_folder = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/test'
+recal_foler = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/recal'
 
 ### get confgis that were recalculated
 #outcar = os.path.join(recal_foler,'OUTCAR')
 natoms = 160
 
-es_org,fs_org,vs_org, es,fs,vs                  = extract_org_nn_pred(test_folder,prefixs,natoms=160)
+es_org,fs_org,vs_org, es,fs,vs                  = extract_org_nn_pred(test_folder,prefixs,natoms=natoms)
 etot,forces ,stress   = es_org[0],fs_org[0],vs[0]
 nsw = np.array(range(len(es_org[0])))
 
