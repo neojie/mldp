@@ -148,7 +148,7 @@ else:
     ax[0].plot(nsw+1,etot[nsw],'-',label='VASP')
     ax[0].plot(nsw+1,es[0],'-',label='nn')
     ax[1].plot(nsw+1,e_diff_per_atom,'-',label='VASP-NN')
-    ax[2].plot(nsw+1, rmsd_f[nsw],'-',label='RMSE of force by nn and vasp)')
+    ax[2].plot(nsw+1, rmsd_f[nsw],'-',label='RMSE of force by nn and vasp')
     ax[0].set_ylabel('E (eV)');
     ax[1].set_ylabel(r'$\Delta E eV/atom$');
     ax[2].set_ylabel('RMSE force (eV/A)');
@@ -168,22 +168,22 @@ else:
     ax[3].legend()
 
     np.savetxt(os.path.join(test_folder,'{0}_vid_e_or_f'.format(prefixs[0])),
-               e_or_f_idx+1,
+               e_or_f_idx+1,fmt='%d',
                header='e ={0}-{1} || f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_or_f_idx)))
     np.savetxt(os.path.join(test_folder,'{0}_id_e_or_f'.format(prefixs[0])),
-               e_or_f_idx,
+               e_or_f_idx,fmt='%d',
                header='e ={0}-{1} || f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_or_f_idx)))
     np.savetxt(os.path.join(test_folder,'{0}_vid_e_and_f'.format(prefixs[0])),
-               e_and_f_idx+1,
+               e_and_f_idx+1,fmt='%d',
                header='e ={0}-{1} && f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_and_f_idx)))
     np.savetxt(os.path.join(test_folder,'{0}_id_e_and_f'.format(prefixs[0])),
-               e_and_f_idx,
+               e_and_f_idx,fmt='%d',
                header='e ={0}-{1} && f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_and_f_idx)))
