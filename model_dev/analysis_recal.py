@@ -50,12 +50,12 @@ prefixs     = args.model_prefix.split('-')
 #recal_foler = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/recal'
 
 ### get confgis that were recalculated
-outcar = os.path.join(recal_foler,'OUTCAR')
+#outcar = os.path.join(recal_foler,'OUTCAR')
 natoms = 160
 
 es_org,fs_org,vs_org, es,fs,vs                  = extract_org_nn_pred(test_folder,prefixs,natoms=160)
 etot,forces ,stress   = es_org[0],fs_org[0],vs[0]
-nsw = range(len(es_org[0]))
+nsw = np.array(range(len(es_org[0])))
 
 nn   = [np.mean(es,axis=0),np.mean(fs,axis=0),np.mean(vs,axis=0)]
 vasp = [etot,forces,stress]
