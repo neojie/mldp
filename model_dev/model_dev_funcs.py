@@ -78,6 +78,57 @@ def extract_nn_pred(test_folder,prefix,natoms=160):
     vs = np.array(vs)
     return es,fs,vs
 
+def extract_org_nn_pred(test_folder,prefix,natoms=160):
+    """
+    extract e, f, v
+    TODO: natoms should be self contained
+    """
+    es_dirs = []; fs_dirs = []; vs_dirs = [];  
+    if type(prefix) is str:
+        prefixs = [prefix]
+    else:
+        prefixs = prefix
+
+    for pref in prefixs:
+       e_dir, f_dir, v_dir = _make_dir(test_folder, pref)
+       es_dirs.append(e_dir)
+       fs_dirs.append(f_dir)
+       vs_dirs.append(v_dir)
+    
+    es = [];es_org = []
+    fs = [];fs_org = []
+    vs = [];vs_org = []   
+
+    for dire in es_dirs:
+        tmp = np.loadtxt(dire)
+        es.append(tmp[:,1])
+        es_org.append(tmp[:,0])
+    es = np.array(es)
+    es_org = np.array(es_org)
+
+    for dire in fs_dirs:
+        tmp = np.loadtxt(dire)
+        tmp = tmp[:,3:6]
+        tmp2 = tmp[:,0:3]
+        length = len(tmp)
+        yy =tmp.reshape((length//natoms,natoms,3))
+        zz = yy.reshape((length//natoms,natoms*3))
+        yy2 =tmp2.reshape((length//natoms,natoms,3))
+        zz2 = yy2.reshape((length//natoms,natoms*3))
+        fs.append(zz)   
+        fs_org.append(zz2)
+    fs = np.array(fs)
+    fs_org = np.array(fs_org)
+    for dire in vs_dirs:
+        tmp = np.loadtxt(dire)
+        tmp = tmp[:,9:]
+        tmp2 = tmp[:,:9]
+        vs.append(tmp)   
+        vs_org.append(tmp2) 
+    vs = np.array(vs)
+    vs_org = np.array(vs_org)
+    return es_org,fs_org,vs_org,es,fs,vs
+
 
 def _make_dir(test_folder,prefix):
     e_dir = os.path.join(test_folder,prefix+'.e.out')
