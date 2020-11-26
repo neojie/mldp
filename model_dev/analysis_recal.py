@@ -35,7 +35,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--test_folder","-tf",default='recal/deepmd',help="model test folder")
 parser.add_argument("--recal_foler","-rf",default='recal',help="recal folder")
 parser.add_argument("--model_prefix","-mp",default='re4-re5-re6-re7-re8',help="recal folder")
-parser.add_argument("--energy_lower_cutoff","-elc",default=0.0044,type=float,help="lower cutoff for energy")
+parser.add_argument("--energy_lower_cutoff","-elc",default=0.0044*2,type=float,help="lower cutoff for energy")
 parser.add_argument("--energy_upper_cutoff","-euc",default=0.2,type=float,help="upper cutoff for energy")
 parser.add_argument("--force_lower_cutoff","-fc",default=0.27,type=float,help="lower cutoff for force")
 parser.add_argument("--force_upper_cutoff","-fuc",default=1,type=float,help="upper cutoff for force")
@@ -159,8 +159,7 @@ else:
     ax[3].plot(e_and_f_idx+1,e_diff_per_atom[e_and_f_idx],'.',
              label='f ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
-                                                           len(e_and_f_idx)))
-    
+                                                           len(e_and_f_idx)))   
     ax[0].legend()
     ax[1].legend()
     ax[2].legend()
