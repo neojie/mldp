@@ -46,8 +46,8 @@ test_folder = args.test_folder
 recal_foler = args.recal_foler
 prefixs     = args.model_prefix.split('-')
 
-test_folder = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/test'
-recal_foler = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/recal'
+#test_folder = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/test'
+#recal_foler = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/recal'
 
 ### get confgis that were recalculated
 #outcar = os.path.join(recal_foler,'OUTCAR')
