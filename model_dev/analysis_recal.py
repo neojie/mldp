@@ -167,22 +167,22 @@ else:
     ax[2].legend()
     ax[3].legend()
 
-    np.savetxt(os.path.join(test_folder,'vid_e_or_f'),
+    np.savetxt(os.path.join(test_folder,'{0}_vid_e_or_f'.format(prefixs[0])),
                e_or_f_idx+1,
                header='e ={0}-{1} || f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_or_f_idx)))
-    np.savetxt(os.path.join(test_folder,'id_e_or_f'),
+    np.savetxt(os.path.join(test_folder,'{0}_id_e_or_f'.format(prefixs[0])),
                e_or_f_idx,
                header='e ={0}-{1} || f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_or_f_idx)))
-    np.savetxt(os.path.join(test_folder,'vid_e_and_f'),
+    np.savetxt(os.path.join(test_folder,'{0}_vid_e_and_f'.format(prefixs[0])),
                e_and_f_idx+1,
                header='e ={0}-{1} && f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_and_f_idx)))
-    np.savetxt(os.path.join(test_folder,'id_e_and_f'),
+    np.savetxt(os.path.join(test_folder,'{0}_id_e_and_f'.format(prefixs[0])),
                e_and_f_idx,
                header='e ={0}-{1} && f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
