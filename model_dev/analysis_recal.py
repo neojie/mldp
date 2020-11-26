@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+
 analysis used for test without org dataset, analysis_recal for test with org dataset
 Created on Tue Nov 24 10:48:49 2020
 1-Given NN0 where is trained with DS
 2-MPMT  DataSet0=>DS0, DS0 has log file which contains potentail energy, and stress, dump file contains position (and atomic forces)
-3-Use five or more different models to calculate model deviation, select idx0 to recal 
+3-Use five or more different models to calculate model deviation, select idx0 to recal
   Select Rule : 1) mean of force model devi > 0.04, we do not impose upper band here
 4-Recal using VASP for trajectories with idx0 to form VASP_DS0
   Note we have several pressure bins, so  VASP_DS0 = {VASP_DS01,VASP_DS02,VASP_DS03,...}
@@ -49,12 +50,12 @@ prefixs     = args.model_prefix.split('-')
 #recal_foler = '/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/40-60/recal'
 
 ### get confgis that were recalculated
-outcar = os.path.join(recal_foler,'OUTCAR')
+#outcar = os.path.join(recal_foler,'OUTCAR')
 natoms = 160
 
 es_org,fs_org,vs_org, es,fs,vs                  = extract_org_nn_pred(test_folder,prefixs,natoms=160)
 etot,forces ,stress   = es_org[0],fs_org[0],vs[0]
-nsw = range(len(es_org[0]))
+nsw = np.array(range(len(es_org[0])))
 
 nn   = [np.mean(es,axis=0),np.mean(fs,axis=0),np.mean(vs,axis=0)]
 vasp = [etot,forces,stress]
@@ -65,7 +66,7 @@ rmsd_e,rmsd_f,rmsd_v=dev_vasp_nn(vasp,nn,natoms=natoms)
 
 
 if len(prefixs) > 1:
-    # several models  
+    # several models
     max_dpgen_fs, mean_std_f = dev_nn(es,fs,vs)
 
     dpgen_corr   = np.corrcoef(max_dpgen_fs,e_diff_per_atom)
@@ -92,16 +93,16 @@ if len(prefixs) > 1:
 
     e_idx=np.where(abs(e_diff_per_atom)>0.0044)[0]
     f_idx=np.where(abs(rmsd_f)>0.27)[0]
-    
+
     cutoffs = np.linspace(0,max(abs(mean_std_f)))
     ratios_e = []; num = []
-    ratios_f = [];  
+    ratios_f = [];
     for cutoff in cutoffs:
         mod_dev_idx=np.where(abs(mean_std_f)>=cutoff)[0]
         ratios_e.append(len(np.intersect1d(e_idx,mod_dev_idx))/len(mod_dev_idx))
         ratios_f.append(len(np.intersect1d(f_idx,mod_dev_idx))/len(mod_dev_idx))
         num.append(len(mod_dev_idx))
-    
+
     fig1,ax1 = plt.subplots(1,1,figsize=(6,2),sharex=True)
     ax1.plot(cutoffs,ratios_e,label='rmse e>nn error ')
     ax1.plot(cutoffs,ratios_f,label='rmse f>nn error ')
@@ -113,7 +114,7 @@ if len(prefixs) > 1:
     ax2.set_ylabel('tot frame selected')
     ax1.grid()
     fig1.savefig('cutoff.png')
-    
+
     fig3,ax3 = plt.subplots(1,1,figsize=(6,2),sharex=True)
     ax3.plot(f_idx,e_diff_per_atom[f_idx],'.',label='f > nn {0}'.format(len(f_idx)))
     ef_idx = np.intersect1d(e_idx,f_idx)
@@ -124,10 +125,10 @@ if len(prefixs) > 1:
     np.savetxt(os.path.join(recal_foler,'nsw_efc'),
                nsw_efc,
                header='energy cutoff {0} && force cutoff {1}'.format(args.energy_cutoff, args.force_cutoff))
-    fig3.show() 
+    fig3.show()
     fig.show()
     fig1.show()
-    
+
 
 else:
     # one model only
@@ -136,13 +137,13 @@ else:
     e_idx2 = np.where(abs(e_diff_per_atom)>args.energy_lower_cutoff)[0]
     f_idx1 = np.where(abs(rmsd_f)<args.force_upper_cutoff)[0]
     f_idx2 = np.where(abs(rmsd_f)>args.force_lower_cutoff)[0]
-        
+
     e_idx=np.intersect1d(e_idx1,e_idx2)
     f_idx=np.intersect1d(f_idx1,f_idx2)
-    
+
     e_and_f_idx = np.intersect1d(e_idx,f_idx)
     e_or_f_idx  = np.union1d(e_idx,f_idx)
-    
+
     fig,ax = plt.subplots(4,1,figsize=(6,10),sharex=True)
     ax[0].plot(nsw+1,etot[nsw],'-',label='VASP')
     ax[0].plot(nsw+1,es[0],'-',label='nn')
@@ -151,7 +152,7 @@ else:
     ax[0].set_ylabel('E (eV)');
     ax[1].set_ylabel(r'$\Delta E eV/atom$');
     ax[2].set_ylabel('RMSE force (eV/A)');
-    
+
     ax[3].plot(e_or_f_idx+1,e_diff_per_atom[e_or_f_idx],'.',
              label='f ={0}-{1} || e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
@@ -159,12 +160,12 @@ else:
     ax[3].plot(e_and_f_idx+1,e_diff_per_atom[e_and_f_idx],'.',
              label='f ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
-                                                           len(e_and_f_idx)))   
+                                                           len(e_and_f_idx)))
     ax[0].legend()
     ax[1].legend()
     ax[2].legend()
     ax[3].legend()
-    
+
     nsw_efc=np.array(nsw+1).astype(int)[ef_idx]
     np.savetxt(os.path.join(test_folder,'vid_e_or_f'),
                e_or_f_idx+1,
@@ -175,7 +176,7 @@ else:
                e_or_f_idx,
                header='f ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
-                                                           len(e_and_f_idx)))   
+                                                           len(e_and_f_idx)))
     np.savetxt(os.path.join(test_folder,'vid_e_and_f'),
                e_and_f_idx+1,
                header='f ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
