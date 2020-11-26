@@ -166,7 +166,6 @@ else:
     ax[2].legend()
     ax[3].legend()
 
-    nsw_efc=np.array(nsw+1).astype(int)[ef_idx]
     np.savetxt(os.path.join(test_folder,'vid_e_or_f'),
                e_or_f_idx+1,
                header='f ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
