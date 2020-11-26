@@ -154,13 +154,14 @@ else:
     ax[2].set_ylabel('RMSE force (eV/A)');
 
     ax[3].plot(e_or_f_idx+1,e_diff_per_atom[e_or_f_idx],'.',
-             label='f ={0}-{1} || e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
+             label='e ={0}-{1} || f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_or_f_idx)))
     ax[3].plot(e_and_f_idx+1,e_diff_per_atom[e_and_f_idx],'.',
-             label='f ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
+             label='e ={0}-{1} && f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_and_f_idx)))
+    ax[3].set_ylabel(r'$\Delta E eV/atom$');
     ax[0].legend()
     ax[1].legend()
     ax[2].legend()
@@ -168,7 +169,7 @@ else:
 
     np.savetxt(os.path.join(test_folder,'vid_e_or_f'),
                e_or_f_idx+1,
-               header='e ={0}-{1} || e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
+               header='e ={0}-{1} || f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_or_f_idx)))
     np.savetxt(os.path.join(test_folder,'id_e_or_f'),
@@ -178,7 +179,7 @@ else:
                                                            len(e_or_f_idx)))
     np.savetxt(os.path.join(test_folder,'vid_e_and_f'),
                e_and_f_idx+1,
-               header='e ={0}-{1} && e = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
+               header='e ={0}-{1} && f = {2}-{3}, {4}'.format(args.energy_lower_cutoff,args.energy_upper_cutoff,
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_and_f_idx)))
     np.savetxt(os.path.join(test_folder,'id_e_and_f'),
