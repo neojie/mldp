@@ -38,7 +38,7 @@ parser.add_argument("--recal_foler","-rf",default='recal',help="recal folder")
 parser.add_argument("--model_prefix","-mp",default='mm2',help="recal folder, support one model or multiple models, e.g., re4-re5-re6")
 parser.add_argument("--energy_lower_cutoff","-elc",default=0.0044*2,type=float,help="lower cutoff for energy")
 parser.add_argument("--energy_upper_cutoff","-euc",default=0.1,type=float,help="upper cutoff for energy")
-parser.add_argument("--force_lower_cutoff","-fc",default=0.27,type=float,help="lower cutoff for force")
+parser.add_argument("--force_lower_cutoff","-flc",default=0.27,type=float,help="lower cutoff for force")
 parser.add_argument("--force_upper_cutoff","-fuc",default=1,type=float,help="upper cutoff for force")
 
 args        = parser.parse_args()

@@ -93,7 +93,7 @@ def build_deepmd(path,nsw,outcar,deepmd):
     """
     if args.idx:
         print("index file provided")
-        idx = np.loadtxt(args.idx)
+        idx = np.loadtxt(args.idx).astype(int)
         ls = ls.sub_system(idx)
     if args.vaspidx:
         print("vasp index file provided")
