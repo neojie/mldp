@@ -81,10 +81,11 @@ if args.recal_foler:
     recal_foler = args.recal_foler
     mode = 'nn_vasp'
     print("mode is {0}, nn average and vasp are compared".format(mode))
-#else:
+else:
     ## only nn test results are given
+    print("mode is {0}, nn model deviation is analyzed".format(mode))
 test_folder = args.test_folder
-print("mode is {0}, nn model deviation is analyzed".format(mode))
+
 
 
 #test_folder = args.test_folder
