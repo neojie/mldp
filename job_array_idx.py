@@ -41,10 +41,27 @@ def get_max_job_id(path):
     for dd in dirs_int:
         if max_job_id<dd:
             max_job_id=dd
-    return max_job_id
+    return max_job_id,len(dirs_int)
 
-count = 0
-def foo(count=0):
+## get the initial job index ##
+
+tmp = 0 
+
+args   = parser.parse_args()
+idx    = np.loadtxt(args.idx).astype(int)
+
+threshold  = 50  # waiting job threshold, if > threshold, do NOT submit, else, submit
+next_batch = 20
+#time_gap   = 100 # sec
+job_lim    = 490 # in UCLA hoffmann
+cwd = os.getcwd()
+path = cwd
+counti = 0
+max_job_id,count0 = get_max_job_id(path)  
+if max_job_id == idx[count0-1]:
+    counti = count0  # start from counti
+
+def foo(count=counti):
     
     num_waiting_jobs, num_tot_jobs =get_waiting_jobs()    
     now   = datetime.datetime.now()
@@ -52,7 +69,7 @@ def foo(count=0):
     time_gap = num_waiting_jobs # if num_waiting_jobs == 0, do not wait
      
     if num_waiting_jobs < threshold and (num_tot_jobs+next_batch) < job_lim:    
-        max_job_id = get_max_job_id(path)   
+        max_job_id,_ = get_max_job_id(path)   
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
               num_waiting_jobs,threshold, max_job_id, max_job_id+next_batch,time))
         for i in range(next_batch):
@@ -66,20 +83,11 @@ def foo(count=0):
     elif (num_tot_jobs+next_batch) > job_lim:
         print("{3}: # of tot job {0} + # nextbatch > {1}, wait for {2} sec(s)".format(
               num_tot_jobs, job_lim, threshold, time_gap,time))
-    max_job_id = get_max_job_id(path)
+    max_job_id, _ = get_max_job_id(path)
     if  max_job_id < args.max_job:          
         threading.Timer(time_gap, foo(count)).start()
     else:
         quit()
 
-args   = parser.parse_args()
-idx    = np.loadtxt(args.idx).astype(int)
-
-threshold  = 50  # waiting job threshold, if > threshold, do NOT submit, else, submit
-next_batch = 20
-#time_gap   = 100 # sec
-job_lim    = 490 # in UCLA hoffmann
-cwd = os.getcwd()
-path = cwd
 foo()
 

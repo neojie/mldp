@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Nov 24 10:48:49 2020
-consider test and recal are in different folder
-test resutls does not contain the orginal info
-This is not a optimal way of practice. 
+
+analysis_nn:    >=1 dp test results, no outcar, analyze the model deviation
+analysis_recal: >=1 dp test results => average to one, compare the averaged test results to vasp recal
+
+1) no outcar, >=1 dp test results, dp test results does not have original e, v, f
+2) there is outcar, >=1 dp test results, dp test results does not have original e, v, f  => deprecated scenario
+3) there is outcar, >=1 dp test results, dp test results does not have original e, v, f
 See analysis_recal.py for a better way
 
 @author: jiedeng
