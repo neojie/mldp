@@ -51,12 +51,13 @@ parser = argparse.ArgumentParser(description="""
         the 2nd col should be model predicted values. 
         mm4 and mm5 are averaged and compared against the vasp values.
         idx between given thresholds are extracted
-        
+        \n\n
         example: analysis.py -tf recal -mp mm4-mm5 
         extract recal/mm4.e.out recal/mm5.e.out, the 1st col is ignored
         the 2nd col should be model predicted values, mm4 and mm5 are caompared
         model devation is computed.
         idx between force thresholds are extracted
+        \n\n
         Note these two modes, thresholds have different meanings
         """)
 
