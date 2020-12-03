@@ -45,7 +45,7 @@ from model_dev_funcs import extract_org_nn_pred, dev_nn, dev_vasp_nn,extract_nn_
 import argparse
 import matplotlib.pyplot as plt
 
-parser = argparse.ArgumentParser(description="""
+description="""
         example: analysis.py -tf recal -rf recal -mp mm4-mm5 
         extract average recal/mm4.e.out recal/mm5.e.out, the 1st col should be vasp values
         the 2nd col should be model predicted values. 
@@ -59,7 +59,9 @@ parser = argparse.ArgumentParser(description="""
         idx between force thresholds are extracted
         \n\n
         Note these two modes, thresholds have different meanings
-        """)
+        """
+print(description)
+parser = argparse.ArgumentParser()
 
 parser.add_argument("--test_folder","-tf",help="folder storing model test ")
 parser.add_argument("--recal_foler","-rf",help="recal folder")
