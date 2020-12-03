@@ -74,7 +74,7 @@ if len(prefixs) > 1:
     fig.savefig('corr.png')
 
     np.savetxt(os.path.join(test_folder,'model_dev_id'),
-               f_idx,
+               f_idx,fmt='%d',
                header=' meand std f = {0}-{1}'.format(args.force_lower_cutoff, args.force_upper_cutoff))
 
 
