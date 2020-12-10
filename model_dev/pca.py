@@ -39,7 +39,7 @@ def cal_pca(dat,natoms=160):
     """
     dat in n*160*3 format, n is # of trajectory
     """
-    dat = dat.reshape((len(dat),480))
+    dat = dat.reshape((len(dat),natoms*3))
     scaler.fit(dat)
     dat = scaler.transform(dat)    
     pca = PCA().fit(dat.T)
@@ -78,6 +78,7 @@ if args.deepmd:
     print("**** If multiple sets exists, configs are disorded ****")
     ls = dpdata.System(args.deepmd,fmt='deepmd/npy')
     sigma = np.load(os.path.join(args.deepmd,'set.000/fparam.npy'))[0]
+#natoms=ls.get_natoms()
 
 idx = np.array(range(len(ls)))
 if args.idx:
