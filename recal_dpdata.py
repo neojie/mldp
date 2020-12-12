@@ -64,7 +64,7 @@ def run(cwd,target_path):
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--deepmd","-d",help="deepmd path file")
-parser.add_argument("--inputfile","-if",help="input files for vasp cal")
+parser.add_argument("--inputfile","-if",help="input files for vasp cal, default is cwd+inputs, if input, please input the absolute path")
 parser.add_argument("--step","-s",default=1,type=int,help="step")
 parser.add_argument("--range","-r",type=str,help="0-2, means from 0 to 2, default is for all folders")
 parser.add_argument("--run_vasp","-rv",help="run vasp?, default without input is Yes")
