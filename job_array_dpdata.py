@@ -17,7 +17,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--max_job","-mj",type=int,help="max job allowed")
-
+parser.add_argument("--deepmd","-d",help="deepmd path file")
+args   = parser.parse_args()
 def get_waiting_jobs():
     call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat -u jd848 | grep qw |wc|awk '{print $1}'>tmp.txt",shell=True)
     fp = open('tmp.txt')
@@ -50,7 +51,7 @@ def foo():
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
               num_waiting_jobs,threshold, max_job_id, max_job_id+next_batch,time))
         nsw_range = '{0}-{1}'.format(max_job_id,max_job_id+next_batch)
-        call("python ~/script/mldp/recal_dpdata.py -r {0}".format(nsw_range),shell=True)
+        call("python ~/script/mldp/recal_dpdata.py -r {0} -d {1}".format(nsw_range,args.deepmd),shell=True)
     elif num_waiting_jobs > threshold:
         print("{3}: # of waiting jobs: {0} > {1}, wait for {2} sec(s)".format(
               num_waiting_jobs,threshold, time_gap,time))
@@ -63,7 +64,7 @@ def foo():
     else:
         quit()
 
-args   = parser.parse_args()
+
 
 threshold  = 50  # waiting job threshold, if > threshold, do NOT submit, else, submit
 next_batch = 20
