@@ -28,6 +28,7 @@ parser.add_argument("--out_deepmd","-od",default='deepmd_pca',help="output deepm
 parser.add_argument("--vaspidx","-vid",help="vasp id file")
 parser.add_argument("--idx","-id",help="id file")
 parser.add_argument("--out_idx","-oi",default='pca',help="output idx file prefix")
+parser.add_argument("--threshold","-th",type=float,default=2e-3,help="e/atom threshold, only for unique e idx file")
 
 parser.add_argument('--plot',"-p", default=True, action='store_false',help="plot the results?")
 parser.add_argument('--test',"-t", default=True, action='store_false',help="save test as set.001?")
@@ -72,11 +73,13 @@ def extract_sigma_outcar(outcar):
         
 if args.outcar:
     ls = dpdata.LabeledSystem(args.outcar,fmt='outcar')
+    e  = ls['energies']
     sigma = extract_sigma_outcar(args.outcar)
     
 if args.deepmd:
     print("**** If multiple sets exists, configs are disorded ****")
     ls = dpdata.System(args.deepmd,fmt='deepmd/npy')
+    e  = ls['energies']
     sigma = np.load(os.path.join(args.deepmd,'set.000/fparam.npy'))[0]
 #natoms=ls.get_natoms()
 
@@ -123,16 +126,32 @@ def build_fparam( folder,sigma): # deepmd/..
         np.save( os.path.join(seti,'fparam.npy'), all_te)
 
 if args.plot:
-    fig,ax = plt.subplots(1,2,figsize=(8,4))
-    ax[0].plot(pca_component_abs_coef,'.')
+    fig,ax = plt.subplots(2,2,figsize=(10,4))
+    ax[0][0].plot(pca_component_abs_coef,'.')
     variance_ratio = np.cumsum(pca_ls.explained_variance_ratio_)
-    ax[1].plot(variance_ratio)
-    ax[0].set_xlabel('trajectory#')
-    ax[0].set_ylabel('coef')
-    ax[1].set_xlabel('number of components')
-    ax[1].set_ylabel('cumulative explained variance')
-    ax[1].grid(True)
+    ax[0][1].plot(variance_ratio)
+    ax[0][0].set_xlabel('trajectory#')
+    ax[0][0].set_ylabel('coef')
+    ax[0][1].set_xlabel('number of components')
+    ax[0][1].set_ylabel('cumulative explained variance')
+    ax[0][1].grid(True)
+    threshold = args.threshold
+    de  = threshold*ls.get_natoms()
+    bins = np.arange(min(e),max(e+de),de)
+    ax[1][0].hist(e,bins)
+    ax[1][0].hist(e[idx],bins,label='unique e')
+    ax[1][0].hist(e[idx[idx1]],bins,label='pca')
+    ax[1][0].set_xlabel('ETOT(eV)')
+    ax[1][0].set_ylabel('count')
+    ax[1][1].plot(e)
+    ax[1][1].plot(idx,e[idx],'.',label='unique e')
+    ax[1][1].plot(idx[idx1],e[idx[idx1]],'.',label='pca')
+    ax[1][1].set_ylabel('ETOT(eV)')
+    ax[1][1].set_xlabel('step')
+    ax[1][0].legend()
+    ax[1][1].legend()
     fig.savefig('pca.png')
+    plt.show()    
 
 build_fparam(args.out_deepmd,sigma)    
 np.savetxt(args.out_idx+'_pca_id',idx[idx1],fmt='%d')
