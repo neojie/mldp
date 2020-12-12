@@ -14,7 +14,8 @@ from subprocess import call
 import os
 import datetime
 import argparse
-
+import sys
+sys.setrecursionlimit(100000)
 parser = argparse.ArgumentParser()
 parser.add_argument("--max_job","-mj",type=int,help="max job allowed")
 parser.add_argument("--deepmd","-d",help="deepmd path file")
