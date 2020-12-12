@@ -16,6 +16,12 @@ import datetime
 import argparse
 import sys
 sys.setrecursionlimit(100000)
+recal_path = os.path.join(os.getcwd(),'recal')
+try:
+    os.mkdir(recal_path)     
+except:
+    print('***recal exists in',recal_path)
+    
 parser = argparse.ArgumentParser()
 parser.add_argument("--max_job","-mj",type=int,help="max job allowed")
 parser.add_argument("--deepmd","-d",help="deepmd path file")
