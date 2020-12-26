@@ -85,7 +85,7 @@ for path in paths:
     f_tr = np.loadtxt(f_tr_file)
     v_tr = np.loadtxt(v_tr_file);     v_gpa_tr = v_tr/vol*eV_A3_2_GPa 
 
-    e_test = np.loadtxt(e_test_file)
+    e_test = np.loadtxt(e_test_file)/natoms
     f_test = np.loadtxt(f_test_file)
     v_test = np.loadtxt(v_test_file); v_gpa_test = v_test/vol*eV_A3_2_GPa 
 
