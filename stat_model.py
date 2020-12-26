@@ -116,8 +116,8 @@ for path in paths:
 
 ### save log file
     logfile= 'log.'+args.detail_file
-    log = open(logfile,'w')
     assert (not os.path.exists(os.path.join(deepmd_path,logfile)))
+    log = open(logfile,'w')
     log.writelines(['## system info ##','# natoms = {0}'.format(natoms), '# sigma = {0}'.format(sigma)])
     log.writelines( [str(i) for i in [natoms,sigma]])        
     log.writeline('## train results stored at {0}.*.tr.out##'.format(args.detail_file))
