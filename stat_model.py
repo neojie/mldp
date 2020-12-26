@@ -19,14 +19,11 @@ print("*"*15,' '*10, '  if no ip, in recal folder  ',' '*10,"*"*12 )
 print("**"*40)
 
 import argparse
-#import numpy as np
 import os
-
-
 
 parser = argparse.ArgumentParser()
 ### MUST SET###
-parser.add_argument("--inputpath","-ip",help="input path file")
+parser.add_argument("--inputpath","-ip",help="input path file. support txt file, json file, default is cwd")
 parser.add_argument("-m", "--model", type=str,help="Frozen model file to import")
 parser.add_argument("-de", "--deepmd", type=str,default = 'deepmd',help="deepmd folder")
 
@@ -61,8 +58,6 @@ else:
     print("No folders point are provided. Use current working path")
 #    inputpath = os.path.join(cwd)
     paths = [cwd]
-
-
 
 
 inputs = {'model':args.model,
@@ -107,14 +102,14 @@ for path in paths:
     log.writelines(['## system info ## \n','# natoms = {0} \n'.format(natoms), '# sigma = {0} \n'.format(sigma)])
     log.writelines([str(i)+'\n' for i in [natoms,sigma]])        
     log.write ('## train results stored at {0}.*.tr.out##'.format(args.detail_file));log.write ('\n')
-    log.write ("# number of test data : %d " % num_tr);log.write ('\n')
+    log.write ("# number of train data : %d " % num_tr);log.write ('\n')
     log.write ("# Energy L2err        : %e eV" % l2e_tr);log.write ('\n')
     log.write ("# Energy L2err/Natoms : %e eV" % l2ea_tr);log.write ('\n')
     log.write ("# Force  L2err        : %e eV/A" % l2f_tr);log.write ('\n')
     log.write ("# Virial L2err        : %e eV" % l2v_tr);log.write ('\n')
     log.write ("# Virial L2err/Natoms : %e eV" % (l2v_tr/natoms));log.write ('\n')
     log.writelines([str(i)+'\n' for i in [num_tr,l2e_tr,l2ea_tr,l2f_tr,l2v_tr,l2v_tr/natoms]])
-    log.write('## train results stored at {0}.*.out##'.format(args.detail_file));log.write ('\n')
+    log.write('## test results stored at {0}.*.out##'.format(args.detail_file));log.write ('\n')
     log.write ("# number of test data : %d " % num_test);log.write ('\n')
     log.write ("# Energy L2err        : %e eV" % l2e_test);log.write ('\n')
     log.write ("# Energy L2err/Natoms : %e eV" % l2ea_test);log.write ('\n')

@@ -154,7 +154,7 @@ def train_ener (inputs) :
     force  = ret[1]
     virial = ret[2]
     energy = energy.reshape([numb_test,1])
-    force = force.reshape([numb_test,-1])
+    force  = force.reshape([numb_test,-1])
     virial = virial.reshape([numb_test,9])
     if atomic:
         ae = ret[3]
