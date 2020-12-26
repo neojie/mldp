@@ -95,9 +95,9 @@ for path in paths:
 
 
 ### save log file
-    logfile= 'log.'+args.detail_file
-    if os.path.exists(os.path.join(deepmd_path,logfile)):
-        print(os.path.join(deepmd_path,logfile) + "exist, overwrite")
+    logfile = os.path.join(deepmd_path,'log.'+args.detail_file)
+    if os.path.exists():
+        print(logfile + "exist, overwrite")
     log = open(logfile,'w')
     log.write('## model path: ## \n')
     log.write('# '+args.model+'\n')
