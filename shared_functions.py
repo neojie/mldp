@@ -272,13 +272,15 @@ def merge_sel(path,OUTCAR):
                         break
                     else:
                         line_num += 1
+        
         for nsw_i in nsw_sel:
             outcarInfolder = os.path.join(os.path.join(path,str(nsw_i)),'OUTCAR')    
             os.system("echo '%nsw_i= {0}' >> {1}".format(nsw_i, outcar))
             if nsw_i  == nsw_sel[0]:
                 os.system("cat {0} >> {1}".format(outcarInfolder, outcar)) 
             else:
-                os.system("tail --line=+{0} {1} >> {2}".format(line_num-1, outcarInfolder, outcar)) 
+#               os.system("tail --line=+{0} {1} >> {2}".format(line_num-1, outcarInfolder, outcar))
+                os.system("tail -n {0} {1} >> {2}".format(line_num-1, outcarInfolder, outcar))# tail --line is for linux only, change to -n to work for unix, diffeernce is minor
 
 
 def remove_recal_traj_files(path):

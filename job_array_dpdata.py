@@ -76,7 +76,7 @@ def foo():
 threshold  = 50  # waiting job threshold, if > threshold, do NOT submit, else, submit
 next_batch = 20
 #time_gap   = 100 # sec
-job_lim    = 480 # in UCLA hoffmann
+job_lim    = 450 # in UCLA hoffmann
 cwd = os.getcwd()
 path = cwd
 foo()
