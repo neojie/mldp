@@ -85,7 +85,7 @@ for path in paths:
         assert os.path.exists(os.path.join(path,args.deepmd))  # deepmd path must exist
         deepmd_path = os.path.join(path,args.deepmd)
     except:
-        assert os.path.exists(path)
+        assert os.path.exists(path) # this gives the fixability 
         deepmd_path = path
         
 #    deepmd_path = os.path.join(path,args.deepmd)
@@ -100,7 +100,7 @@ for path in paths:
         print(logfile + "exist, overwrite")
     log = open(logfile,'w')
     log.write('## model path: ## \n')
-    if (not '/' in args.model):
+    if '/' in args.model:
         log.write('# '+args.model+'\n')
     else:
         log.write('# '+os.path.join(cwd, args.model)+'\n')
