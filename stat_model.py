@@ -101,16 +101,23 @@ for path in paths:
     ## check the source data, some only has deepmd, not deepmd_relax2
     ## and vice versa. deepmd_relax2 is for relax process only
     ## to do the statisitics, we only care where there is deepmd
-    assert os.path.exists(os.path.join(path,args.deepmd))  # deepmd path must exist
-    deepmd_path = os.path.join(path,args.deepmd)
+    try:
+        assert os.path.exists(os.path.join(path,args.deepmd))  # deepmd path must exist
+        deepmd_path = os.path.join(path,args.deepmd)
+    except:
+        assert os.path.exists(path)
+        deepmd_path = path
+        
+#    deepmd_path = os.path.join(path,args.deepmd)
     inputs['system'] = deepmd_path        
     num_test, sigma, natoms, l2e_test, l2ea_test, l2f_test, l2v_test = test_ener(inputs)
     num_tr,   sigma, natoms, l2e_tr,   l2ea_tr,   l2f_tr,   l2v_tr   = train_ener(inputs)
 
 
 ### save log file
-    log = open('log'+args.detail_file,'w')
-    assert (not os.path.exists(os.path.join(path,log)))
+    logfile= 'log.'+args.detail_file
+    log = open(logfile,'w')
+    assert (not os.path.exists(os.path.join(deepmd_path,logfile)))
     log.writelines(['## system info ##','# natoms = {0}'.format(natoms), '# sigma = {0}'.format(sigma)])
     log.writelines( [str(i) for i in [natoms,sigma]])        
     log.writeline('## train results stored at {0}.*.tr.out##'.format(args.detail_file))
