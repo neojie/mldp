@@ -116,10 +116,12 @@ for path in paths:
 
 ### save log file
     logfile= 'log.'+args.detail_file
-    assert (not os.path.exists(os.path.join(deepmd_path,logfile)))
+    if os.path.exists(os.path.join(deepmd_path,logfile)):
+        print(os.path.join(deepmd_path,logfile) + "exist, overwrite")
     log = open(logfile,'w')
-    log.write('## model path: ##'+args.model+'\n')
-    log.writelines(['## system info ##','# natoms = {0}'.format(natoms), '# sigma = {0}'.format(sigma)])
+    log.write('## model path: ##')
+    log.write('# '+args.model+'\n')
+    log.writelines(['## system info ## \n','# natoms = {0} \n'.format(natoms), '# sigma = {0} \n'.format(sigma)])
     log.writelines([str(i)+'\n' for i in [natoms,sigma]])        
     log.write ('## train results stored at {0}.*.tr.out##'.format(args.detail_file));log.write ('\n')
     log.write ("# number of test data : %d " % num_tr);log.write ('\n')
@@ -127,7 +129,7 @@ for path in paths:
     log.write ("# Energy L2err/Natoms : %e eV" % l2ea_tr);log.write ('\n')
     log.write ("# Force  L2err        : %e eV/A" % l2f_tr);log.write ('\n')
     log.write ("# Virial L2err        : %e eV" % l2v_tr);log.write ('\n')
-#    log.write ("# Virial L2err/Natoms : %e eV" % l2v_tr/natoms);log.write ('\n')
+    log.write ("# Virial L2err/Natoms : %e eV" % (l2v_tr/natoms));log.write ('\n')
     log.writelines([str(i)+'\n' for i in [num_tr,l2e_tr,l2ea_tr,l2f_tr,l2v_tr,l2v_tr/natoms]])
     log.write('## train results stored at {0}.*.out##'.format(args.detail_file));log.write ('\n')
     log.write ("# number of test data : %d " % num_test);log.write ('\n')
@@ -135,6 +137,6 @@ for path in paths:
     log.write ("# Energy L2err/Natoms : %e eV" % l2ea_test);log.write ('\n')
     log.write ("# Force  L2err        : %e eV/A" % l2f_test);log.write ('\n')
     log.write ("# Virial L2err        : %e eV" % l2v_test);log.write ('\n')
-#    log.write ("# Virial L2err/Natoms : %e eV" % l2v_test/natoms);log.write ('\n')
+    log.write ("# Virial L2err/Natoms : %e eV" % (l2v_test/natoms));log.write ('\n')
     log.writelines([str(i)+'\n' for i in [num_test,l2e_test,l2ea_test,l2f_test,l2v_test,l2v_test/natoms]])                
     log.close()           
