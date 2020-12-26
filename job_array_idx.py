@@ -16,7 +16,7 @@ import datetime
 import argparse
 import numpy as np
 import sys
-sys.setrecursionlimit(100000)
+sys.setrecursionlimit(200000)
 parser = argparse.ArgumentParser()
 parser.add_argument("--max_job","-mj",type=int,help="max job allowed")
 parser.add_argument("--idx","-id",type=str,help="index file, relative index only!")
