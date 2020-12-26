@@ -59,7 +59,7 @@ if args.inputpath:
 #    paths = [os.path.join(path,args.suffix) for path in tmp]
 else:
     print("No folders point are provided. Use current working path")
-    inputpath = os.path.join(cwd)
+#    inputpath = os.path.join(cwd)
     paths = [cwd]
 
 
@@ -100,7 +100,10 @@ for path in paths:
         print(logfile + "exist, overwrite")
     log = open(logfile,'w')
     log.write('## model path: ## \n')
-    log.write('# '+args.model+'\n')
+    if (not '/' in args.model):
+        log.write('# '+args.model+'\n')
+    else:
+        log.write('# '+os.path.join(cwd, args.model)+'\n')
     log.writelines(['## system info ## \n','# natoms = {0} \n'.format(natoms), '# sigma = {0} \n'.format(sigma)])
     log.writelines([str(i)+'\n' for i in [natoms,sigma]])        
     log.write ('## train results stored at {0}.*.tr.out##'.format(args.detail_file));log.write ('\n')
