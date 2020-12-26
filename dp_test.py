@@ -14,7 +14,7 @@ from deepmd import DeepPot
 #from deepmd import DeepPolar
 #from deepmd import DeepWFC
 #from tensorflow.python.framework import ops
-
+import os
 
 def l2err (diff) :    
     return np.sqrt(np.average (diff*diff))
@@ -81,17 +81,17 @@ def test_ener (args) :
         pe = np.concatenate((np.reshape(test_data["energy"][:numb_test], [-1,1]),
                              np.reshape(energy, [-1,1])), 
                             axis = 1)
-        np.savetxt(detail_file+".e.out", pe, 
+        np.savetxt(os.path.join(args['system'], detail_file+".e.out"), pe, 
                    header = 'data_e pred_e')
         pf = np.concatenate((np.reshape(test_data["force"] [:numb_test], [-1,3]), 
                              np.reshape(force,  [-1,3])), 
                             axis = 1)
-        np.savetxt(detail_file+".f.out", pf,
+        np.savetxt(os.path.join(args['system'], detail_file+".f.out"), pf,
                    header = 'data_fx data_fy data_fz pred_fx pred_fy pred_fz')
         pv = np.concatenate((np.reshape(test_data["virial"][:numb_test], [-1,9]), 
                              np.reshape(virial, [-1,9])), 
                             axis = 1)
-        np.savetxt(detail_file+".v.out", pv,
+        np.savetxt(os.path.join(args['system'], detail_file+".v.out"), pv,
                    header = 'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')        
     return numb_test,fparam[0][0],natoms, l2e, l2ea, l2f, l2v
 
@@ -180,17 +180,17 @@ def train_ener (inputs) :
         pe = np.concatenate((np.reshape(train_data["energy"], [-1,1]),
                              np.reshape(energy, [-1,1])), 
                             axis = 1)
-        np.savetxt(detail_file+".e.tr.out", pe, 
+        np.savetxt(os.path.join(inputs['system'],detail_file+".e.tr.out"), pe, 
                    header = 'data_e pred_e')
         pf = np.concatenate((np.reshape(train_data["force"], [-1,3]), 
                              np.reshape(force,  [-1,3])), 
                             axis = 1)
-        np.savetxt(detail_file+".f.tr.out", pf,
+        np.savetxt(os.path.join(inputs['system'],detail_file+".f.tr.out"), pf,
                    header = 'data_fx data_fy data_fz pred_fx pred_fy pred_fz')
         pv = np.concatenate((np.reshape(train_data["virial"], [-1,9]), 
                              np.reshape(virial, [-1,9])), 
                             axis = 1)
-        np.savetxt(detail_file+".v.tr.out", pv,
+        np.savetxt(os.path.join(inputs['system'],detail_file+".v.tr.out"), pv,
                    header = 'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')        
     return numb_test,fparam[0][0],natoms, l2e, l2ea, l2f, l2v
 

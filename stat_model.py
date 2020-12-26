@@ -21,21 +21,15 @@ print("**"*40)
 import argparse
 #import numpy as np
 import os
-from shared_functions import load_paths
+
+from dp_test import test_ener, train_ener
 
 
 parser = argparse.ArgumentParser()
 ### MUST SET###
 parser.add_argument("--inputpath","-ip",help="input path file")
 parser.add_argument("-m", "--model", type=str,help="Frozen model file to import")
-#parser.add_argument("-mo", "--mo", type=str,help="model only")
-#parser.add_argument("-de", "--deepmd", type=str,default = 'deepmd',help="deepmd folder, could be deepmd-deepmd_relax, use - as separator")
 parser.add_argument("-de", "--deepmd", type=str,default = 'deepmd',help="deepmd folder")
-
-
-#parser.add_argument("--outcar","-o",type=str,default = 'OUTCAR',help="name of outcar file")
-#parser.add_argument("--excudedfraction","-e",type=float,default = 0.2,help="excluded fraction, first few may not reach equil")
-#parser.add_argument("--suffix","-s",type=str,default = '',help="add recal or other suffix in the path")
 
 parser.add_argument("-S", "--set_prefix", default="set", type=str, 
                         help="The set prefix")
@@ -54,45 +48,31 @@ cwd    = os.getcwd()
 if args.inputpath:
     print("Check files in {0}  ".format(args.inputpath))
     inputpath = args.inputpath
-    paths = load_paths(inputpath,level='recal')
+    if len(inputpath) >4 and inputpath[-4:] == 'json':
+        print("input is json file, load json")
+        import json
+        with open('/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/80-100/mgsio3.json') as f:
+            tmp = json.load(f)
+            paths = tmp['training']['systems']
+    else:
+        from shared_functions import load_paths
+        paths = load_paths(inputpath,level='recal')
 #    paths = [os.path.join(path,args.suffix) for path in tmp]
 else:
     print("No folders point are provided. Use current working path")
     inputpath = os.path.join(cwd)
     paths = [cwd]
 
-#out = []
-#phases = {'liquid':0,'pv':1,'ppv':2,'akimotoite':3,'enstatite':4, 'major':5, 'unkown':9}
-
-#def get_phase(path):
-#    if 'ppv' in path:
-#        phase = 'ppv'
-#    elif 'pv' in path:
-#        phase = 'pv'
-#    elif 'enstatite' in path:
-#        phase = 'enstatite'
-#    elif 'major' in path:
-#        phase = 'major'
-#    elif 'akimotoite' in path:
-#        phase = 'akimotoite'   
-#    else:
-#        print('phase unidentifiable')
-#        phase = 'unkown'
-#    return phase
-
-
-if args.model:  ##
-    from dp_test import test_ener, train_ener
-    inputs = {'model':args.model,
-              'rand_seed':0,
-              'system': None,
-              'set_prefix':'set',
-              'shuffle_test': args.shuffle_test,
-              'numb_test':args.numb_test,
-              'detail_file':args.detail_file}
 
 
 
+inputs = {'model':args.model,
+          'rand_seed':0,
+          'system': None,
+          'set_prefix':'set',
+          'shuffle_test': args.shuffle_test,
+          'numb_test':args.numb_test,
+          'detail_file':args.detail_file}
 
 for path in paths:
     print('--'*40)
@@ -109,7 +89,7 @@ for path in paths:
         deepmd_path = path
         
 #    deepmd_path = os.path.join(path,args.deepmd)
-    inputs['system'] = deepmd_path        
+    inputs['system'] = deepmd_path     
     num_test, sigma, natoms, l2e_test, l2ea_test, l2f_test, l2v_test = test_ener(inputs)
     num_tr,   sigma, natoms, l2e_tr,   l2ea_tr,   l2f_tr,   l2v_tr   = train_ener(inputs)
 
@@ -119,7 +99,7 @@ for path in paths:
     if os.path.exists(os.path.join(deepmd_path,logfile)):
         print(os.path.join(deepmd_path,logfile) + "exist, overwrite")
     log = open(logfile,'w')
-    log.write('## model path: ##')
+    log.write('## model path: ## \n')
     log.write('# '+args.model+'\n')
     log.writelines(['## system info ## \n','# natoms = {0} \n'.format(natoms), '# sigma = {0} \n'.format(sigma)])
     log.writelines([str(i)+'\n' for i in [natoms,sigma]])        
