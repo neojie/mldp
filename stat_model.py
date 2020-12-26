@@ -22,7 +22,6 @@ import argparse
 #import numpy as np
 import os
 
-from dp_test import test_ener, train_ener
 
 
 parser = argparse.ArgumentParser()
@@ -51,7 +50,7 @@ if args.inputpath:
     if len(inputpath) >4 and inputpath[-4:] == 'json':
         print("input is json file, load json")
         import json
-        with open('/Users/jiedeng/GD/papers/paperxx4_ml/sigma-20interval/80-100/mgsio3.json') as f:
+        with open(inputpath) as f:
             tmp = json.load(f)
             paths = tmp['training']['systems']
     else:
@@ -74,6 +73,7 @@ inputs = {'model':args.model,
           'numb_test':args.numb_test,
           'detail_file':args.detail_file}
 
+from dp_test import test_ener, train_ener
 for path in paths:
     print('--'*40)
     print(path)
