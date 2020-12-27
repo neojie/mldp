@@ -11,6 +11,7 @@ import argparse
 from dpdata import LabeledSystem
 import glob
 import numpy as np
+import shutil
 
 
 parser = argparse.ArgumentParser()
@@ -130,7 +131,6 @@ def build_deepmd(path,nsw,outcar,deepmd):
     ls.to_deepmd_npy(deepmd,set_size=set_size)
     if args.test:
         ls2.to_deepmd_npy('test_tmp',set_size=100000)
-        import shutil, os
         shutil.copytree('test_tmp/set.000',os.path.join(deepmd,'set.001'))
         shutil.rmtree('test_tmp')
 
