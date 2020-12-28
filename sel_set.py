@@ -30,4 +30,6 @@ os.mkdir('reduced.001')
 for npy in npys:
     tmp = np.load('set.001/'+npy)[idxs]
     np.save('reduced.001/'+npy,tmp)
+
+print('{0} out of {1} frame are DEselected'.format(len(anomalous_idx), len(energy)))
 np.savetxt('reduced.001/anomalous_idx.txt',anomalous_idx,fmt='%d',header='np.unique(np.where(dif_f_test>{0})[0]//160)'.format(cutoff))
