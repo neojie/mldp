@@ -1,0 +1,2 @@
+version 1 :  log_lmp.py without lammps-logfile package
+version 2 :  log_lmp.py using lammps-logfile package

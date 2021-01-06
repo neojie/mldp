@@ -9,8 +9,6 @@ Step PotEng KinEng TotEng Temp Press Volume
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import argparse
-import glob
 
 def blockAverage(datastream, isplot=False, maxBlockSize=0):
 	"""This program computes the block average of a potentially correlated timeseries "x", and
@@ -77,19 +75,7 @@ def blockAverage(datastream, isplot=False, maxBlockSize=0):
 
 	return blockMean[-1], np.sqrt(blockVar)[-1]
 
-#log = 'log.lammps.0_'
-#log = '/Users/jiedeng/Documents/ml/deepmd-kit/my_example/3k/tmp/r1/out.4577904'
-#
-#header =  'Step PotEng KinEng TotEng Temp Press Volume'
-#end = 'Loop time'
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--skip_header","-sh",type=int,help="# skipped skipped")
-parser.add_argument("--skip_footer","-sf",type=int,help="# skipped skipped")
-parser.add_argument("--file","-f",type=str,help="name of log file")
-parser.add_argument("--header_pattern","-hp",default='Step PotEng',type=str,help="header pattern")
-parser.add_argument("--footer_pattern","-fp",default='Loop time',type=str,help="footer pattern")
-parser.add_argument("--skip_step","-ss",default=10,type=int,help="# step skipped")
 
 
 def reverse_readline(filename, buf_size=8192):
@@ -141,48 +127,6 @@ def search_footer(file,pattern):
         line = next(txt)
         if pattern in line:
             return i
-         
-args   = parser.parse_args()
-
-if args.file:
-    file = args.file
-else:
-    file = glob.glob('out*')[0]
-if args.skip_header:
-    skip_header =  args.skip_header
-else:
-    skip_header = search_header(file,args.header_pattern)
-
-if args.skip_footer:
-    skip_footer =  args.skip_footer
-else:
-    skip_footer = search_footer(file,args.footer_pattern)
- 
-#print(file)
-#print(skip_header)
-#print(skip_footer)
-
-#skip_header = (72, 'Step PotEng KinEng TotEng Temp Press Volume \n')
-items = skip_header[-1].split()
-out=np.genfromtxt(file,comments='WARNING:',skip_header=skip_header[0]+1,skip_footer=skip_footer+1)
-#print(out[0,0])
-#print(out[-1,0])
-#print(out)
-for i in range(1,len(items)):
-    print(items[i])
-    ave = blockAverage(out[args.skip_step:,i])
-    if items[i] == 'Press':
-        print(ave[0]/1e4,ave[1]/1e4) 
-    else:
-        print(ave[0],ave[1]) 
-    
-##added formatting, may not applied for other output fomrat##
-# pressure 
-ave1 = blockAverage(out[args.skip_step:,5])
-# energy
-ave2 = blockAverage(out[args.skip_step:,1])
-print('{0}{4}{1}{5}{2}{6}{3}'.format(ave1[0]/1e4,ave2[0],ave1[1]/1e4,ave2[1],'\t','\t','\t'))
-
 
 def autocorr(a):
     b=np.concatenate((a,np.zeros(len(a))),axis=0)
@@ -191,32 +135,32 @@ def autocorr(a):
     d=d/(np.array(range(len(a)))+1)[::-1]
     return d
 
-print(skip_header[1])
-if 'Pxx Pyy Pzz Pxy Pyz Pxz' in skip_header[1]:
-    from scipy.integrate import cumtrapz
-    stress = out[args.skip_step:,7:]*1e5
-#    print(stress[:,0])
-    c_xx = autocorr(stress[:,0])
-    c_xy = autocorr(stress[:,3])
-    c_xz = autocorr(stress[:,5])
-    c_yy = autocorr(stress[:,1])
-    c_yz = autocorr(stress[:,4])
-    c_zz = autocorr(stress[:,2])
-
-    corr = (c_xy + c_xz + c_xy)/3
-    corr_2 = (c_xy + c_xz + c_xy + autocorr((stress[:,0] - stress[:,1])/2) + autocorr((stress[:,1] - stress[:,2])/2))/5
-    
-    fs2s       = 1e-15
-#    eV_A3_2_Pa = 160.21766208e9
-    kb         = 1.38e-23
-    vol  = out[:,6][0]
-    temp = np.mean(out[:,4])
-    visco      = cumtrapz(corr,list(range(len(corr))))*fs2s*vol*1e-30/(kb*temp*3)
-    visco_2    = cumtrapz(corr_2,list(range(len(corr))))*fs2s*vol*1e-30/(kb*temp*3)
-    
-    plt.figure()
-    plt.plot(list(range(len(visco))), visco,label='pii')
-    plt.plot(list(range(len(visco_2))), visco_2,label='pii+(pii-pjj)')
-    plt.yscale('log')
-    plt.legend()
-    plt.savefig("visco.png",bbox_inches='tight')
+#print(skip_header[1])
+#if 'Pxx Pyy Pzz Pxy Pyz Pxz' in skip_header[1]:
+#    from scipy.integrate import cumtrapz
+#    stress = out[args.skip_step:,7:]*1e5
+##    print(stress[:,0])
+#    c_xx = autocorr(stress[:,0])
+#    c_xy = autocorr(stress[:,3])
+#    c_xz = autocorr(stress[:,5])
+#    c_yy = autocorr(stress[:,1])
+#    c_yz = autocorr(stress[:,4])
+#    c_zz = autocorr(stress[:,2])
+#
+#    corr = (c_xy + c_xz + c_xy)/3
+#    corr_2 = (c_xy + c_xz + c_xy + autocorr((stress[:,0] - stress[:,1])/2) + autocorr((stress[:,1] - stress[:,2])/2))/5
+#    
+#    fs2s       = 1e-15
+##    eV_A3_2_Pa = 160.21766208e9
+#    kb         = 1.38e-23
+#    vol  = out[:,6][0]
+#    temp = np.mean(out[:,4])
+#    visco      = cumtrapz(corr,list(range(len(corr))))*fs2s*vol*1e-30/(kb*temp*3)
+#    visco_2    = cumtrapz(corr_2,list(range(len(corr))))*fs2s*vol*1e-30/(kb*temp*3)
+#    
+#    plt.figure()
+#    plt.plot(list(range(len(visco))), visco,label='pii')
+#    plt.plot(list(range(len(visco_2))), visco_2,label='pii+(pii-pjj)')
+#    plt.yscale('log')
+#    plt.legend()
+#    plt.savefig("visco.png",bbox_inches='tight')

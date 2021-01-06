@@ -1,0 +1,216 @@
+LAMMPS (3 Mar 2020)
+Processor partition = 0
+echo both
+
+include		in.partitions
+variable p_id world   0 # 1 2 3 4 5
+
+include		in.temp
+variable	temperature equal 5000
+variable	temperature2 equal 5000.
+variable	tempDamp equal 0.01 # 0.1 ps standard value
+include		in.pressure
+variable	pressure equal 1300000.
+variable	pressureDamp equal 0.1 # This is 10 ps
+include 	in.seed
+variable	seed world 74581 # 93734 12832 21934 57383 49172
+units		metal
+atom_style       atomic
+# periodic boundary
+boundary         p p p
+include 	in.setup
+variable	out_freq equal 500
+variable	out_freq2 equal 500
+
+neighbor         2 bin
+neigh_modify    delay 10 every 1
+include		in.MgSiO3
+read_data inputcrystal.mgsio3
+  orthogonal box = (0.367018 0.378423 0.530205) to (9.2948 9.58363 13.4275)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  160 atoms
+  reading velocities ...
+  160 velocities
+  read_data CPU = 0.00716835 secs
+
+mass             1 24.305
+mass             2 28.085
+mass             3 15.999
+
+
+pair_style      deepmd ./pv_cpu.pb fparam 0.344693
+pair_coeff
+
+# neighbor lists
+neighbor         4 bin
+neigh_modify     every 2 delay 10 check yes
+
+
+timestep	0.002 # According to Frenkel and Smit is 0.001
+
+thermo          ${out_freq}
+thermo          500
+thermo_style 	custom step temp pe press lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz
+
+
+restart 	${out_freq} restart.${p_id} restart2.${p_id}
+restart 	500 restart.${p_id} restart2.${p_id}
+restart 	500 restart.0 restart2.${p_id}
+restart 	500 restart.0 restart2.0
+
+
+
+
+
+
+#replicate       2 2 2
+
+minimize 1.0e-2 1.0e-3 100 1000
+WARNING: Using 'neigh_modify every 1 delay 0 check yes' setting during minimization (../min.cpp:190)
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 10
+  ghost atom cutoff = 10
+  binsize = 5, bins = 2 2 3
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair deepmd, perpetual
+      attributes: , newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 4.18 | 4.18 | 4.18 Mbytes
+Step Temp PotEng Press Lx Ly Lz Xy Xz Yz Pxx Pyy Pzz Pxy Pxz Pyz 
+       0    2161.1352   -1068.6987      1015463    8.9277777    9.2052063    12.897326            0            0            0    1167589.2    907006.19    971793.69     14827.43   -9793.9015    13064.555 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+       3    2161.1352   -1111.3547    892455.57    8.9277777    9.2052063    12.897326            0            0            0    1067466.9    743291.25    866608.54   -2075.4038    3744.8815   -269.48088 
+Loop time of 0.157144 on 8 procs for 3 steps with 160 atoms
+
+155.8% CPU use with 8 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -1068.69867767     -1105.96863365     -1111.35474145
+  Force two-norm initial, final = 65.9469 13.9687
+  Force max component initial, final = 13.8916 2.25066
+  Final line search alpha, max atom move = 0.0329455 0.0741491
+  Iterations, force evaluations = 3 3
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.10361    | 0.11756    | 0.12647    |   2.2 | 74.81
+Neigh   | 0.00031478 | 0.00035213 | 0.00047141 |   0.0 |  0.22
+Comm    | 0.017427   | 0.024863   | 0.038375   |   4.6 | 15.82
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.01437    |            |       |  9.15
+
+Nlocal:    20 ave 21 max 18 min
+Histogram: 1 0 0 2 0 0 1 0 0 4
+Nghost:    2416.5 ave 2436 max 2403 min
+Histogram: 4 0 0 0 0 1 1 0 0 2
+Neighs:    0 ave 0 max 0 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 1
+Dangerous builds = 0
+
+write_data      data.min
+
+
+# NPT
+
+reset_timestep 	0
+include		in.dump
+dump            myDump all atom ${out_freq2} dump.${p_id}
+dump            myDump all atom 500 dump.${p_id}
+dump            myDump all atom 500 dump.0
+
+
+fix             1 all plumed plumedfile plumed.dat outfile plumed.out
+fix             2 all nph iso ${pressure} ${pressure} ${pressureDamp}
+fix             2 all nph iso 1300000 ${pressure} ${pressureDamp}
+fix             2 all nph iso 1300000 1300000 ${pressureDamp}
+fix             2 all nph iso 1300000 1300000 0.1
+fix             3 all temp/csvr ${temperature} ${temperature} ${tempDamp} ${seed}
+fix             3 all temp/csvr 5000 ${temperature} ${tempDamp} ${seed}
+fix             3 all temp/csvr 5000 5000 ${tempDamp} ${seed}
+fix             3 all temp/csvr 5000 5000 0.01 ${seed}
+fix             3 all temp/csvr 5000 5000 0.01 74581
+fix             4 all momentum 10000 linear 1 1 1 angular
+
+run             100 # 20ns
+Per MPI rank memory allocation (min/avg/max) = 4.056 | 4.056 | 4.056 Mbytes
+Step Temp PotEng Press Lx Ly Lz Xy Xz Yz Pxx Pyy Pzz Pxy Pxz Pyz 
+       0    2161.1352   -1111.3547    892455.57    8.9277777    9.2052063    12.897326            0            0            0    1067466.9    743291.25    866608.54   -2075.4038    3744.8815   -269.48088 
+     100    5021.5131   -1007.1209    1237532.1    8.9133837     9.190365    12.876532            0            0            0    1285805.2    1180976.3    1245814.6   -10917.083    20591.349    4894.3258 
+Loop time of 3.83723 on 8 procs for 100 steps with 160 atoms
+
+Performance: 4.503 ns/day, 5.329 hours/ns, 26.060 timesteps/s
+162.1% CPU use with 8 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 2.5997     | 2.7097     | 2.868      |   4.6 | 70.62
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.63114    | 0.80848    | 0.96366    |  12.1 | 21.07
+Output  | 6.0828e-05 | 6.2874e-05 | 6.6325e-05 |   0.0 |  0.00
+Modify  | 0.21351    | 0.31767    | 0.35882    |  10.1 |  8.28
+Other   |            | 0.001354   |            |       |  0.04
+
+Nlocal:    20 ave 21 max 18 min
+Histogram: 1 0 0 2 0 0 1 0 0 4
+Nghost:    2416.5 ave 2436 max 2403 min
+Histogram: 4 0 0 0 0 1 1 0 0 2
+Neighs:    0 ave 0 max 0 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run             10000000 # 20ns
+Per MPI rank memory allocation (min/avg/max) = 4.056 | 4.056 | 4.056 Mbytes
+Step Temp PotEng Press Lx Ly Lz Xy Xz Yz Pxx Pyy Pzz Pxy Pxz Pyz 
+     100    5021.5131   -1007.1209    1237532.1    8.9133837     9.190365    12.876532            0            0            0    1285805.2    1180976.3    1245814.6   -10917.083    20591.349    4894.3258 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+     500    4243.9564   -1006.5952    1221053.8    8.9008085    9.1773991    12.858366            0            0            0      1288614    1191802.2    1182745.1   -1212.8555    42231.339     29055.47 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    1000    5069.1617   -1015.1661    1210313.8    8.9124397    9.1893917    12.875169            0            0            0    1253401.9    1172989.7    1204549.7   -18474.522    52600.706    30746.372 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    1500    4788.1117   -994.94697    1259331.5    8.9028765    9.1795313    12.861353            0            0            0    1296402.3    1226963.3    1254629.1   -52198.954   -32695.459     4332.692 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    2000    4921.8133   -1009.5884    1301643.9    8.8683309    9.1439122    12.811448            0            0            0    1381662.7    1263712.2    1259556.7    28342.066    92913.016    60450.444 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    2500    5100.1203   -994.83289    1250078.9    8.9098196    9.1866902    12.871384            0            0            0    1369022.9    1215390.6    1165823.1   -62865.944    8609.0659    22198.154 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    3000    4882.2745    -988.0771    1344376.7    8.8350775    9.1096254    12.763409            0            0            0    1358764.6    1349271.7    1325093.7    37199.029   -5831.7207   -11542.795 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    3500     4160.876   -992.32149    1277236.7    8.8647759    9.1402467    12.806312            0            0            0    1208741.4    1354698.1    1268270.6    31597.634    27176.914    25787.127 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    4000    5038.2862   -996.39283    1307747.2     8.888991    9.1652143    12.841294            0            0            0    1280939.6    1294967.4    1347334.5    15730.454   -20391.759   -61770.097 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    4500    5161.5413    -996.1322      1330030    8.8502234    9.1252421    12.785289            0            0            0    1329836.4    1332750.4    1327503.2    5365.8635   -24475.612   -18357.937 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    5000    4888.0335   -1000.4891    1243078.9    8.8570751    9.1323067    12.795187            0            0            0    1120477.9    1349711.4    1259047.5    9806.3408   -21229.946    14487.203 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    5500    5202.3534   -997.46016    1323958.2    8.8730583    9.1487865    12.818277            0            0            0    1314986.7    1350446.3    1306441.5    48631.267    5599.2483   -1057.5302 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    6000    4623.5897   -1012.6084    1253203.6    8.9039662    9.1806549    12.862927            0            0            0    1291446.9    1263120.2    1205043.8   -21174.357   -24215.058    9388.9603 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    6500    5139.7822   -999.03477    1301828.3    8.9063864    9.1831503    12.866424            0            0            0    1387500.2    1241572.2    1276412.3   -37981.455   -31480.865    8420.3156 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    7000    4861.2088   -1013.7327    1270774.2    8.8711249    9.1467931    12.815484            0            0            0    1251116.4    1324990.1    1236216.2    10332.579    7915.2481   -31945.808 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    7500    4786.6451   -989.69567    1309114.5    8.8468148    9.1217275    12.780365            0            0            0    1193009.3    1403824.8    1330509.5    25292.812   -8009.0011   -9120.0103 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    8000    4835.9905   -971.34303    1339474.2     8.851828    9.1268965    12.787607            0            0            0    1345929.1    1382610.1    1289883.3    33856.247    18000.699   -14545.759 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
+    8500    4779.9364   -982.92179    1289271.8    8.8433922    9.1181985    12.775421            0            0            0    1185520.9    1411537.5    1270757.1    3860.6126   -15225.198   -40538.695 
+WARNING: Pair style restartinfo set but has no restart support (../pair.cpp:715)
