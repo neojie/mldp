@@ -104,6 +104,8 @@ for path in paths:
         f_tr_all = np.concatenate((f_tr_all,f_tr),axis=0)
         v_tr_all = np.concatenate((v_tr_all,v_tr),axis=0); v_gpa_tr_all = np.concatenate((v_gpa_tr_all,v_gpa_tr),axis=0)           
 
+        print(e_test_all)
+        print(e_test)
         e_test_all = np.concatenate((e_test_all,e_test),axis=0)
         f_test_all = np.concatenate((f_test_all,f_test),axis=0)
         v_test_all = np.concatenate((v_test_all,v_test),axis=0); v_gpa_test_all = np.concatenate((v_gpa_test_all,v_gpa_test),axis=0)           
