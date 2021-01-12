@@ -38,7 +38,7 @@ n_mg = len(Zs[Zs==Zs[0]]);  idx_mg = range(0,n_mg);
 n_si = len(Zs[Zs==Zs[1]]);  idx_si = range(n_mg,n_mg+n_si)
 n_o  = len(Zs[Zs==Zs[2]]);   idx_o  = range(n_mg+n_si,n_mg+n_si+n_o)
 
-def get_min_dist(dist,idx0,idx1):
+def get_min_dist(dist,idx0,idx1,label='MgMg'):
     mindist = np.inf
     for i in idx0:
         for j in idx1:
@@ -46,7 +46,7 @@ def get_min_dist(dist,idx0,idx1):
 #                print(dist[i,j])
                 mindist = dist[i,j]   
     print('***'*10)
-    print(i,j,mindist)
+    print(label,i,j,mindist)
     return mindist
 
 #struct = ase.io.read('/Users/jiedeng/GD/papers/paperxx4_ml/post_nn/generate_new_poscar/50000.vasp',format='vasp')
@@ -69,32 +69,32 @@ for ii in range(100000):
             print('format not supported!')
 
         dist=struct.get_all_distances(mic=True)
-        mindist = get_min_dist(dist,idx_mg,idx_mg)             
+        mindist = get_min_dist(dist,idx_mg,idx_mg,label='MgMg')             
         if mindist < cutoffs['MgMg']:
             print('MgMg ', mindist)
             raise ValueError('MgMg ', mindist)
 
-        mindist = get_min_dist(dist,idx_mg,idx_si)             
+        mindist = get_min_dist(dist,idx_mg,idx_si,label='MgSi')             
         if mindist < cutoffs['MgSi']:
             print('MgSi ', mindist)
             raise ValueError('MgSi ', mindist)
 
-        mindist = get_min_dist(dist,idx_mg,idx_o)             
+        mindist = get_min_dist(dist,idx_mg,idx_o,label='MgO')             
         if mindist < cutoffs['MgO']:
             print('MgO ', mindist)
             raise ValueError('MgO ', mindist)
 
-        mindist = get_min_dist(dist,idx_si,idx_si)             
+        mindist = get_min_dist(dist,idx_si,idx_si,label='SiSi')             
         if mindist < cutoffs['SiSi']:
             print("SiSi ", mindist)
             raise ValueError("SiSi ", mindist)
 
-        mindist = get_min_dist(dist,idx_si,idx_o)             
+        mindist = get_min_dist(dist,idx_si,idx_o,label='SiO')             
         if mindist < cutoffs['SiO']:
             print("SiO ", mindist)
             raise ValueError("SiO ", mindist)
 
-        mindist = get_min_dist(dist,idx_o,idx_o)             
+        mindist = get_min_dist(dist,idx_o,idx_o,label='OO')             
         if mindist < cutoffs['OO']:
             print("OO ", mindist)
             raise ValueError("OO ", mindist)
