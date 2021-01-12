@@ -59,8 +59,16 @@ for ii in range(100000):
         print('--'*20)
         print(ii)
         
-        tmp = ase.io.read(file,format='lammps-dump-text',index=ii)
-        dist=tmp.get_all_distances(mic=True)
+        if args.format == 'dump':
+            struct = ase.io.read(file,format='lammps-dump-text',index=ii)
+        elif args.format == 'vasp':
+            struct = ase.io.read(file,format='vasp')
+        elif args.format == 'lmp':
+            struct = ase.io.read(file,format='lammps-data',style='atomic')
+        else:
+            print('format not supported!')
+
+        dist=struct.get_all_distances(mic=True)
         mindist = get_min_dist(dist,idx_mg,idx_mg)             
         if mindist < cutoffs['MgMg']:
             print('MgMg ', mindist)
