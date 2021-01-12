@@ -12,6 +12,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--file","-f",default='mgsio3.dump',help="input  file")
+parser.add_argument("--format","-ft",default='dump',help="input  file")
+
 args   = parser.parse_args()
 
 file = args.file
@@ -20,7 +22,15 @@ file = args.file
 cutoffs = {'MgMg': 1.2, 'MgSi': 1.15, 'MgO': 1.1, 
            'SiSi': 1.2, 'SiO':  1.1, 'OO': 0.9}
 
-struct = ase.io.read(file,format='lammps-dump-text',index=0)
+if args.format == 'dump':
+    struct = ase.io.read(file,format='lammps-dump-text',index=0)
+elif args.format == 'vasp':
+    struct = ase.io.read(file,format='vasp')
+elif args.format == 'lmp':
+    struct = ase.io.read(file,format='lammps-data',style='atomic')
+else:
+    print('format not supported!')
+  
 pos = struct.positions
 Zs = struct.get_atomic_numbers() 
 
