@@ -18,7 +18,7 @@ file = args.file
 #file = '/Users/jiedeng/GD/papers/paperxx4_ml/post_nn/generate_new_poscar/new/re_4k_p2/mgsio3.dump'
 
 cutoffs = {'MgMg': 1.2, 'MgSi': 1.15, 'MgO': 1.1, 
-           'SiSi': 1.4, 'SiO':  1.1, 'OO': 0.9}
+           'SiSi': 1.2, 'SiO':  1.1, 'OO': 0.9}
 
 struct = ase.io.read(file,format='lammps-dump-text',index=0)
 pos = struct.positions
@@ -35,7 +35,8 @@ def get_min_dist(dist,idx0,idx1):
             if i < j and dist[i,j] <mindist:
 #                print(dist[i,j])
                 mindist = dist[i,j]   
-                print(i,j,mindist)
+    print('***'*10)
+    print(i,j,mindist)
     return mindist
 
 #struct = ase.io.read('/Users/jiedeng/GD/papers/paperxx4_ml/post_nn/generate_new_poscar/50000.vasp',format='vasp')
