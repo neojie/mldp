@@ -46,6 +46,9 @@ idx = []
 dist = struct.get_all_distances(mic=True)
 for ii in range(100000):
     try:
+        print('--'*20)
+        print(ii)
+        
         tmp = ase.io.read(file,format='lammps-dump-text',index=ii)
         dist=tmp.get_all_distances(mic=True)
         mindist = get_min_dist(dist,idx_mg,idx_mg)             

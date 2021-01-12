@@ -20,14 +20,14 @@ def lmp2pos(path,sel_nsw,copybs=False):
     copy INCAR, POTCAR, KPOINTS into the same folder
     
     """
-    lmps1=glob.glob(os.path.join(path,'*lammps*'))
+#    lmps1=glob.glob(os.path.join(path,'*lammps*'))
     lmps2=glob.glob(os.path.join(path,'*dump*'))
     if lmps2 is []:
         print("No dump file found")
     elif not(lmps2 is []):
         lmp = lmps2[0]    
-    elif not(lmps1 is []):
-        lmp = lmps1[0]
+#    elif not(lmps1 is []):
+#        lmp = lmps1[0]
     else:
         print("No dump file and lammps file found")
         
