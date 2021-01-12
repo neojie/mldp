@@ -62,9 +62,9 @@ for ii in range(100000):
         if args.format == 'dump':
             struct = ase.io.read(file,format='lammps-dump-text',index=ii)
         elif args.format == 'vasp':
-            struct = ase.io.read(file,format='vasp')
+            struct = ase.io.read(file,format='vasp',index=ii)
         elif args.format == 'lmp':
-            struct = ase.io.read(file,format='lammps-data',style='atomic')
+            struct = ase.io.read(file,format='lammps-data',style='atomic',index=ii)
         else:
             print('format not supported!')
 
