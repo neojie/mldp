@@ -71,8 +71,9 @@ if args.running_average:
     average=np.array(ys).mean(axis=0)
     plt.plot(x,average,label='average')
 plt.legend()
-plt.show()
 plt.grid(True)
+plt.show()
+
 
 if args.store:
     header=args.x + ' '+  ' '.join(args.y)
