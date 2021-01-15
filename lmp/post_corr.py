@@ -90,7 +90,7 @@ ax[0].plot(dt,JyJy,label='y')
 ax[0].plot(dt,JzJz,label='z')
 ax[0].plot(dt,JJ,label='average')
 ax[0].set_xlabel('dt (ps)')
-ax[0].ylabel('autocorrelation')
+ax[0].set_ylabel('autocorrelation')
 ax[0].grid(True)
 ax[0].legend()
 
