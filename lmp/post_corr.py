@@ -62,6 +62,7 @@ parser.add_argument("--input_file", "-i",type=str, default="J0Jt.dat",  help="av
 parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
 parser.add_argument("--timestep", "-t",type=float, default=1,  help=" timestep in fs, default 1fs")
 parser.add_argument("--scale", "-s",type=float, default=1,  help=" scale to SI unit, check the log file for this value, default 1")
+parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
 
 args = parser.parse_args()
 
@@ -89,7 +90,15 @@ cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
 print('integrations of x,y,z are : ', cumsum_JxJx[-1], cumsum_JyJy[-1], cumsum_JzJz[-1])
 print('This number should be consistent with log file value: ')
-print(' kappa is {0} (W m-1 K-1): '.format( cumsum_JJ[-1]))
+print(' Last step kappa is {0} (W m-1 K-1): '.format( cumsum_JJ[-1]))
+
+if args.average:
+    window = args.average
+    window_mean = cumsum_JJ[range(window[0],window[1])].mean()
+    print('mean kappa within {0} ps - {1} ps is {2} (W m-1 K-1): '.format(
+            dat[window[0],1]*args.timestep/1e3, 
+            dat[window[1],1]*args.timestep/1e3, 
+            window_mean))
 
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt,JxJx,label='x') # 2ps is enough, interesting
