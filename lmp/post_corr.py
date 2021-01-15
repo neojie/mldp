@@ -74,15 +74,22 @@ JzJz = dat[:,5]
 JJ = (JxJx + JyJy + JzJz)/3
 JJ_JJ0 = JJ/JJ[0]
 
-cumsum_JxJx = np.cumsum(JxJx)*args.scale
-cumsum_JyJy = np.cumsum(JyJy)*args.scale
-cumsum_JzJz = np.cumsum(JzJz)*args.scale
+#cumsum_JxJx = np.cumsum(JxJx)*args.scale
+#cumsum_JyJy = np.cumsum(JyJy)*args.scale
+#cumsum_JzJz = np.cumsum(JzJz)*args.scale
+#
+#cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
+import scipy.integrate
+cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*args.scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*args.scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*args.scale; #np.insert(cumsum_JxJx, 0, 0)
 
 cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
+
 print('integrations of x,y,z are : ', cumsum_JxJx[-1], cumsum_JyJy[-1], cumsum_JzJz[-1])
-print('This number should be consistent with log file value: ', cumsum_JxJx[-1], cumsum_JyJy[-1], cumsum_JzJz[-1])
-print(' kappa is {0} (W m-1 K-1): ', cumsum_JJ[-1])
+print('This number should be consistent with log file value: ')
+print(' kappa is {0} (W m-1 K-1): '.foramt( cumsum_JJ[-1]))
 
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt,JxJx,label='x') # 2ps is enough, interesting
