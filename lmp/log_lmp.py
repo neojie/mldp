@@ -67,7 +67,7 @@ if not check(Step):
 for i in range(len(args.y)):
     plt.plot(x,ys[i],label=args.y[i])
     if args.running_average:
-        average=np.array(ys).mean(axis=1)
+        average=np.array(ys).mean(axis=0)
         plt.plot(x,average,label='average')
 plt.legend()
 plt.show()
