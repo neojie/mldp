@@ -58,12 +58,12 @@ def read_file(file,count):
     return np.array(out[::-1])
 
 parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
-parser.add_argument("--input_file", "-x",type=str, default="J0Jt.dat",  help="ave/correlate output file")
-parser.add_argument("--n", "-x",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
+parser.add_argument("--input_file", "-i",type=str, default="J0Jt.dat",  help="ave/correlate output file")
+parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
 args = parser.parse_args()
 
 print('timestep = 1s is assumed')
-dat=read_file(args.input_file,200)
+dat=read_file(args.input_file,args.num)
 
 dt = dat[:,1]/1e3 # in ps
 JxJx = dat[:,3] # autocorr of heat flux in x direction
