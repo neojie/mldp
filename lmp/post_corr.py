@@ -60,37 +60,50 @@ def read_file(file,count):
 parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
 parser.add_argument("--input_file", "-i",type=str, default="J0Jt.dat",  help="ave/correlate output file")
 parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
+parser.add_argument("--timestep", "-t",type=float, default=1,  help=" timestep in fs, default 1fs")
+parser.add_argument("--scale", "-s",type=float, default=1,  help=" scale to SI unit, check the log file for this value, default 1")
+
 args = parser.parse_args()
 
-print('timestep = 1s is assumed')
 dat=read_file(args.input_file,args.num)
 
-dt = dat[:,1]/1e3 # in ps
+dt = dat[:,1]*args.timestep/1e3 # in ps
 JxJx = dat[:,3] # autocorr of heat flux in x direction
 JyJy = dat[:,4]
 JzJz = dat[:,5]
-plt.figure()
-plt.plot(dt,JxJx,label='x') # 2ps is enough, interesting
-plt.plot(dt,JyJy,label='y')
-plt.plot(dt,JzJz,label='z')
 JJ = (JxJx + JyJy + JzJz)/3
 JJ_JJ0 = JJ/JJ[0]
-plt.plot(dt,JJ,label='average')
-plt.legend()
-plt.grid(True)
-plt.xlabel('dt')
-plt.xlabel('correlation time (ps)')
-plt.show()
 
-cumsum_JxJx = np.cumsum(JxJx)
-cumsum_JyJy = np.cumsum(JyJy)
-cumsum_JzJz = np.cumsum(JzJz)
-plt.figure()
-plt.plot(dt,cumsum_JxJx,label='x') # 
-plt.plot(dt,cumsum_JyJy,label='y')
-plt.plot(dt,cumsum_JzJz,label='z')
-print('integrations of x,y,z are : ', np.trapz(JxJx), np.trapz(JyJy), np.trapz(JzJz))
-plt.grid(True)
+cumsum_JxJx = np.cumsum(JxJx)*args.scale
+cumsum_JyJy = np.cumsum(JyJy)*args.scale
+cumsum_JzJz = np.cumsum(JzJz)*args.scale
+
+cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
+
+print('integrations of x,y,z are : ', cumsum_JxJx[-1], cumsum_JyJy[-1], cumsum_JzJz[-1])
+print('This number should be consistent with log file value: ', cumsum_JxJx[-1], cumsum_JyJy[-1], cumsum_JzJz[-1])
+print(' kappa is {0} (W m-1 K-1): ', cumsum_JJ[-1])
+
+fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
+ax[0].plot(dt,JxJx,label='x') # 2ps is enough, interesting
+ax[0].plot(dt,JyJy,label='y')
+ax[0].plot(dt,JzJz,label='z')
+ax[0].plot(dt,JJ,label='average')
+ax[0].set_xlabel('dt (ps)')
+ax[0].ylabel('autocorrelation')
+ax[0].grid(True)
+ax[0].legend()
+
+ax[1].plot(dt,cumsum_JxJx,label='x') # 
+ax[1].plot(dt,cumsum_JyJy,label='y')
+ax[1].plot(dt,cumsum_JzJz,label='z')
+ax[1].plot(dt, cumsum_JJ,label='average')
+
+ax[1].set_xlabel('dt (ps)')
+ax[1].set_ylabel('thermal conductivity (W m-1 K-1)')
+ax[1].grid(True)
+ax[1].legend()
+plt.show()
 #plt.figure()
 #plt.plot(dt,JJ_JJ0)
 #plt.show()
