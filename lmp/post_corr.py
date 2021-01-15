@@ -89,7 +89,7 @@ cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
 print('integrations of x,y,z are : ', cumsum_JxJx[-1], cumsum_JyJy[-1], cumsum_JzJz[-1])
 print('This number should be consistent with log file value: ')
-print(' kappa is {0} (W m-1 K-1): '.foramt( cumsum_JJ[-1]))
+print(' kappa is {0} (W m-1 K-1): '.format( cumsum_JJ[-1]))
 
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt,JxJx,label='x') # 2ps is enough, interesting
