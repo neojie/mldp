@@ -64,6 +64,7 @@ if not check(Step):
     ys = [(y[selected_idx]).astype(float) for y in ys]
     print('**Fixed**')
 
+plt.figure()
 for i in range(len(args.y)):
     plt.plot(x,ys[i],label=args.y[i])
 if args.running_average:
