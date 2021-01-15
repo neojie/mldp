@@ -62,18 +62,24 @@ parser.add_argument("--input_file", "-x",type=str, default="J0Jt.dat",  help="av
 args = parser.parse_args()
 dat=read_file(args.input_file,200)
 
-dt = dat[:,1] # in fs
-Jx = dat[:,3]
-Jy = dat[:,4]
-Jz = dat[:,5]
-print('integrations of x,y,z are : ', np.trapz(Jx), np.trapz(Jy), np.trapz(Jz))
+dt = dat[:,1]/1e3 # in ps
+JxJx = dat[:,3] # autocorr of heat flux in x direction
+JyJy = dat[:,4]
+JzJz = dat[:,5]
+print('integrations of x,y,z are : ', np.trapz(JxJx), np.trapz(JyJy), np.trapz(JzJz))
 plt.figure()
-plt.plot(dt,Jx,label='x') # 2ps is enough, interesting
-plt.plot(dt,Jy,label='y')
-plt.plot(dt,Jz,label='z')
+plt.plot(dt,JxJx,label='x') # 2ps is enough, interesting
+plt.plot(dt,JyJy,label='y')
+plt.plot(dt,JzJz,label='z')
 plt.legend()
 plt.grid(True)
 plt.xlabel('dt')
-plt.xlabel('corr')
+plt.xlabel('correlation time (ps)')
 plt.show()
 
+JJ = JxJx + JyJy + JzJz
+JJ_JJ0 = JJ/JJ[0]
+
+plt.figure()
+plt.plot(dt,JJ_JJ0)
+plt.show()
