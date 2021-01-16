@@ -31,7 +31,7 @@ deepmd_files = ['energy.npy', 'box.npy',  'coord.npy' , 'force.npy' ,\
                 'set.010', 'set.011', 'set.012', 'set.013', 'set.014']
 
 def ig_f(dire, files):
-    tmpf = []    
+    tmpf = []
     for file in files:
         if not (file in deepmd_files):
             tmpf.append(file)
@@ -41,11 +41,12 @@ def ig_f(dire, files):
     else:
         print("-"*100)
         print(dire)
-        print("remove",tmpf)        
+        print("remove",tmpf)
     return tmpf
 
 os.mkdir(target_folder)
 for path in paths:
+    path = os.path.normpath(path) # this is critical
     dire=path.split('/')
     tmp = ''
     for i in dire[1:-1]:
@@ -53,4 +54,3 @@ for path in paths:
     newfolder = os.path.join(target_folder,tmp[1:])
     os.mkdir(newfolder)
     shutil.copytree(path,os.path.join(newfolder,dire[-1]), ignore = ig_f)
-    

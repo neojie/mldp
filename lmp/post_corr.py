@@ -61,10 +61,91 @@ parser = argparse.ArgumentParser(description="Plot contents from lammps log file
 parser.add_argument("--input_file", "-i",type=str, default="J0Jt.dat",  help="ave/correlate output file")
 parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
 parser.add_argument("--timestep", "-t",type=float, default=1,  help=" timestep in fs, default 1fs")
-parser.add_argument("--scale", "-s",type=float, default=1,  help=" scale to SI unit, check the log file for this value, default 1")
+parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
 parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
+parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
+parser.add_argument("--volume", "-v",type=float,help='volume in A3')
+parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
 
 args = parser.parse_args()
+
+# convert from LAMMPS real units to SI
+kB = 1.3806504e-23   # [J/K] Boltzmann
+ev2j = 1.60218e-19
+A2m = 1.0e-10
+ps2s = 1.0e-12
+convert = ev2j*ev2j/ps2s/A2m
+
+if args.scale:
+    scale = args.scale
+else:
+    try:
+        print("Unit conversion scale is not provided. Try parsing from inputs")
+        if args.temperature:
+            T = args.temperature
+        else:
+            import glob
+            infile = glob.glob('in*')[0]
+            print('Find ', infile)
+            print("temperature not provided, parse from in file") 
+#            try:
+            fp = open(infile)
+            ins = fp.readlines()
+            for line in ins:
+                line=line.split('#')[0].split()
+                if len(line)>0 and line[0] ==   'variable' and line[1] == 'T' and line[2] == 'equal':
+                    T = float(line[3])
+                    break
+#            except:
+#                print('No T found in ', infile)                   
+
+        if args.sample_rate:
+            sr = args.sample_rate
+        else:
+            import glob
+            infile = glob.glob('in*')[0]
+            print('Find ', infile)
+            print("sample rate not provided, parse from in file") 
+#            try:
+            fp = open(infile)
+            ins = fp.readlines()
+            for line in ins:
+                line=line.split('#')[0].split()
+                if len(line)>0 and line[0] ==   'variable' and line[1] == 's' and line[2] == 'equal':
+                    sr = float(line[3])
+                    break
+#            except:
+#                print('No sample rate found in ', infile)   
+                
+        if args.volume:
+            V = args.volume
+        else:
+            infile = 'conf.lmp'
+            print("vol not provided, parse from in conf.lmp") 
+#            try:
+            xhi = False
+            yhi = False
+            zhi = False
+            for line in ins:
+                if 'xlo' in line:
+                    xlo = float(line.split()[0])
+                    xhi = float(line.split()[1])
+                if 'ylo' in line:
+                    ylo = float(line.split()[0])
+                    yhi = float(line.split()[1])
+                if 'zlo' in line:
+                    zlo = float(line.split()[0])
+                    zhi = float(line.split()[1])
+                if xhi and yhi and zhi:
+                    break
+                
+            V = (xhi - xlo)*(yhi - ylo)*(zhi - zlo)
+#            except:
+#                print('volume parse error') 
+            
+        scale = convert/kB/T/T/V*sr*args.timestep
+    except:
+        raise ValueError('scale problem!')
 
 dat=read_file(args.input_file,args.num)
 
@@ -81,9 +162,9 @@ JJ_JJ0 = JJ/JJ[0]
 #
 #cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 import scipy.integrate
-cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*args.scale; #np.insert(cumsum_JxJx, 0, 0)
-cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*args.scale; #np.insert(cumsum_JxJx, 0, 0)
-cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*args.scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 
 cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
