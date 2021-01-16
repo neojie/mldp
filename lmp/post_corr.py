@@ -60,7 +60,7 @@ def read_file(file,count):
 parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
 parser.add_argument("--input_file", "-i",type=str, default="J0Jt.dat",  help="ave/correlate output file")
 parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
-parser.add_argument("--timestep", "-t",type=float, default=1,  help=" timestep in fs, default 1fs")
+parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
 parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
 parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
 parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
@@ -80,14 +80,15 @@ if args.scale:
     scale = args.scale
 else:
     try:
-        print("Unit conversion scale is not provided. Try parsing from inputs")
+        print("--"*40)
+        print("  Unit conversion scale is not provided. Try parsing from inputs")
         if args.temperature:
             T = args.temperature
         else:
             import glob
             infile = glob.glob('in*')[0]
-            print('Find ', infile)
-            print("temperature not provided, parse from in file") 
+            print('  Find ', infile)
+            print("  ?? temperature not provided, parse from in file") 
 #            try:
             fp = open(infile)
             ins = fp.readlines()
@@ -98,14 +99,14 @@ else:
                     break
 #            except:
 #                print('No T found in ', infile)                   
-
+            print('  ** T = ', T)
         if args.sample_rate:
             sr = args.sample_rate
         else:
             import glob
             infile = glob.glob('in*')[0]
             print('Find ', infile)
-            print("sample rate not provided, parse from in file") 
+            print(" ?? sample rate not provided, parse from in file") 
 #            try:
             fp = open(infile)
             ins = fp.readlines()
@@ -116,12 +117,15 @@ else:
                     break
 #            except:
 #                print('No sample rate found in ', infile)   
+            print(' ** sample rate = ', sr)
                 
         if args.volume:
             V = args.volume
         else:
             infile = 'conf.lmp'
-            print("vol not provided, parse from in conf.lmp") 
+            fp = open(infile)
+            ins = fp.readlines()
+            print("  ?? vol not provided, parse from in conf.lmp") 
 #            try:
             xhi = False
             yhi = False
@@ -140,10 +144,14 @@ else:
                     break
                 
             V = (xhi - xlo)*(yhi - ylo)*(zhi - zlo)
+            print(' ** volume = ', V)
+
 #            except:
 #                print('volume parse error') 
             
-        scale = convert/kB/T/T/V*sr*args.timestep
+        scale = convert/kB/T/T/V*sr*args.timestep/1e3
+        print('scale = ',scale)
+        print("--"*40)
     except:
         raise ValueError('scale problem!')
 
