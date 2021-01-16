@@ -105,7 +105,7 @@ else:
         else:
             import glob
             infile = glob.glob('in*')[0]
-            print('Find ', infile)
+            print('  Find ', infile)
             print(" ?? sample rate not provided, parse from in file") 
 #            try:
             fp = open(infile)
@@ -150,7 +150,7 @@ else:
 #                print('volume parse error') 
             
         scale = convert/kB/T/T/V*sr*args.timestep/1e3
-        print('scale = ',scale)
+        print('  scale = ',scale)
         print("--"*40)
     except:
         raise ValueError('scale problem!')
