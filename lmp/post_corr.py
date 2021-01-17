@@ -78,6 +78,8 @@ convert = ev2j*ev2j/ps2s/A2m
 
 if args.scale:
     scale = args.scale
+    metal2SIps = scale/10/0.001 
+    print('metal2SIps = scale/10/0.001 is assumed')
 else:
     try:
         print("--"*40)
@@ -150,6 +152,7 @@ else:
 #                print('volume parse error') 
             
         scale = convert/kB/T/T/V*sr*args.timestep/1e3
+        metal2SIps = convert/kB/T/T/V
         print('  scale = ',scale)
         print("--"*40)
     except:
@@ -189,13 +192,15 @@ if args.average:
             dat[window[1],1]*args.timestep/1e3, 
             window_mean))
 
+ # s to ps
+
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
-ax[0].plot(dt,JxJx,label='x') # 2ps is enough, interesting
-ax[0].plot(dt,JyJy,label='y')
-ax[0].plot(dt,JzJz,label='z')
+ax[0].plot(dt,JxJx*metal2SIps,label='x') # 2ps is enough, interesting
+ax[0].plot(dt,JyJy*metal2SIps,label='y')
+ax[0].plot(dt,JzJz*metal2SIps,label='z')
 ax[0].plot(dt,JJ,label='average')
 ax[0].set_xlabel('dt (ps)')
-ax[0].set_ylabel('autocorrelation')
+ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
 ax[0].grid(True)
 ax[0].legend()
 
@@ -211,12 +216,12 @@ ax[1].legend()
 plt.show()
 
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
-ax[0].plot(dt,JxJx,label='x') # 2ps is enough, interesting
-ax[0].plot(dt,JyJy,label='y')
-ax[0].plot(dt,JzJz,label='z')
+ax[0].plot(dt,JxJx*metal2SIps,label='x') # 
+ax[0].plot(dt,JyJy*metal2SIps,label='y')
+ax[0].plot(dt,JzJz*metal2SIps,label='z')
 ax[0].plot(dt,JJ,label='average')
 ax[0].set_xlabel('dt (ps)')
-ax[0].set_ylabel('autocorrelation')
+ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
 ax[0].grid(True)
 ax[0].legend()
 ax[0].set_xscale('log')
