@@ -21,9 +21,10 @@ parser.add_argument("--run_vasp","-rv",default=True,action='store_false',help="r
 
 args   = parser.parse_args()
 
+inputfile =  os.path.abspath(args.inputfile)
 def run(target_path):
     os.chdir(target_path)
-    sub_file = os.path.join(args.inputfile,'sub_vasp.sh')
+    sub_file = os.path.join(inputfile,'sub_vasp.sh') # os.path.abspath('.')
     call("/u/systems/UGE8.6.4/bin/lx-amd64/qsub {0}".format(sub_file), shell=True)
 #    call("bash {0}".format(sub_file), shell=True)
     os.chdir(cwd)
@@ -34,9 +35,9 @@ cwd = os.getcwd()
 for i in range(len(pos)):
     os.mkdir(str(i))
     copy('p'+str(i)+'.vasp',str(i)+'/POSCAR')
-    copy(os.path.join(args.inputfile,'INCAR'),str(i))
-    copy(os.path.join(args.inputfile, 'KPOINTS'),str(i))
-    copy(os.path.join(args.inputfile, 'POTCAR'),str(i))  
+    copy(os.path.join(inputfile,'INCAR'),str(i))
+    copy(os.path.join(inputfile, 'KPOINTS'),str(i))
+    copy(os.path.join(inputfile, 'POTCAR'),str(i))  
     if args.run_vasp:        
         run(str(i))
     
