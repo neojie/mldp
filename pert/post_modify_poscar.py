@@ -87,10 +87,10 @@ f2_nn   = f2[:,3:]; mag_f2_nn = np.sqrt(np.sum(f2_nn**2,axis=1))
 
 import matplotlib.pyplot as plt
 fig,ax = plt.subplots(2,1,figsize=(4,6),sharex=True)
-ax[0].plot(dist,mag_f2_nn,'o',label='nn')
+ax[0].plot(dist,mag_f2_nn,'o',label=prefix)
 ax[0].plot(dist,mag_f2_vasp,'+',label='vasp')
 
-ax[1].plot(dist,e[:,1],'o',label='nn')
+ax[1].plot(dist,e[:,1],'o',label=prefix)
 ax[1].plot(dist,e[:,0],'+',label='vasp')
 
 ax[0].set_ylabel('force (eV/A)')
