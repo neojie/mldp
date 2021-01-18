@@ -38,7 +38,7 @@ parser.add_argument("--shuffle_test", action = 'store_true',
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
 
-parser.add_argument("-o", "--overwrite", type=True,action='store_false', 
+parser.add_argument("-o", "--overwrite", default=True,action='store_false', 
                         help="Overwrite existing test results")
 args   = parser.parse_args()
 cwd    = os.getcwd()
