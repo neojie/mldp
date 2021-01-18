@@ -86,7 +86,8 @@ for path in paths:
         deepmd_path = path
         
 #    deepmd_path = os.path.join(path,args.deepmd)
-    if not args.overwrite and os.path.exists(deepmd_path,'log.'+args.detail_file):
+    logfile = os.path.join(deepmd_path,'log.'+args.detail_file)
+    if not args.overwrite and os.path.exists(logfile):
         print('dp test file exist, skip')
     else:
         inputs['system'] = deepmd_path     
@@ -95,7 +96,7 @@ for path in paths:
     
     
     ### save log file
-        logfile = os.path.join(deepmd_path,'log.'+args.detail_file)
+        
         if os.path.exists(logfile):
             print(logfile + "exist, overwrite")
         log = open(logfile,'w')
