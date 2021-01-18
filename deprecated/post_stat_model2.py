@@ -13,9 +13,9 @@ analyze post stat_model.py run
 TODO : consider vol and natoms change frame to frame
 @author: jiedeng
 """
-
+import numpy as np
 import argparse
-
+import os
 
 parser = argparse.ArgumentParser()
 ### MUST SET###
@@ -25,9 +25,6 @@ parser.add_argument("-d", "--detail_file", type=str,
                         help="The file containing details of energy force and virial accuracy")
 
 args   = parser.parse_args()
-
-import numpy as np
-import os
 cwd    = os.getcwd()
 
 if args.inputpath:
@@ -53,7 +50,7 @@ eV_A3_2_GPa  = 160.21766208 # 1 eV/Å3 = 160.2176621 GPa
 count = 0
 for path in paths:
     print('--'*40)
-    print(path)
+#    print(path)
     print('--'*40)
     ## check the source data, some only has deepmd, not deepmd_relax2
     ## and vice versa. deepmd_relax2 is for relax process only
@@ -64,7 +61,17 @@ for path in paths:
     except:
         assert os.path.exists(path) # this gives the fixability 
         deepmd_path = path
-        
+
+
+    if os.path.exists(os.path.join(deepmd_path,'set.001')):  
+        pass
+    else:
+        print(deepmd_path)
+        print(os.listdir(deepmd_path))
+#####
+#####
+#####
+#####        
 #    deepmd_path = os.path.join(path,args.deepmd)
     logfile  = os.path.join(deepmd_path,'log.'+args.detail_file)
     # deepmd must at least have set.000 and type.raw
@@ -75,11 +82,12 @@ for path in paths:
     b = box[3:6]
     c = box[6:]
     vol = np.dot(c,np.cross(a,b))
-
+    
+    
     e_tr_file  =  os.path.join(deepmd_path,args.detail_file+".e.tr.out")
     f_tr_file  =  os.path.join(deepmd_path,args.detail_file+".f.tr.out")
     v_tr_file  =  os.path.join(deepmd_path,args.detail_file+".v.tr.out")
-    
+
     e_test_file = os.path.join(deepmd_path, args.detail_file+".e.out")
     f_test_file = os.path.join(deepmd_path, args.detail_file+".f.out")
     v_test_file = os.path.join(deepmd_path, args.detail_file+".v.out")
@@ -94,6 +102,11 @@ for path in paths:
 
     log = np.loadtxt(logfile)
     
+    dif_f_test = np.abs(f_test[:,:3] - f_test[:,3:])
+    if np.max(np.max(dif_f_test,axis=0)) >5:
+        print("????",path)
+        
+    
     if count == 0:
         e_tr_all = e_tr
         f_tr_all = f_tr
@@ -107,8 +120,6 @@ for path in paths:
         f_tr_all = np.concatenate((f_tr_all,f_tr),axis=0)
         v_tr_all = np.concatenate((v_tr_all,v_tr),axis=0); v_gpa_tr_all = np.concatenate((v_gpa_tr_all,v_gpa_tr),axis=0)           
 
-        print(e_test_all)
-        print(e_test)
         e_test_all = np.concatenate((e_test_all,e_test),axis=0)
         f_test_all = np.concatenate((f_test_all,f_test),axis=0)
         v_test_all = np.concatenate((v_test_all,v_test),axis=0); v_gpa_test_all = np.concatenate((v_gpa_test_all,v_gpa_test),axis=0)           
