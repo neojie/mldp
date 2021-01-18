@@ -5,14 +5,8 @@ Created on Sun Jun 21 13:51:58 2020
 merge to 
 @author: jiedeng
 """
-from shared_functions import load_paths
-import os
-import argparse
-from dpdata import LabeledSystem
-import glob
-import numpy as np
-import shutil
 
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputpath","-ip",help="input path file")
@@ -24,6 +18,13 @@ parser.add_argument("--idx","-id",type = str, help="idx file, idx[0] >= 0")
 parser.add_argument('--test',"-t", default=True, action='store_false',help="save test as set.001?")
 
 args   = parser.parse_args()
+
+from shared_functions import load_paths
+import os
+from dpdata import LabeledSystem
+import glob
+import numpy as np
+import shutil
 
 cwd    = os.getcwd()
 if args.inputpath:
