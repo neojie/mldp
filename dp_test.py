@@ -130,7 +130,8 @@ def train_ener (inputs) :
     numb_test = data.get_sys_numb_batch(1)  ## use 1 batch, # of batches are the numb of train
     natoms = len(train_data["type"][0])
     nframes = train_data["box"].shape[0]
-    numb_test = min(nframes, numb_test)
+    #print("xxxxx",nframes, numb_test)
+    numb_test = nframes  #, to be investigated, original dp use min, but here should be nframes directly, I think, Jan 18, 21, min(nfames, numb_test)
     dp = DeepPot(inputs['model'])
     coord = train_data["coord"].reshape([numb_test, -1])
     box   = train_data["box"]
