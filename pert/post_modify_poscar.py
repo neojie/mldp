@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jan 17 20:23:32 2021
-use
+use 
 merge_out.py
 extract_deepmd
 
@@ -12,13 +12,13 @@ extract_deepmd
 example:
     python ~/script/mldp/check_nbands_nelm.py -ip all
     python ~/script/mldp/merge_out.py -o OUTCAR -r y
-    python ~/script/mldp/extract_deepmd.py -bs 1000 -o OUTCAR -d deepmd -t
+    python ~/script/mldp/extract_deepmd.py -bs 1000 -o OUTCAR -d deepmd -t 
 (deepmd-kit-gpu)[jd848@n7214 deepmd]$ dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/mpmt/mm12/pv_Jan8_cpu.pb -d mm12
 
 dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/mpmt/mm12/pv_Jan8_cpu.pb -d mm12
-dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/extreme_filtered/re4/pv-cpu.pb -d extreme4
-dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/extreme_filtered/re7/pv_gpu.pb -d extreme7
-dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/pert/mp1/pv.pb -d mp1
+dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/extreme_filtered/re4/pv-cpu.pb -d extreme4  
+dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/extreme_filtered/re7/pv_gpu.pb -d extreme7   
+dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/pert/mp1/pv.pb -d mp1 
 dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/dp-train/onlymelt/om2/pv.pb -d om2
 
 
@@ -31,7 +31,7 @@ import argparse
 parser = argparse.ArgumentParser("Test model on poscars where atoms are manually palced and interatomic distances are controlled ")
 parser.add_argument("--index","-i",nargs="+", help="index of atom of interest, if not provided, read from log file")
 parser.add_argument("--log","-log", help="log file")
-parser.add_argument("--test_folder","-tf",default='deeepmd', help="where is dp test located?")
+parser.add_argument("--test_folder","-tf",default='deepmd', help="where is dp test located?")
 parser.add_argument("--model_prefix","-mp", help="model prefix")
 parser.add_argument("--natoms","-na",type=int,default = 20, help="log file")
 args = parser.parse_args()
@@ -65,14 +65,14 @@ box = np.array([box[0], box[4], box[8]])
 coord_atom1 = coord[:,(atom1*3):(atom1*3+3)]
 coord_atom2 = coord[:,(atom2*3):(atom2*3+3)]
 
-#cal distance
+#cal distance 
 diffs = coord_atom2 - coord_atom1
 cond = np.where(diffs > box / 2.)
 diffs[cond] -= box[cond[1]]
 cond = np.where(diffs < -box / 2.)
 diffs[cond] += box[cond[1]]
 sqdist = np.square(diffs).sum(axis=1)
-dist = np.sqrt(sqdist)
+dist = np.sqrt(sqdist)     
 
 
 e=np.loadtxt(e_dir)
@@ -102,7 +102,6 @@ ax[0].legend()
 ax[1].legend()
 plt.minorticks_on()
 plt.show()
-
 
 
 
