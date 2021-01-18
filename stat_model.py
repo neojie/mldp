@@ -38,6 +38,8 @@ parser.add_argument("--shuffle_test", action = 'store_true',
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
 
+parser.add_argument("-o", "--overwrite", type=True,action='store_false', 
+                        help="Overwrite existing test results")
 args   = parser.parse_args()
 cwd    = os.getcwd()
 
@@ -84,37 +86,40 @@ for path in paths:
         deepmd_path = path
         
 #    deepmd_path = os.path.join(path,args.deepmd)
-    inputs['system'] = deepmd_path     
-    num_test, sigma, natoms, l2e_test, l2ea_test, l2f_test, l2v_test = test_ener(inputs)
-    num_tr,   sigma, natoms, l2e_tr,   l2ea_tr,   l2f_tr,   l2v_tr   = train_ener(inputs)
-
-
-### save log file
-    logfile = os.path.join(deepmd_path,'log.'+args.detail_file)
-    if os.path.exists(logfile):
-        print(logfile + "exist, overwrite")
-    log = open(logfile,'w')
-    log.write('## model path: ## \n')
-    if '/' in args.model:
-        log.write('# '+args.model+'\n')
+    if not args.overwrite and os.path.exists(deepmd_path,'log.'+args.detail_file):
+        print('dp test file exist, skip')
     else:
-        log.write('# '+os.path.join(cwd, args.model)+'\n')
-    log.writelines(['## system info ## \n','# natoms = {0} \n'.format(natoms), '# sigma = {0} \n'.format(sigma)])
-    log.writelines([str(i)+'\n' for i in [natoms,sigma]])        
-    log.write ('## train results stored at {0}.*.tr.out##'.format(args.detail_file));log.write ('\n')
-    log.write ("# number of train data : %d " % num_tr);log.write ('\n')
-    log.write ("# Energy L2err        : %e eV" % l2e_tr);log.write ('\n')
-    log.write ("# Energy L2err/Natoms : %e eV" % l2ea_tr);log.write ('\n')
-    log.write ("# Force  L2err        : %e eV/A" % l2f_tr);log.write ('\n')
-    log.write ("# Virial L2err        : %e eV" % l2v_tr);log.write ('\n')
-    log.write ("# Virial L2err/Natoms : %e eV" % (l2v_tr/natoms));log.write ('\n')
-    log.writelines([str(i)+'\n' for i in [num_tr,l2e_tr,l2ea_tr,l2f_tr,l2v_tr,l2v_tr/natoms]])
-    log.write('## test results stored at {0}.*.out##'.format(args.detail_file));log.write ('\n')
-    log.write ("# number of test data : %d " % num_test);log.write ('\n')
-    log.write ("# Energy L2err        : %e eV" % l2e_test);log.write ('\n')
-    log.write ("# Energy L2err/Natoms : %e eV" % l2ea_test);log.write ('\n')
-    log.write ("# Force  L2err        : %e eV/A" % l2f_test);log.write ('\n')
-    log.write ("# Virial L2err        : %e eV" % l2v_test);log.write ('\n')
-    log.write ("# Virial L2err/Natoms : %e eV" % (l2v_test/natoms));log.write ('\n')
-    log.writelines([str(i)+'\n' for i in [num_test,l2e_test,l2ea_test,l2f_test,l2v_test,l2v_test/natoms]])                
-    log.close()           
+        inputs['system'] = deepmd_path     
+        num_test, sigma, natoms, l2e_test, l2ea_test, l2f_test, l2v_test = test_ener(inputs)
+        num_tr,   sigma, natoms, l2e_tr,   l2ea_tr,   l2f_tr,   l2v_tr   = train_ener(inputs)
+    
+    
+    ### save log file
+        logfile = os.path.join(deepmd_path,'log.'+args.detail_file)
+        if os.path.exists(logfile):
+            print(logfile + "exist, overwrite")
+        log = open(logfile,'w')
+        log.write('## model path: ## \n')
+        if '/' in args.model:
+            log.write('# '+args.model+'\n')
+        else:
+            log.write('# '+os.path.join(cwd, args.model)+'\n')
+        log.writelines(['## system info ## \n','# natoms = {0} \n'.format(natoms), '# sigma = {0} \n'.format(sigma)])
+        log.writelines([str(i)+'\n' for i in [natoms,sigma]])        
+        log.write ('## train results stored at {0}.*.tr.out##'.format(args.detail_file));log.write ('\n')
+        log.write ("# number of train data : %d " % num_tr);log.write ('\n')
+        log.write ("# Energy L2err        : %e eV" % l2e_tr);log.write ('\n')
+        log.write ("# Energy L2err/Natoms : %e eV" % l2ea_tr);log.write ('\n')
+        log.write ("# Force  L2err        : %e eV/A" % l2f_tr);log.write ('\n')
+        log.write ("# Virial L2err        : %e eV" % l2v_tr);log.write ('\n')
+        log.write ("# Virial L2err/Natoms : %e eV" % (l2v_tr/natoms));log.write ('\n')
+        log.writelines([str(i)+'\n' for i in [num_tr,l2e_tr,l2ea_tr,l2f_tr,l2v_tr,l2v_tr/natoms]])
+        log.write('## test results stored at {0}.*.out##'.format(args.detail_file));log.write ('\n')
+        log.write ("# number of test data : %d " % num_test);log.write ('\n')
+        log.write ("# Energy L2err        : %e eV" % l2e_test);log.write ('\n')
+        log.write ("# Energy L2err/Natoms : %e eV" % l2ea_test);log.write ('\n')
+        log.write ("# Force  L2err        : %e eV/A" % l2f_test);log.write ('\n')
+        log.write ("# Virial L2err        : %e eV" % l2v_test);log.write ('\n')
+        log.write ("# Virial L2err/Natoms : %e eV" % (l2v_test/natoms));log.write ('\n')
+        log.writelines([str(i)+'\n' for i in [num_test,l2e_test,l2ea_test,l2f_test,l2v_test,l2v_test/natoms]])                
+        log.close()           

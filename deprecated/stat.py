@@ -23,11 +23,54 @@ import os
 from shared_functions import load_paths
 
 import pandas as pd
+import glob
 
 def stds(outcar,exclude_fraction=0.2):
     """
     calculate std of outcar
     exclude_fraction : exclude the first 20% trajectory, not apply to recal case because the random choice of frame
+    """
+    atom_names, \
+    atom_numbs, \
+    atom_types, \
+    cells, \
+    coords, \
+    energies, \
+    forces, \
+    tmp_virial = dpdata.vasp.outcar.get_frames(outcar)   ## Note here tmp_varial is in kB!!!
+    
+    nsw   = len(energies)
+    start = int(nsw*exclude_fraction)
+    e_std = np.std(energies[start:])
+    e_bar = np.mean(energies[start:])
+#    e_dif  = energies - e_bar
+#    e_std2 = np.sqrt(sum(e_dif**2)/len(energies))
+    forces = forces[start:,]
+    f_bar = np.sum(forces,axis=0)/len(forces)   
+    f_dif = forces - f_bar
+    d_F   = np.sqrt((f_dif**2).sum(axis = 1).sum(axis = 1)/atom_numbs[0]/3) #eqn 13
+    f_std = np.sqrt(sum(d_F**2)/len(d_F)) # => should be len(d_F) -1
+    
+    tmp_virial = tmp_virial[start:]
+    vol = (np.cross(cells[0][0], cells[0][1])*cells[0][2]).sum()
+#    print("cells", cells)
+#    print("vol is",vol)
+    tmp_virial = tmp_virial/10*vol/eV_A3_2_GPa   # kB to eV
+    
+    v_bar = np.sum(tmp_virial,axis=0)/len(tmp_virial)   
+    v_dif = tmp_virial - v_bar
+    d_v   = np.sqrt((v_dif**2).sum(axis = 1).sum(axis = 1)/9) #eqn 13
+    v_std = np.sqrt(sum(d_v**2)/len(d_v))
+#    print(cell)
+#    vol  = cell[0]
+    return e_bar, v_bar, e_std, f_std, v_std, nsw,sum(atom_numbs)
+
+
+def stds2(outcar,exclude_fraction=0.2):
+    """
+    calculate std of outcar
+    exclude_fraction : exclude the first 20% trajectory, not apply to recal case because the random choice of frame
+    for some case, we exclude some set, so the nsw should be smaller than that in the OUTCAR
     """
     atom_names, \
     atom_numbs, \
@@ -62,7 +105,13 @@ def stds(outcar,exclude_fraction=0.2):
     v_std = np.sqrt(sum(d_v**2)/len(d_v))
 #    print(cell)
 #    vol  = cell[0]
-    return e_bar, v_bar, e_std, f_std, v_std, nsw,sum(atom_numbs)
+    
+    ### Ntrain
+    energies=glob.glob(deepmd_path+'/set*'+'/energy.npy')
+    count = 0
+    for energy in energies:
+        count += len(np.load(energy))
+    return e_bar, v_bar, e_std, f_std, v_std, count,sum(atom_numbs)
     
 def extract_sigma_incar(incar):
 
@@ -107,7 +156,9 @@ def extract_sigma_vol_kp_outcar(outcar):
 parser = argparse.ArgumentParser()
 ### MUST SET###
 parser.add_argument("--inputpath","-ip",help="input path file")
-parser.add_argument("-m", "--model", type=str,help="Frozen model file to import")
+parser.add_argument("-m", "--model", type=str,help="Frozen model file to import, no model specify => no model mode")
+parser.add_argument("-mo", "--mo", type=str,help="model only")
+parser.add_argument("-de", "--deepmd", type=str,default = 'deepmd',help="deepmd folder, could be deepmd-deepmd_relax, use - as separator")
 
 
 parser.add_argument("--outcar","-o",type=str,default = 'OUTCAR',help="name of outcar file")
@@ -171,6 +222,8 @@ if args.model:  ##
 eV_A3_2_GPa  = 160.21766208  # http://greif.geo.berkeley.edu/~driver/conversions.html
 boltz        = 8.6173332e-5  
 
+import random
+tag = str(random.randint(0,1e5))  ## put a tag to avoid data overprint
 for path in paths:
     print('--'*40)
     print(path)
@@ -178,13 +231,13 @@ for path in paths:
     ## check the source data, some only has deepmd, not deepmd_relax2
     ## and vice versa. deepmd_relax2 is for relax process only
     ## to do the statisitics, we only care where there is deepmd
-    if  os.path.exists(os.path.join(path,'deepmd')): 
-        deepmd_path = os.path.join(path,'deepmd')     
+    if  os.path.exists(os.path.join(path,args.deepmd)): 
+        deepmd_path = os.path.join(path,args.deepmd)     
         recal_outcar = os.path.join(path,args.outcar)
         org_outcar_tmp   = os.path.normpath(os.path.join(path, os.pardir)) #os.path.join(path,'')
         org_outcar       = os.path.join(org_outcar_tmp,args.outcar)
     #    print(path)
-        _, _, e_std_tr,f_std_tr,v_std_tr,train_size,_   = stds(recal_outcar)
+        _, _, e_std_tr,f_std_tr,v_std_tr,train_size,_   = stds2(recal_outcar)
         _, _, e_std_all,f_std_all,v_std_all,data_size,_ = stds(org_outcar,0)
         e_bar, v_bar, e_std_eq,f_std_eq,v_std_eq,_,natoms    = stds(org_outcar,args.excudedfraction)   
         
@@ -245,10 +298,10 @@ out_pd = pd.DataFrame(out, columns = columns)
 if not os.path.exists('out'):
     os.mkdir('out')
 target = 'out'
-if args.model: 
-    out_pd.to_csv(os.path.join(target,'out_pd_model'))
+if args.model:
+    out_pd.to_excel(os.path.join(target,'out_pd_model'+'_'+tag+'.xlsx'))
 else:
-    out_pd.to_csv(os.path.join(target,'no_model'))
+    out_pd.to_excel(os.path.join(target,'no_model'+'_'+tag+'.xlsx'))
     
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots(1,3,figsize=(14,4))
@@ -258,17 +311,17 @@ ax[2].plot(out_pd['T'],out_pd['E(eV)'],'o')
 ax[0].set_xlabel('T'); ax[0].set_ylabel('P (GPa)')
 ax[1].set_xlabel('T'); ax[1].set_ylabel('Vol (A3)')
 ax[2].set_xlabel('T'); ax[2].set_ylabel('E (eV)')
-fig.savefig(os.path.join(target,'pev.png'),bbox_inches='tight')
+fig.savefig(os.path.join(target,'pev_{0}.png'.format(tag)),bbox_inches='tight')
 
 fig, ax = plt.subplots(1,3,figsize=(14,4))
 ax[0].scatter(out_pd['sigma(eV)'],out_pd['Est_eq'],c=out_pd['vol'])
 ax[1].scatter(out_pd['sigma(eV)'],out_pd['Fst_eq'],c=out_pd['vol'])
 f3 = ax[2].scatter(out_pd['sigma(eV)'],out_pd['Vst_eq'],c=out_pd['vol'])
 plt.colorbar(f3)
-ax[0].set_xlabel('sigma(eV)'); ax[0].set_ylabel('Est (eV)')
-ax[1].set_xlabel('sigma(eV)'); ax[1].set_ylabel('Fst (A3)')
-ax[2].set_xlabel('sigma(eV)'); ax[2].set_ylabel('Vst (eV)')
-fig.savefig(os.path.join(target,'simga_vs_std.png'),bbox_inches='tight')
+ax[0].set_xlabel('sigma(eV)'); ax[0].set_ylabel('Est (eV/atom)')
+ax[1].set_xlabel('sigma(eV)'); ax[1].set_ylabel('Fst (eV/A)')
+ax[2].set_xlabel('sigma(eV)'); ax[2].set_ylabel('Vst (eV/atom)')
+fig.savefig(os.path.join(target,'simga_vs_std_{0}.png'.format(tag)),bbox_inches='tight')
 
 if args.model:
     fig, ax = plt.subplots(1,3,figsize=(14,4))
@@ -279,7 +332,7 @@ if args.model:
     ax[0].set_xlabel('sigma(eV)'); ax[0].set_ylabel('Eaerr/std')
     ax[1].set_xlabel('sigma(eV)'); ax[1].set_ylabel('Fst/std')
     ax[2].set_xlabel('sigma(eV)'); ax[2].set_ylabel('Vst/std')
-    fig.savefig(os.path.join(target,'simga_vs_err_std.png'),bbox_inches='tight')
+    fig.savefig(os.path.join(target,'simga_vs_err_std_{0}.png'.format(tag)),bbox_inches='tight')
     
     fig, ax = plt.subplots(1,3,figsize=(14,4))
     ax[0].scatter(out_pd['Ndata'],out_pd['Eaerr_tr']/(out_pd['Est_eq']/out_pd['N']),c=out_pd['vol'])
@@ -289,5 +342,5 @@ if args.model:
     ax[0].set_xlabel('Ndata'); ax[0].set_ylabel('Eaerr/std')
     ax[1].set_xlabel('Ndata'); ax[1].set_ylabel('Fst/std')
     ax[2].set_xlabel('Ndata'); ax[2].set_ylabel('Vst/std')
-    fig.savefig(os.path.join(target,'ndata_vs_err_std.png'),bbox_inches='tight')
+    fig.savefig(os.path.join(target,'ndata_vs_err_std_{0}.png'.format(tag)),bbox_inches='tight')
 
