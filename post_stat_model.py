@@ -86,11 +86,11 @@ for path in paths:
 
     e_tr = np.loadtxt(e_tr_file)/natoms
     f_tr = np.loadtxt(f_tr_file)
-    v_tr = np.loadtxt(v_tr_file);     v_gpa_tr = v_tr/vol*eV_A3_2_GPa 
+    v_tr = np.loadtxt(v_tr_file);     
 
     e_test = np.loadtxt(e_test_file)/natoms
     f_test = np.loadtxt(f_test_file)
-    v_test = np.loadtxt(v_test_file); v_gpa_test = v_test/vol*eV_A3_2_GPa 
+    v_test = np.loadtxt(v_test_file); 
     
     if e_tr.ndim == 1:
         e_tr = np.reshape(e_tr,(1,len(e_tr)))
@@ -102,6 +102,9 @@ for path in paths:
     if v_test.ndim == 1:
         v_test = np.reshape(v_test,(1,len(v_test)))
     # force cannot be 1 d datal as it is for every atom
+    v_gpa_tr = v_tr/vol*eV_A3_2_GPa 
+    v_gpa_test = v_test/vol*eV_A3_2_GPa 
+    
     log = np.loadtxt(logfile)
     
     if count == 0:
