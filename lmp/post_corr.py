@@ -194,26 +194,7 @@ if args.average:
 
  # s to ps
 
-fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
-ax[0].plot(dt,JxJx*metal2SIps,label='x') # 2ps is enough, interesting
-ax[0].plot(dt,JyJy*metal2SIps,label='y')
-ax[0].plot(dt,JzJz*metal2SIps,label='z')
-ax[0].plot(dt,JJ*metal2SIps,label='average')
-ax[0].set_xlabel('dt (ps)')
-ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
-ax[0].grid(True)
-ax[0].legend()
 
-ax[1].plot(dt,cumsum_JxJx,label='x') # 
-ax[1].plot(dt,cumsum_JyJy,label='y')
-ax[1].plot(dt,cumsum_JzJz,label='z')
-ax[1].plot(dt, cumsum_JJ,label='average')
-
-ax[1].set_xlabel('dt (ps)')
-ax[1].set_ylabel('thermal conductivity (W m-1 K-1)')
-ax[1].grid(True)
-ax[1].legend()
-plt.show()
 
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt,JxJx*metal2SIps,label='x') # 
@@ -237,6 +218,28 @@ ax[1].grid(True)
 ax[1].legend()
 ax[1].set_xscale('log')
 plt.show()
+
+
+#fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
+#ax[0].plot(dt,JxJx*metal2SIps,label='x') # 2ps is enough, interesting
+#ax[0].plot(dt,JyJy*metal2SIps,label='y')
+#ax[0].plot(dt,JzJz*metal2SIps,label='z')
+#ax[0].plot(dt,JJ*metal2SIps,label='average')
+#ax[0].set_xlabel('dt (ps)')
+#ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
+#ax[0].grid(True)
+#ax[0].legend()
+#
+#ax[1].plot(dt,cumsum_JxJx,label='x') # 
+#ax[1].plot(dt,cumsum_JyJy,label='y')
+#ax[1].plot(dt,cumsum_JzJz,label='z')
+#ax[1].plot(dt, cumsum_JJ,label='average')
+#
+#ax[1].set_xlabel('dt (ps)')
+#ax[1].set_ylabel('thermal conductivity (W m-1 K-1)')
+#ax[1].grid(True)
+#ax[1].legend()
+#plt.show()
 
 #plt.figure()
 #plt.plot(dt,JJ_JJ0)
