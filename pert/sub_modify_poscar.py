@@ -38,7 +38,7 @@ for i in range(len(pos)):
     copy(os.path.join(args.inputfile, 'KPOINTS'),str(i))
     copy(os.path.join(args.inputfile, 'POTCAR'),str(i))  
     if args.run_vasp:        
-        run(cwd,str(i))
+        run(str(i))
     
 
         
