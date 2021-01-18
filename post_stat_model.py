@@ -99,7 +99,7 @@ for path in paths:
 
     if v_tr.ndim == 1:
         v_tr = np.reshape(v_tr,(1,len(v_tr)))
-    if f_test.ndim == 1:
+    if v_test.ndim == 1:
         v_test = np.reshape(v_test,(1,len(v_test)))
     # force cannot be 1 d datal as it is for every atom
     log = np.loadtxt(logfile)
