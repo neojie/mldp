@@ -5,6 +5,8 @@ Created on Tue Jan 19 11:02:36 2021
 unit 
 https://lammps.sandia.gov/doc/compute_heat_flux.html
 
+directly analyze the log.properties file with Step, Jx, Jy, Jz 
+
 @author: jiedeng
 """
 #!/usr/bin/env python3
@@ -15,72 +17,26 @@ analyze output of ave/correlate
 @author: jiedeng
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
+
 #from util import reverse_readline
-import os 
+#import os 
 import argparse
-import glob
-
-def reverse_readline(filename, buf_size=8192):
-    """A generator that returns the lines of a file in reverse order
-    read big file in reverse order is not trivial, library avaialable but not a optimum choice
-    source: https://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
-    """
-
-    with open(filename) as fh:
-        segment = None
-        offset = 0
-        fh.seek(0, os.SEEK_END)
-        file_size = remaining_size = fh.tell()
-        while remaining_size > 0:
-            offset = min(file_size, offset + buf_size)
-            fh.seek(file_size - offset)
-            buffer = fh.read(min(remaining_size, buf_size))
-            remaining_size -= buf_size
-            lines = buffer.split('\n')
-            # The first line of the buffer is probably not a complete line so
-            # we'll save it and append it to the last line of the next buffer
-            # we read
-            if segment is not None:
-                # If the previous chunk starts right from the beginning of line
-                # do not concat the segment to the last line of new chunk.
-                # Instead, yield the segment first 
-                if buffer[-1] != '\n':
-                    lines[-1] += segment
-                else:
-                    yield segment
-            segment = lines[0]
-            for index in range(len(lines) - 1, 0, -1):
-                if lines[index]:
-                    yield lines[index]
-        # Don't yield None if the file was empty
-        if segment is not None:
-            yield segment
-            
-def read_file(file,count):
-    out = []
-    txt  = reverse_readline(file)
-    for i in range(count):
-        line = next(txt)
-        line1 =[float(i) for i in line.split()]
-        out.append(line1)
-    return np.array(out[::-1])
-
 parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
 parser.add_argument("--input_file", "-i",type=str, default="log.properties",  help="log_lmp generated file")
 
-parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
-parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
-parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
+#parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
+#parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
+#parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
 parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
 parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
 parser.add_argument("--volume", "-v",type=float,help='volume in A3')
-parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
+#parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
 
 args = parser.parse_args()
 
-
+import numpy as np
+import matplotlib.pyplot as plt
+import glob
 
 def autocorr(a):
     b=np.concatenate((a,np.zeros(len(a))),axis=0)
@@ -105,23 +61,7 @@ else:
 #            except:
 #                print('No T found in ', infile)                   
     print('  ** T = ', T)
-if args.sample_rate:
-    sample_rate = args.sample_rate
-else:
-    infile = glob.glob('in*')[0]
-    print('  Find ', infile)
-    print(" ?? sample rate not provided, parse from in file") 
-#            try:
-    fp = open(infile)
-    ins = fp.readlines()
-    for line in ins:
-        line=line.split('#')[0].split()
-        if len(line)>0 and line[0] ==   'variable' and line[1] == 's' and line[2] == 'equal':
-            sample_rate = float(line[3])
-            break
-#            except:
-#                print('No sample rate found in ', infile)   
-    print(' ** sample rate = ', sample_rate)
+
         
 if args.volume:
     V = args.volume
@@ -130,7 +70,6 @@ else:
     fp = open(infile)
     ins = fp.readlines()
     print("  ?? vol not provided, parse from in conf.lmp") 
-#            try:
     xhi = False
     yhi = False
     zhi = False
@@ -150,37 +89,21 @@ else:
     V = (xhi - xlo)*(yhi - ylo)*(zhi - zlo)
     print(' ** volume = ', V)
 
-#            except:
-#                print('volume parse error') 
-    
-#scale = convert/kB/T/T/V*sr*args.timestep/1e3
-#metal2SIps = convert/kB/T/T/V
-#print('  scale = ',scale)
-#print("--"*40)
-#except:
-#raise ValueError('scale problem!')
-
 
 # convert from LAMMPS real units to SI
-kB = 1.3806504e-23   # [J/K] Boltzmann
+kB   = 1.3806504e-23   # [J/K] Boltzmann
 ev2j = 1.60218e-19
-A2m = 1.0e-10
+A2m  = 1.0e-10
 ps2s = 1.0e-12
-convert = ev2j*ev2j/ps2s/A2m
-timestep = 1e-3 # in ps this is different from post_corr
-
-
-         # in ps 
-#sample_rate = 1     # sample every x step
-#V = 1033.5195
-#T = 4000
+convert      = ev2j*ev2j/ps2s/A2m
+timestep    = 1e-3    # in ps this is different from post_corr
+sample_rate = 1       # for all mgsio3 syste, sample every single step
 
 scale = convert/kB/T/T/V*sample_rate*timestep
 
 metal2SIps = convert/kB/T/T/V
 
-#file = '/Users/jiedeng/GD/papers/paperxx3_ml/om6/log.properties'
-file = 'log.properties'
+file = args.input_file
 
 J=np.loadtxt(file) # heat current J is saved, but heat flux (energy x velocity) autocorrelation is saved in J0Jt, heat flux/V = heat flux
 J = J*V
@@ -199,6 +122,8 @@ k22 = np.trapz(JyJy)*scale
 k33 = np.trapz(JzJz)*scale
 
 kappa = (k11+k22+k33)/3.0
+print(' Last step kappa is {0} (W m-1 K-1): '.format( kappa))
+#print('kappa is 'kappa)
 
 
 import scipy.integrate
@@ -206,6 +131,7 @@ cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*scale; #np.insert(cumsum_
 cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
+
 
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt, JxJx*metal2SIps,label='x') # 
@@ -217,8 +143,6 @@ ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
 ax[0].grid(True)
 ax[0].legend()
 ax[0].set_xscale('log')
-
-
 
 ax[1].plot(dt, cumsum_JxJx,label='x') # 
 ax[1].plot(dt, cumsum_JyJy,label='y')
@@ -232,13 +156,8 @@ ax[1].legend()
 ax[1].set_xscale('log')
 plt.show()
 
-#plt.figure()
-#plt.plot(JxJx)
-#plt.plot(JyJy)
-#plt.plot(JzJz)
-#plt.xscale('log')
-plt.show()
-print(kappa)
+#plt.show()
+
 
 """
 ### more straighyforward way
