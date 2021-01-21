@@ -22,8 +22,10 @@ parser.add_argument("-x", type=str, default="Step", help="Data to plot on the fi
 parser.add_argument("-y", type=str, nargs="+", help="Data to plot on the second axis. You can supply several names to get several plot lines in the same figure.")
 parser.add_argument("-a", "--running_average", default=False, action='store_true', help="average y?")
 parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num should be set if there are several runs and thermostyle does not change from run to run")
-parser.add_argument("-s", "--store", default=False, action='store_true', help="save data as outfile")
+parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
+parser.add_argument("-np", "--no_plot", default=False, action='store_true', help="Defualt:  Do not plot")
+
 
 args = parser.parse_args()
 
@@ -63,6 +65,7 @@ if not check(Step):
     x = (x[selected_idx]).astype(float)
     ys = [(y[selected_idx]).astype(float) for y in ys]
     print('**Fixed**')
+
 
 plt.figure()
 for i in range(len(args.y)):
