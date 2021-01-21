@@ -68,7 +68,8 @@ def read_file(file,count):
     return np.array(out[::-1])
 
 parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
-parser.add_argument("--input_file", "-i",type=str, default="J0Jt.dat",  help="ave/correlate output file")
+parser.add_argument("--input_file", "-i",type=str, default="log.properties",  help="log_lmp generated file")
+
 parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
 parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
 parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
@@ -170,7 +171,7 @@ timestep = 1e-3 # in ps this is different from post_corr
 
 
          # in ps 
-sample_rate = 1     # sample every x step
+#sample_rate = 1     # sample every x step
 #V = 1033.5195
 #T = 4000
 

@@ -24,7 +24,7 @@ parser.add_argument("-a", "--running_average", default=False, action='store_true
 parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num should be set if there are several runs and thermostyle does not change from run to run")
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
-parser.add_argument("-np", "--no_plot", default=False, action='store_true', help="Defualt:  Do not plot")
+parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
 
 
 args = parser.parse_args()
@@ -66,7 +66,7 @@ if not check(Step):
     ys = [(y[selected_idx]).astype(float) for y in ys]
     print('**Fixed**')
 
-
+if args.no_plot:
 plt.figure()
 for i in range(len(args.y)):
     plt.plot(x,ys[i],label=args.y[i])
