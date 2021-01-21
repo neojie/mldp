@@ -141,7 +141,7 @@ if args.average:
     window = args.average
     cumsum_JJ_sel = cumsum_JJ[range(window[0],window[1])]
 #    window_mean = cumsum_JJ[range(window[0],window[1])].mean()
-    print('mean kappa within {0} ps - {1} ps is {2}   {3}{(W m-1 K-1): '.format(
+    print('mean kappa within {0} ps - {1} ps is {2}   {3}(W m-1 K-1): '.format(
             dt[window[0]], 
             dt[window[1]], 
             min(cumsum_JJ_sel),
