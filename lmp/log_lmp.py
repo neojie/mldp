@@ -67,15 +67,15 @@ if not check(Step):
     print('**Fixed**')
 
 if args.no_plot:
-plt.figure()
-for i in range(len(args.y)):
-    plt.plot(x,ys[i],label=args.y[i])
-if args.running_average:
-    average=np.array(ys).mean(axis=0)
-    plt.plot(x,average,label='average')
-plt.legend()
-plt.grid(True)
-plt.show()
+    plt.figure()
+    for i in range(len(args.y)):
+        plt.plot(x,ys[i],label=args.y[i])
+    if args.running_average:
+        average=np.array(ys).mean(axis=0)
+        plt.plot(x,average,label='average')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 
 if args.store:
