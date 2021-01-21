@@ -31,6 +31,8 @@ parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window ave
 parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
 parser.add_argument("--volume", "-v",type=float,help='volume in A3')
 #parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
+parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
+parser.add_argument("-of", "--outfile",type=str,default='log.kappa', help="out file name")
 
 args = parser.parse_args()
 
@@ -95,7 +97,7 @@ kB   = 1.3806504e-23   # [J/K] Boltzmann
 ev2j = 1.60218e-19
 A2m  = 1.0e-10
 ps2s = 1.0e-12
-convert      = ev2j*ev2j/ps2s/A2m
+convert     = ev2j*ev2j/ps2s/A2m
 timestep    = 1e-3    # in ps this is different from post_corr
 sample_rate = 1       # for all mgsio3 syste, sample every single step
 
@@ -125,14 +127,27 @@ kappa = (k11+k22+k33)/3.0
 print(' Last step kappa is {0} (W m-1 K-1): '.format( kappa))
 #print('kappa is 'kappa)
 
-
 import scipy.integrate
 cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
+if args.store:
+    header='Step (ps)    autocorr (W/m/K/ps)    kappa(W/m/K)'
+    np.savetxt(args.outfile,np.concatenate(([dt],[JJ*metal2SIps],[cumsum_JJ])).T,fmt='%12.10f',header = header)
 
+if args.average:
+    window = args.average
+    cumsum_JJ_sel = cumsum_JJ[range(window[0],window[1])]
+#    window_mean = cumsum_JJ[range(window[0],window[1])].mean()
+    print('mean kappa within {0} ps - {1} ps is {2}   {3}{(W m-1 K-1): '.format(
+            dt[window[0]], 
+            dt[window[1]], 
+            min(cumsum_JJ_sel),
+            max(cumsum_JJ_sel)
+            ))
+    
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt, JxJx*metal2SIps,label='x') # 
 ax[0].plot(dt, JyJy*metal2SIps,label='y')
