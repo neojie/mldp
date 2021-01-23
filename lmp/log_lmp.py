@@ -4,6 +4,11 @@
 Created on Sun Oct  4 00:21:59 2020
 modified from cmd_interface.py
 
+WARNING message can only be handled if filed is less than lammps fields
+say if I have
+Step TotEng
+then this code cannot handle it.
+
 @author: jiedeng
 """
 
@@ -29,7 +34,13 @@ parser.add_argument("-p", "--plot", default=True, action='store_false', help="De
 
 args = parser.parse_args()
 
-log = File(args.input_file)
+try:
+    log = File(args.input_file)
+except:
+    from subprocess import call
+    call("sed -i 's/style restartinfo set but has//' {0}".format(args.input_file), shell=True)
+    log = File(args.input_file)
+    
 x   = log.get(args.x,run_num=args.run_num)
 ys  = [log.get(y,run_num=args.run_num) for y in args.y]
 """
