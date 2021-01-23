@@ -25,14 +25,17 @@ parser = argparse.ArgumentParser(description="Plot contents from lammps log file
 parser.add_argument("input_file", type=str, help="Lammps log file containing thermo output from lammps simulation.")
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
 parser.add_argument("-y", type=str, nargs="+", help="Data to plot on the second axis. You can supply several names to get several plot lines in the same figure.")
-parser.add_argument("-a", "--running_average", default=False, action='store_true', help="average y?")
+#parser.add_argument("-a", "--running_average", default=False, action='store_true', help="average y?")
 parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num should be set if there are several runs and thermostyle does not change from run to run")
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
-parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
+parser.add_argument("-of", "--outfile",type=str,default='log.e', help="out file name")
 parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
+parser.add_argument("-n", "--natoms", type=int, default=160, help="# of atoms")
 
 
 args = parser.parse_args()
+args.run_num = 1
+args.y       = ['TotEng']
 
 try:
     log = File(args.input_file)
@@ -77,13 +80,20 @@ if not check(Step):
     ys = [(y[selected_idx]).astype(float) for y in ys]
     print('**Fixed**')
 
+
+etot = ys[0]
+max_ind = np.argmax(etot)
+min_ind = np.argmin(etot)
+drift = (etot[max_ind] - etot[min_ind])/((max_ind-min_ind)*1/1000)*1000/args.natoms # timestep 1 fs
+print("energy drif is: {0} meV/ps/atom from {1} to {2}".format(drift, min_ind, max_ind))
+
 if args.plot:
     plt.figure()
     for i in range(len(args.y)):
         plt.plot(x,ys[i],label=args.y[i])
-    if args.running_average:
-        average=np.array(ys).mean(axis=0)
-        plt.plot(x,average,label='average')
+#    if args.running_average:
+#        average=np.array(ys).mean(axis=0)
+#        plt.plot(x,average,label='average')
     plt.legend()
     plt.grid(True)
     plt.show()
@@ -92,3 +102,5 @@ if args.plot:
 if args.store:
     header=args.x + ' '+  ' '.join(args.y)
     np.savetxt(args.outfile,np.concatenate(([x],ys),axis=0).T,fmt='%12.10f',header = header)
+    
+
