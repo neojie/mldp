@@ -124,6 +124,7 @@ k22 = np.trapz(JyJy)*scale
 k33 = np.trapz(JzJz)*scale
 
 kappa = (k11+k22+k33)/3.0
+print(' JJ[0 is] {0} (W m-1 K-1 ps-1): '.format( JJ[0]))
 print(' Last step kappa is {0} (W m-1 K-1): '.format( kappa))
 #print('kappa is 'kappa)
 
@@ -146,6 +147,13 @@ if args.average:
             dt[window[1]], 
             min(cumsum_JJ_sel),
             max(cumsum_JJ_sel)
+            ))
+
+    print('mean kappa within {0} ps - {1} ps is {2} +/-  {3}(W m-1 K-1): '.format(
+            dt[window[0]], 
+            dt[window[1]], 
+            np.mean(cumsum_JJ_sel),
+            np.std(cumsum_JJ_sel)
             ))
     
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)

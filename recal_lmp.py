@@ -10,7 +10,6 @@ if recal exist, check if the NSW is selected?
 """
 import os
 from shutil import copy
-from shared_functions import load_paths
 import dpdata
 import glob
 
@@ -72,6 +71,7 @@ args   = parser.parse_args()
 print(args.run_vasp)
 cwd    = os.getcwd()
 if args.inputpath:
+    from shared_functions import load_paths
     print("Check files in {0}  ".format(args.inputpath))
     inputpath = args.inputpath
     paths = load_paths(inputpath)
