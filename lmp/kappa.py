@@ -124,7 +124,7 @@ k22 = np.trapz(JyJy)*scale
 k33 = np.trapz(JzJz)*scale
 
 kappa = (k11+k22+k33)/3.0
-print(' JJ[0 is] {0} (W m-1 K-1 ps-1): '.format( JJ[0]*JJ*metal2SIps))
+print(' JJ[0 is] {0} (W m-1 K-1 ps-1): '.format( JJ[0]*metal2SIps))
 print(' Last step kappa is {0} (W m-1 K-1): '.format( kappa))
 #print('kappa is 'kappa)
 
