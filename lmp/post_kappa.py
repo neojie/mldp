@@ -20,8 +20,8 @@ fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 for i in range(len(ds)):
     kappa = np.loadtxt(ds[i] + '/log.kappa')
     label = str(VVx) + ' ' + 'T' + ' K' 
-    ax[0].plot(kappa[:,0], kappa[:,1],label= '4000 K, V/Vx=0.5')
-    ax[1].plot(kappa[:,0], kappa[:,2],label= '4000 K, V/Vx=0.5')
+    ax[0].plot(kappa[:,0], kappa[:,1],label= label)
+    ax[1].plot(kappa[:,0], kappa[:,2],label= label)
 ax[0].grid(True)
 ax[0].legend()
 ax[0].set_xscale('log')
