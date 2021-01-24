@@ -38,8 +38,10 @@ try:
     log = File(args.input_file)
 except:
     from subprocess import call
-    call("sed -i 's/style restartinfo set but has//' {0}".format(args.input_file), shell=True)
-    log = File(args.input_file)
+    call("cp {0} {1}".format(args.input_file, args.input_file+'tmp'), shell=True) # do not change in the original file, better for checking on running sinulation
+    call("sed -i 's/style restartinfo set but has//' {0}".format(args.input_file+'tmp'), shell=True)
+    log = File(args.input_file+'tmp')
+    call("rm {0}".format(args.input_file+'tmp'), shell=True)
     
 x   = log.get(args.x,run_num=args.run_num)
 ys  = [log.get(y,run_num=args.run_num) for y in args.y]

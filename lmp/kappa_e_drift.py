@@ -85,7 +85,7 @@ etot = ys[0]
 max_ind = np.argmax(etot)
 min_ind = np.argmin(etot)
 drift = (etot[max_ind] - etot[min_ind])/((max_ind-min_ind)*1/1000)*1000/args.natoms # timestep 1 fs
-print("energy drif is: {0} meV/ps/atom from {1} to {2}".format(drift, min_ind, max_ind))
+print("energy drif is: {0} meV/ps/atom from {1} to {2}".format(drift, min_ind, max_ind)) # https://www.researchgate.net/post/What-may-be-the-cause-of-total-energy-drift-in-NVE-ab-initio-molecular-dynamical-simulations
 
 if args.plot:
     plt.figure()

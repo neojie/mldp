@@ -39,7 +39,7 @@ parser.add_argument("-d", "--detail_file", type=str,
                         help="The file containing details of energy force and virial accuracy")
 
 parser.add_argument("-o", "--overwrite", default=True,action='store_false', 
-                        help="Overwrite existing test results")
+                        help="Overwrite existing test results | default is overwrite")
 args   = parser.parse_args()
 cwd    = os.getcwd()
 
