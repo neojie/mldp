@@ -9,7 +9,7 @@ Created on Thu Jan 21 13:39:51 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-ds = ['/u/project/ESS/lstixrud/jd848/pv+hf/dp-train/lmp_run/3k/r1/kappa/nvtnve_om8',
+ds = ['/u/project/ESS/lstixrud/jd848/pv+hf/dp-train/lmp_run/3k/r1/kappa/nvtnve_om8_re',
       '/u/project/ESS/lstixrud/jd848/pv+hf/dp-train/lmp_run/4k/r1/kappa/160/nvtnve_om8',
       '/u/project/ESS/lstixrud/jd848/pv+hf/dp-train/lmp_run/6k/r1/kappa/nvtnve_om8']
 
