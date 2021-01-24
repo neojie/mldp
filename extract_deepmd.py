@@ -98,7 +98,7 @@ def build_deepmd(path,nsw,outcar,deepmd):
     if args.idx:
         print("index file provided")
         idx = np.loadtxt(args.idx).astype(int)
-        ls = ls.sub_system(idx)
+#        ls = ls.sub_system(idx)
     if args.vaspidx:
         print("vasp index file provided")
         vaspidx=np.loadtxt(args.vaspidx)
@@ -119,7 +119,7 @@ def build_deepmd(path,nsw,outcar,deepmd):
             idx = vaspidx - 1 
     idx2 = [i for i in range(len(ls)) if i not in idx]
     ls2 = ls.sub_system(idx2)
-    ls = ls.sub_system(idx)
+    ls  = ls.sub_system(idx)
         
     deepmd = os.path.join(path,deepmd)
     if args.batchsize: 
