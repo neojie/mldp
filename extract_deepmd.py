@@ -15,7 +15,7 @@ parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR
 parser.add_argument("--deepmd","-d",type = str, default = 'deepmd', help="deepmd folder name")
 parser.add_argument("--vaspidx","-vid",type = str, help="idx file, vasp idx, idx[0] >= 1")
 parser.add_argument("--idx","-id",type = str, help="idx file, idx[0] >= 0")
-parser.add_argument('--test',"-t", default=True, action='store_false',help="save test as set.001?")
+parser.add_argument('--test',"-t", default=True, action='store_false',help="Default: save test as set.001? ")
 
 args   = parser.parse_args()
 
