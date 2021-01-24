@@ -19,7 +19,7 @@ T   = [3000, 4000, 6000]
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 for i in range(len(ds)):
     kappa = np.loadtxt(ds[i] + '/log.kappa')
-    label = str(VVx) + ' ' + 'T' + ' K' 
+    label = str(VVx[i]) + ' ' + str(T[i]) + ' K' 
     ax[0].plot(kappa[:,0], kappa[:,1],label= label)
     ax[1].plot(kappa[:,0], kappa[:,2],label= label)
 ax[0].grid(True)
