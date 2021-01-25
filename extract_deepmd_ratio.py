@@ -10,7 +10,6 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputpath","-ip",help="input path file")
-#parser.add_argument("--batchsize","-bs",type = int, help="input path file")
 parser.add_argument("--train_test_ratio","-ttr",type = float,default=3, help="input path file")
 parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
 parser.add_argument("--deepmd","-d",type = str, default = 'deepmd', help="deepmd folder name")
@@ -110,21 +109,15 @@ def build_deepmd(path,nsw,outcar,deepmd):
         train_size = round(len(ls)*(args.train_test_ratio)/(args.train_test_ratio+1))
 #        test_size = round(len(ls)*1/(args.train_test_ratio+1))
         idx = np.random.choice(range(len(ls)), train_size, replace=False)
+        print(idx)
         idx = idx.sort()
     
     idx2 = [i for i in range(len(ls)) if i not in idx] # test
-    ls2 = ls.sub_system(idx2) # test
-    ls  = ls.sub_system(idx)
+    ls2  = ls.sub_system(idx2) # test
+    ls   = ls.sub_system(idx)
         
     deepmd = os.path.join(path,deepmd)
-#    if args.batchsize: 
-#        set_size = args.batchsize
-#    else:
-#        if nsw <= 4: # we know nsw must > 100
-#            set_size = 1
-#            print("{0} has only {1}".format(path,nsw))
-#        if nsw > 4:
-#            set_size,_ = best_size(nsw)  # 25% used as , but if say 82, then 20, 20, 20, 2, too less
+    
     ls.to_deepmd_npy(deepmd,set_size=1000000) # give a *large* value, default is 5000
     if args.test:
         ls2.to_deepmd_npy('test_tmp',set_size=1000000)
