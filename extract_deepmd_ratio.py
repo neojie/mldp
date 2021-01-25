@@ -109,8 +109,7 @@ def build_deepmd(path,nsw,outcar,deepmd):
         train_size = round(len(ls)*(args.train_test_ratio)/(args.train_test_ratio+1))
 #        test_size = round(len(ls)*1/(args.train_test_ratio+1))
         idx = np.random.choice(range(len(ls)), train_size, replace=False)
-        print(idx)
-        idx = idx.sort()
+        idx.sort()
     
     idx2 = [i for i in range(len(ls)) if i not in idx] # test
     ls2  = ls.sub_system(idx2) # test
