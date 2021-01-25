@@ -118,7 +118,9 @@ def build_deepmd(path,nsw,outcar,deepmd):
     deepmd = os.path.join(path,deepmd)
     
     ls.to_deepmd_npy(deepmd,set_size=1000000) # give a *large* value, default is 5000
-    if args.test:
+    if len(ls2) == 0:
+        print('test set has no data')
+    elif args.test and len(ls2)>0:
         ls2.to_deepmd_npy('test_tmp',set_size=1000000)
         shutil.copytree('test_tmp/set.000',os.path.join(deepmd,'set.001'))
         shutil.rmtree('test_tmp')
