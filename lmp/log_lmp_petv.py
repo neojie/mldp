@@ -115,7 +115,7 @@ average1=np.array(ys).mean(axis=1)
 print_list(average1)
 
 print('-----NVT + NVE-----')
-print_list(average0 + average1)
+print_list(np.concatenate(average0 , average1))
 
 if args.plot:
     for i in range(3):
