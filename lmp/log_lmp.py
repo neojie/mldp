@@ -93,8 +93,9 @@ if args.plot:
 
 if args.running_average:
     average=np.array(ys).mean(axis=0)
-    print('average of ys ',ys)
-    print(average)
+    print('average of ys ',args.y)
+    for y in ys:
+        print(y.mean(axis=0))
 #    plt.plot(x,average,label='average')
 
 if args.store:
