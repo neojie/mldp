@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description="Plot contents from lammps log file
 parser.add_argument("input_file", type=str, help="Lammps log file containing thermo output from lammps simulation.")
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
 parser.add_argument("-y", type=str, nargs="+", help="Data to plot on the second axis. You can supply several names to get several plot lines in the same figure.")
-parser.add_argument("-a", "--running_average", default=False, action='store_true', help="average y?")
+parser.add_argument("-a", "--running_average", default=True, action='store_false', help="Default: average y and print out the averaged value ")
 parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num should be set if there are several runs and thermostyle does not change from run to run")
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
@@ -83,13 +83,19 @@ if args.plot:
     plt.figure()
     for i in range(len(args.y)):
         plt.plot(x,ys[i],label=args.y[i])
-    if args.running_average:
-        average=np.array(ys).mean(axis=0)
-        plt.plot(x,average,label='average')
+#    if args.running_average:
+#        average=np.array(ys).mean(axis=0)
+#        plt.plot(x,average,label='average')
     plt.legend()
     plt.grid(True)
     plt.show()
 
+
+if args.running_average:
+    average=np.array(ys).mean(axis=0)
+    print('average of ys ',ys)
+    print(average)
+#    plt.plot(x,average,label='average')
 
 if args.store:
     header=args.x + ' '+  ' '.join(args.y)
