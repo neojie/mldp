@@ -1,4 +1,4 @@
-#import dpdata as dp
+u#import dpdata as dp
 #from dpdata import LabeledSystem
 #outcar = '/Users/jiedeng/Documents/tmp/jd848/project_folder/pv+hf/8k/r3-3100/recal/OUTCAR'
 #ls = LabeledSystem(outcar,fmt='outcar')

@@ -12,17 +12,12 @@ then this code cannot handle it. => so I use 'sed' as workaround
 @author: jiedeng
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-#import os
-import argparse
-#import glob
-#from util import blockAverage
-from lammps_logfile import File
 
+import argparse
 
 parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
-parser.add_argument("input_file", type=str, help="Lammps log file containing thermo output from lammps simulation.")
+#parser.add_argument("input_file", type=str, help="Lammps log file containing thermo output from lammps simulation.") # default cannot be set to positional argument
+parser.add_argument("--input_file",'-i', type=str,default='log.lammps', help="Lammps log file containing thermo output from lammps simulation.")
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
 parser.add_argument("-y", type=str, nargs="+", help="Data to plot on the second axis. You can supply several names to get several plot lines in the same figure.")
 parser.add_argument("-a", "--running_average", default=True, action='store_false', help="Default: average y and print out the averaged value ")
@@ -33,6 +28,10 @@ parser.add_argument("-p", "--plot", default=True, action='store_false', help="De
 
 
 args = parser.parse_args()
+
+from lammps_logfile import File
+import numpy as np
+import matplotlib.pyplot as plt
 
 try:
     log = File(args.input_file)
@@ -78,25 +77,29 @@ if not check(Step):
     x = (x[selected_idx]).astype(float)
     ys = [(y[selected_idx]).astype(float) for y in ys]
     print('**Fixed**')
-
-if args.plot:
-    plt.figure()
-    for i in range(len(args.y)):
-        plt.plot(x,ys[i],label=args.y[i])
-#    if args.running_average:
-#        average=np.array(ys).mean(axis=0)
-#        plt.plot(x,average,label='average')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-
+    
 if args.running_average:
     average=np.array(ys).mean(axis=0)
-    print('average of ys ',args.y)
-    for y in ys:
-        print(y.mean(axis=0))
-#    plt.plot(x,average,label='average')
+    print('----average----')
+    print(args.y)
+    if len(args.y) == 1:
+        ys_mean = [ys[0].mean()]
+    else:
+        ys_mean = [y.mean(axis=0) for y in ys]
+    print('\t'.join([str(i) for i in ys_mean]))
+    
+if args.plot:
+    horizontal_scale = len(args.y)*3
+    fig,ax = plt.subplots(len(args.y),1,figsize=(6,horizontal_scale),sharex=True,sharey=False)
+    if len(args.y) == 1:
+        ax.plot(x,ys[0],label=args.y[0])
+        ax.legend();ax.grid()
+    else:
+        for i in range(len(args.y)):
+            ax[i].plot(x,ys[i],label=args.y[i])
+            ax[i].legend();ax[i].grid()
+    plt.show()
+
 
 if args.store:
     header=args.x + ' '+  ' '.join(args.y)
