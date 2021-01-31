@@ -21,7 +21,7 @@ parser.add_argument("--input_file",'-i', type=str,default='log.lammps', help="La
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
 parser.add_argument("-y", type=str, nargs="+", help="Data to plot on the second axis. You can supply several names to get several plot lines in the same figure.")
 parser.add_argument("-a", "--running_average", default=True, action='store_false', help="Default: average y and print out the averaged value ")
-parser.add_argument("-h", "--half_window", default=True, action='store_false', help="Default: average the second half of y")
+parser.add_argument("-hw", "--half_window", default=True, action='store_false', help="Default: average the second half of y")
 parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num should be set if there are several runs and thermostyle does not change from run to run")
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
