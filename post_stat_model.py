@@ -188,7 +188,7 @@ def plot(e,f,v):
 
 if args.merge:
     print("merge train and test")
-    e_all = np.concatenate((e_test_all,e_test_all),axis=0)
+    e_all = np.concatenate((e_test_all,e_tr_all),axis=0)
     f_all = np.concatenate((f_test_all,f_tr_all),axis=0)
     v_all = np.concatenate((v_test_all,v_tr_all),axis=0)
     v_gpa_all = np.concatenate((v_gpa_test_all,v_gpa_tr_all),axis=0)
