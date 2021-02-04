@@ -97,12 +97,14 @@ def build_deepmd(path,nsw,outcar,deepmd):
         fmax = max(args.force_limit)
         print("force limit imposed, force in between {0}, {1}".format(fmin, fmax))
         idx_new = []
-        
+        exclude = []
         for i in range(len(ls)):
             forces = ls[i].data['forces']
             if forces.min() >= fmin and forces.max() <= fmax:
                 idx_new.append(i)
-        
+            else:
+                exclude.append(i)
+        print('excluded frames', exclude)
         print('{0} / {1} is selected'.format(len(idx_new),len(ls)))
         ls = ls.sub_system(idx_new)
 
