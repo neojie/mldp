@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
-parser.add_argument("-bad_force_prediction", "--bf", type=float,default=4, 
+parser.add_argument("--bad_force_prediction", "-bf", type=float,default=4, 
                         help="bad force prediction criterion, as difference between force and predictio")   
 args   = parser.parse_args()
 
