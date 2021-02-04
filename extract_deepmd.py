@@ -17,6 +17,8 @@ parser.add_argument("--vaspidx","-vid",type = str, help="idx file, vasp idx, idx
 parser.add_argument("--idx","-id",type = str, help="idx file, idx[0] >= 0")
 parser.add_argument('--test',"-t", default=True, action='store_false',help="Default: save test as set.001? ")
 parser.add_argument('--force_limit',"-f", type=float,nargs="+",help="force limit max and min, order does not matter.")
+parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs")
+
 args   = parser.parse_args()
 
 
@@ -83,7 +85,13 @@ def build_deepmd(path,nsw,outcar,deepmd):
     """
 
     ls = LabeledSystem(outcar,fmt='outcar')
-
+    if args.exclude:
+        oldsize = len(ls)
+        idx_new = [i for i in range(len(ls)) if i not in args.exclude]
+        ls = ls.sub_system(idx_new)
+        newsize = len(ls)
+        print('{0}/{1} is selected'.format(newsize,oldsize))
+        
     if args.force_limit:
         fmin = min(args.force_limit)
         fmax = max(args.force_limit)

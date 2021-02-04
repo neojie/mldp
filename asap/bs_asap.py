@@ -9,22 +9,7 @@ Created on Tue Dec 29 09:15:25 2020
 import pandas as pd
 #import shutil
 import os
-out_pd = pd.read_excel('/Users/jiedeng/GD/ppt/2020/extreme_filter4_with_state.xlsx')
 
-deepmds = out_pd['local_path'].values
-
-## check OUTCAR exists
-for deepmd in deepmds:
-    recal_dir = os.path.abspath(os.path.join(deepmd, os.pardir))
-    if os.path.exists(os.path.join(recal_dir,'OUTCAR')):
-        pass
-    else:
-        print("??",recal_dir,"no outcar in recal")
-    pardir = os.path.abspath(os.path.join(recal_dir, os.pardir)) # https://stackoverflow.com/questions/2860153/how-do-i-get-the-parent-directory-in-python
-    if os.path.exists(os.path.join(pardir,'OUTCAR')):
-        pass
-    else:
-        print("??",pardir,"no outcar in pardir")
 
 def asap(path,stride=1):
     asap_dir =  os.path.join(path,'asap')
@@ -35,8 +20,33 @@ def asap(path,stride=1):
     os.chdir(asap_dir)
     call("asap gen_desc -s {0} --fxyz ../OUTCAR soap -e -c 6 -n 6 -l 6 -g 0.44 --crossover".format(stride), shell=True)
 
+def check_outcar_in_recal_vasp(deepmds):
+    new = []
+    for deepmd in deepmds:
+        recal_dir = os.path.abspath(os.path.join(deepmd, os.pardir))
+        if os.path.exists(os.path.join(recal_dir,'OUTCAR')):
+            pass
+        else:
+            print("??",recal_dir,"no outcar in recal")
+        pardir = os.path.abspath(os.path.join(recal_dir, os.pardir)) # https://stackoverflow.com/questions/2860153/how-do-i-get-the-parent-directory-in-python
+        if os.path.exists(os.path.join(pardir,'OUTCAR')):
+            pass
+        else:
+            print("??",pardir,"no outcar in pardir")
+        if os.path.exists(os.path.join(recal_dir,'OUTCAR')) and os.path.exists(os.path.join(pardir,'OUTCAR')):
+            new.append(deepmd)
+    return deepmds
+            
+#out_pd = pd.read_excel('/Users/jiedeng/GD/ppt/2020/extreme_filter4_with_state.xlsx')
+ak = pd.read_excel('/Users/jiedeng/GD/papers/pv_sum/dat_sum.xlsx',sheet_name = 'ak')
+deepmds = ak['local'].values
+
+## check OUTCAR exists
+
+deepmds = check_outcar_in_recal_vasp(deepmds)
+
 stride = 2
-override = False
+override = True
 from subprocess import call
 for deepmd in deepmds:
     print('--'*30)
