@@ -42,7 +42,7 @@ for deepmd in deepmds:
     print('--'*30)
     print(deepmd)
     recal_dir = os.path.abspath(os.path.join(deepmd, os.pardir))
-    vaspdir = os.path.abspath(os.path.join(recal_dir, os.pardir)) # https://stackoverflow.com/questions/2860153/how-do-i-get-the-parent-directory-in-python
+    vaspdir   = os.path.abspath(os.path.join(recal_dir, os.pardir)) # https://stackoverflow.com/questions/2860153/how-do-i-get-the-parent-directory-in-python
 
     if override:
         asap(recal_dir) 

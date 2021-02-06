@@ -36,8 +36,8 @@ en_sel  = en[(en['T'] == T0) & (en['P(GPa)']<300)]['local'].values
 maj_sel = maj[(maj['T'] == T0) & (maj['P(GPa)']<300)]['local'].values
 
 #deepmds = out_pd['local_path'].values
-
-def get_vasp_asap_path(deepmds):
+file = 'ASAP-desc.xyz'
+def get_vasp_asap_path(deepmds,file=file):
     fxyz_recal = []
     fxyz_vasp  = []
     for deepmd in deepmds:
@@ -53,7 +53,7 @@ def get_vasp_asap_path(deepmds):
             fxyz_vasp.append(os.path.join(vasp_asap,file))
     return fxyz_vasp, fxyz_recal
             
-file = 'ASAP-desc.xyz'
+
 
 
 fxyz_vasp_om8, fxyz_recal_om8 = get_vasp_asap_path(om8_sel)
