@@ -11,6 +11,7 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--inputpath","-ip",help="input path file. support txt file, json file, default is cwd")
 
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
@@ -60,7 +61,6 @@ for path in paths:
         assert os.path.exists(path) # this gives the fixability 
         deepmd_path = path
         
-    deepmd_path = '.'
     
     eV_A3_2_GPa  = 160.21766208 # 1 eV/Å3 = 160.2176621 GPa
     natoms = np.loadtxt(os.path.join(deepmd_path,'type.raw')).shape[0]  #assume natoms does not change
@@ -84,7 +84,7 @@ for path in paths:
     v_test = np.loadtxt(v_test_file)
     v_gpa_test = v_test/vol*eV_A3_2_GPa 
     
-    print(v_gpa_test)
+#    print(v_gpa_test)
     
     bad_force_exclude_idx = []
     energy_exclude_idx = []
@@ -112,7 +112,7 @@ for path in paths:
         min_f = min(args.force_range)
         tmp1= np.where(f_test[:,:3].max(axis=1)>max_f)[0]
         tmp2= np.where(f_test[:,:3].min(axis=1)<min_f)[0]
-        force_exclude_idx  = np.union1d(tmp1,tmp2)
+        force_exclude_idx  = np.union1d(tmp1,tmp2)//natoms
         out=np.union1d(out,force_exclude_idx)
     
     if args.virial_range:
