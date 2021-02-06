@@ -123,7 +123,7 @@ for path in paths:
         virial_exclude_idx  = np.union1d(tmp1,tmp2)
         out=np.union1d(out,virial_exclude_idx)
     if len(out)>0:
-        print("Frames dis-satfitisfy", out) 
+        print("Frames dis-satfitisfy", out.astype(int)) 
     else:
         print("**good**")
 
