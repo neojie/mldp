@@ -26,10 +26,10 @@ import argparse
 from lammps_logfile import File
 
 
-parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
+parser = argparse.ArgumentParser(description="Cv, assume run 0 is NVT")
 parser.add_argument("--input_file","-i", type=str,default='log.lammps', help="Lammps log file containing thermo output from lammps simulation.")
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
-parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
+parser.add_argument("-p", "--plot", default=False, action='store_true', help="Defualt: plot")
 
 
 args = parser.parse_args()
@@ -72,8 +72,9 @@ def print_list(L):
 print('-----NVT-----')
 run_num  = 0
 x   = log.get(args.x,run_num=run_num)
-args_y = ['Press','TotEng','Temp', 'Volume']
+args_y = ['Press','TotEng','Temp', 'PotEng','KinEng']
 ys  = [log.get(y,run_num=run_num) for y in args_y]
+
 
 Step = log.get('Step',run_num=run_num)
 if not check(Step):
@@ -85,10 +86,26 @@ if not check(Step):
     ys = [(y[selected_idx]).astype(float) for y in ys]
     print('**Fixed**')
 
-average0=np.array(ys).mean(axis=1)
-
+xlen = len(x)
+xrange = range(xlen//2,xlen)
+x  = x[xrange]
+ys = np.array(ys)[:,xrange]
+average0=ys.mean(axis=1)
 print_list(average0)
-((np.array(ys) - average0)**2).mean()
+
+kb =  8.617e-5 # eV/K
+kb_natoms = kb*160
+
+tmp = ((ys - np.reshape(average0,(len(average0),1)))**2).mean(axis=1)
+print("TotEng",xrange)
+print(tmp[1]/(average0[2]**2)/kb/kb_natoms)
+
+print("KinEng",xrange)
+print(tmp[-1]/(average0[2]**2)/kb/kb_natoms)
+
+print("PotEng",xrange)
+print(tmp[-2]/(average0[2]**2)/kb/kb_natoms)
+
 if args.plot:   
     fig,ax = plt.subplots(3,2,figsize=(10,6),sharex=False,sharey=False)
     for i in range(3):
@@ -97,32 +114,7 @@ if args.plot:
         ax[i][0].grid(True)
 
 
-print('-----NVE-----')
-run_num  = 1
-x   = log.get(args.x,run_num=run_num)
-args_y = ['Press','TotEng','Temp']
-ys  = [log.get(y,run_num=run_num) for y in args_y]
+#plt.plot(ys[1] - average0[1],'*-');plt.xlabel('step');plt.ylabel('TotEng - mean');plt.show()
+#plt.plot(ys[-2] - average0[-2],'*-');plt.xlabel('step');plt.ylabel('PotEng - mean');plt.show()
+#plt.plot(ys[-1] - average0[-1],'*-');plt.xlabel('step');plt.ylabel('KinEng - mean');plt.show()
 
-Step = log.get('Step',run_num=run_num)
-if not check(Step):
-#    print('    Step col is:', Step[:10])
-    print('**data messed up**')
-    selected_idx = select(Step)
-    
-    x = (x[selected_idx]).astype(float)
-    ys = [(y[selected_idx]).astype(float) for y in ys]
-    print('**Fixed**')
-
-average1=np.array(ys).mean(axis=1)
-print_list(average1)
-
-print('-----NVT + NVE-----')
-print_list(np.concatenate((average0 , average1)))
-
-if args.plot:
-    for i in range(3):
-        ax[i][1].plot(x,ys[i],label=args_y[i])
-        ax[i][1].legend()
-        ax[i][1].grid(True)
-
-    plt.show()
