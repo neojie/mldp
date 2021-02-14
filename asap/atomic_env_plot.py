@@ -99,9 +99,6 @@ ax.tick_params(
     labelleft=False) # labels along the bottom edge are off
 
 
-
-
-
 plot_styles.set_nice_font()
 fig, ax2 = plt.subplots()
 fig.set_size_inches(10, 5)

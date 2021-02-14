@@ -22,8 +22,9 @@ parser.add_argument("--force_range",'-f', type=float,nargs="+",
 parser.add_argument("--energy_peratom_range",'-e',type=float,nargs="+", 
                         help="Default: None, energy (eV/atom) range")   
 parser.add_argument("--virial_range",'-v', type=float,nargs="+", 
-                        help="Default: None, virial (GPa) range peratom")   
-#parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs")
+                        help="Default: None, virial (GPa) range peratom")  
+parser.add_argument('--check_test',"-ct", default=True, action='store_false',
+                    help="Default: check test, if false, check train")
 
 args   = parser.parse_args()
 cwd    = os.getcwd()
@@ -75,9 +76,14 @@ for path in paths:
         
     natoms = np.loadtxt(os.path.join(deepmd_path,'type.raw')).shape[0]  #assume natoms does not change
     
-    e_test_file = os.path.join(deepmd_path, args.detail_file+".e.out")
-    f_test_file = os.path.join(deepmd_path, args.detail_file+".f.out")
-    v_test_file = os.path.join(deepmd_path, args.detail_file+".v.out")
+    if args.check_test:
+        e_test_file = os.path.join(deepmd_path, args.detail_file+".e.out")
+        f_test_file = os.path.join(deepmd_path, args.detail_file+".f.out")
+        v_test_file = os.path.join(deepmd_path, args.detail_file+".v.out")
+    else:
+        e_test_file = os.path.join(deepmd_path, args.detail_file+".e.tr.out")
+        f_test_file = os.path.join(deepmd_path, args.detail_file+".f.tr.out")
+        v_test_file = os.path.join(deepmd_path, args.detail_file+".v.tr.out")        
     
     e_test = np.loadtxt(e_test_file)
     f_test = np.loadtxt(f_test_file)

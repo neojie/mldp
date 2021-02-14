@@ -9,9 +9,10 @@ Created on Tue Dec 29 09:15:25 2020
 import pandas as pd
 #import shutil
 import os
-out_pd = pd.read_excel('/Users/jiedeng/GD/ppt/2020/extreme_filter4_with_state.xlsx')
+#out_pd = pd.read_excel('/Users/jiedeng/GD/ppt/2020/extreme_filter4_with_state.xlsx')
+out_pd = pd.read_excel('/Users/jiedeng/GD/papers/pv_sum/dat_sum.xlsx',sheet_name='ak')
 
-deepmds = out_pd['local_path'].values
+deepmds = out_pd['local'].values
 
 ## check OUTCAR exists
 for deepmd in deepmds:
