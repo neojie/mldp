@@ -30,6 +30,7 @@ parser = argparse.ArgumentParser(description="Cv, assume run 0 is NVT")
 parser.add_argument("--input_file","-i", type=str,default='log.lammps', help="Lammps log file containing thermo output from lammps simulation.")
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
 parser.add_argument("-p", "--plot", default=False, action='store_true', help="Defualt: plot")
+parser.add_argument("-n", "--natoms", default=160, type=int, help="natoms")
 
 
 args = parser.parse_args()
@@ -94,7 +95,7 @@ average0=ys.mean(axis=1)
 print_list(average0)
 
 kb =  8.617e-5 # eV/K
-kb_natoms = kb*160
+kb_natoms = kb*args.natoms
 
 tmp = ((ys - np.reshape(average0,(len(average0),1)))**2).mean(axis=1)
 print("TotEng",xrange)
