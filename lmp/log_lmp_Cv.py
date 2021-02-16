@@ -73,7 +73,7 @@ print('-----NVT-----')
 run_num  = 0
 x   = log.get(args.x,run_num=run_num)
 args_y = ['Press','TotEng','Temp', 'PotEng','KinEng']
-ys  = [log.get(y,run_num=run_num) for y in args_y]
+ys0  = [log.get(y,run_num=run_num) for y in args_y]
 
 
 Step = log.get('Step',run_num=run_num)
@@ -83,13 +83,13 @@ if not check(Step):
     selected_idx = select(Step)
     
     x = (x[selected_idx]).astype(float)
-    ys = [(y[selected_idx]).astype(float) for y in ys]
+    ys0 = [(y[selected_idx]).astype(float) for y in ys0]
     print('**Fixed**')
 
 xlen = len(x)
 xrange = range(xlen//2,xlen)
 x  = x[xrange]
-ys = np.array(ys)[:,xrange]
+ys = np.array(ys0)[:,xrange]
 average0=ys.mean(axis=1)
 print_list(average0)
 
@@ -112,6 +112,29 @@ if args.plot:
         ax[i][0].plot(x,ys[i],label=args_y[i])
         ax[i][0].legend()
         ax[i][0].grid(True)
+
+def fluct(data):
+    tmp=data - data.mean()
+    out = (tmp**2).mean()
+    return out
+
+pot = np.array(ys0)[-2,:]
+out = []        
+for i in range(len(pot)):
+    cv_i = fluct(pot[i:])/(average0[2]**2)/kb/kb_natoms
+    out.append(cv_i)
+
+fig,ax = plt.subplots(2,1,figsize=(6,6),sharex=True,sharey=False)
+ax[0].plot(pot)
+ax[1].plot(out)
+ax[0].grid()
+ax[0].minorticks_on()
+ax[1].set_xlabel('step')
+ax[0].set_ylabel('PotEng')
+ax[1].set_ylabel('cv_ion')
+ax[1].minorticks_on()
+ax[1].grid()
+plt.show()
 
 
 #plt.plot(ys[1] - average0[1],'*-');plt.xlabel('step');plt.ylabel('TotEng - mean');plt.show()
