@@ -221,10 +221,12 @@ else:
     save(e_tr_all,".all.e.tr.out",'data_e pred_e')
     save(f_tr_all,".all.f.tr.out",'data_fx data_fy data_fz pred_fx pred_fy pred_fz')
     save(v_tr_all,".all.v.tr.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
+    save(v_gpa_tr_all,".all.v.test.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
     
     save(e_test_all,".all.e.test.out",'data_e pred_e')
     save(f_test_all,".all.f.test.out",'data_fx data_fy data_fz pred_fx pred_fy pred_fz')
     save(v_test_all,".all.v.test.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
+    save(v_gpa_test_all,".all.v.test.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
 
 if args.merge:
     plot(e_all,f_all,v_gpa_all)
