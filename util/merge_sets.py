@@ -12,12 +12,12 @@ import glob
 import argparse
 parser = argparse.ArgumentParser()
 #l1=dpdata.System('/Users/jiedeng/Documents/ml/deepmd-kit/my_example/tail_3.dump')
-parser.add_argument("--sets","-s",type=str,default='x.001-x.002',help="set file")
-parser.add_argument("--os","-os",type=str,default='merge.001',help="merged file")
+parser.add_argument("--sets","-s",type=str,nargs="+",help="set files, e.g., ,x.001 x.002")
+parser.add_argument("--os","-os",type=str,default='merge.001',help="merged file, default: merge.001")
 
 args   = parser.parse_args()
 
-sets = args.sets.split('-')
+sets = args.sets
 count = 0
 #npys = ['box.npy',  'coord.npy' , 'energy.npy' , 'force.npy' , 'fparam.npy' , 'virial.npy']
 npys =glob.glob(sets[0]+'/*npy')
