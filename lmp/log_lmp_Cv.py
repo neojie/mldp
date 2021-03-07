@@ -31,6 +31,7 @@ parser.add_argument("--input_file","-i", type=str,default='log.lammps', help="La
 parser.add_argument("-x", type=str, default="Step", help="Data to plot on the first axis")
 parser.add_argument("-p", "--plot", default=False, action='store_true', help="Defualt: plot")
 parser.add_argument("-n", "--natoms", default=160, type=int, help="natoms")
+parser.add_argument("-run_num", "--r", default=0, type=int, help="natoms")
 
 
 args = parser.parse_args()

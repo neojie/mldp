@@ -33,6 +33,7 @@ parser.add_argument("-p", "--plot", default=False, action='store_true', help="De
 parser.add_argument("-n", "--natoms", default=160, type=int, help="natoms")
 parser.add_argument("--volume", "-v",type=float,help='volume in A3')
 parser.add_argument("--cv_nk", "-cv",type=float,help='cv in kb*N')
+parser.add_argument("--run_num", "-r", default=0, type=int, help="run number, default is 0")
 
 
 args = parser.parse_args()
@@ -101,7 +102,7 @@ else:
     
 # run_num  = 0
 print('-----NVE-----')
-run_num  = 0
+run_num  = args.run_num
 x   = log.get(args.x,run_num=run_num)
 args_y = ['Press','TotEng','Temp']
 ys0  = [log.get(y,run_num=run_num) for y in args_y]
