@@ -1,44 +1,67 @@
-# mldp
-machine learning data preparation
+# MLDP
 
-recal protocal
-1- convergence test, 1 single point with CONTCAR is enough
-2- the previous step also test for single submission for the 
-3-test for environment works for both python 3 and vasp
-4-check for array submission script
-5- recal/post_recal/merge_out/extract_deepmd/pre_train
-6-run training
-7-freeze model
-8-analyze with stat.py 
+## 1. Recalculate
+
+## 2. Pertubation
+
+##### Perturb systems and run simulations
+#### dependencies
+---------------------------
+-`ase`
+-`MDAnalysis`
+-`dpdata`
+
+### 2.1. Workflow
+---------------------------
+1. analyze rdf with `MDAnayalysis`? search for which two pairs to swap so that the short interatomic distance of the corresponding pair can be reached. `velocity.py` calculate velocity of the atoms given timestep and temperature and determine the min interatomic distance should be reached given target pressure, temperature, and timestep
+2. simulation using good POSCAR without pertubation, set temperature and teimstep based on 1), to make the system collapse as quickly as possible
+3. simulation using perturbed POSCAR
+`pert.py` perturbed POSCAR , input must be vasp/poscar format, for now this file is designed for MgSiO3 only, automatically swap Si-O, Mg-O, Mg-Si
+`post_pert.py` inpsect the interatomic distnace for piars in Mg-Si-O system, current cutoffs are designed for MgSiO3 up to around 1400 GPa. Support `dump`, `vasp/poscar`, `lmp` format
+4. simulation with lammps
+```lmp -in in.lammps``` login node usually can handle this. Do check the interatomic distance frequently. You do not want to waste time doing unnecessary runs
+5. check interatomic distance.
+```python ~/script/mldp/pert/post_pert.py -f mgsio3.dump -ft dump```
+    ==WARNING: Dump file may have lost atoms. If so, corresponding frames should be deleted==
+6. recal with `recal_lmp.py`
+```python ~/script/mldp/recal_lmp.py -if /u/home/j/jd848/project-lstixrud/pv+hf/dp-train/lmp_run/6k/rp5/160-cpu/pert/4k_mgo_swap_p2/inputs -r 0-7```
+Here step 5) output 0-6 generate interatomic distance close within the range prescribed
+7. check if all vasp runs are done
+```python ~/script/mldp/post_recal_lmp.py```
+If not, `bash out`
+8. check if all runs have sufficent nbands and NELM is good
+```python ~/script/mldp/check_nbands_nelm.py -ip all```
+if not, increase NBANDS, NELM in INCAR
+9. Merge all vasp runs to one single `OUTCAR`
+```python ~/script/mldp/merge_out.py -o OUTCAR -r y``` 
+    ==Be cautious about the -r (remove everything) flag==
+10. Build `deepmd` input file from `OUTCAR`
+```python ~/script/mldp/extract_deepmd.py -t  -bs 1000```
+    ==1000 is a random large number so that only one set is generated, -t means no test set==
 
 
-Rescale training
-1-2-3-4
-5- recal/post_recal/merge_out/extract_deepmd
-6- stat.py , no model mode to get the scale function model
-7- scale deepmd
-8- pre_train.py scale deepmd
-9- stat.py
-10-post_stat.py
+## 3. Lammps
+scripts used for analyzing lammps output
+#### dependencies
+---------------------------
+-`lammps_logfile`
+### 2.1. Workflow for thermal conductivity calculation
+1. run lammps calculation 
+2. `log_lmp.py` extract the v_Jx, v_Jy, v_Jz heat current 
+```python ~/script/mldp/lmp/log_lmp.py log.lammps -y v_Jx v_Jy v_Jz -s -p```
+4. If ave/correlate output file is stored, which is NOT recommended for liquid since many auto-correlation needs to be done, `post_corr.py` can be used to analyze the results
+5. If no ave/correlate output file, use `kappa.py` analyze the output of step 2)
+```python ~/script/mldp/lmp/kappa.py -s -a 500 1500```
+-a specifcy average between step 500 to 1500
+ ## 4. ASAP
+Fingerprint analysis using ASAP and Dscribe
+#### dependencies
+---------------------------
+-`ASAP`
+-`Dscribe`
+ 
+## 5. Model deviation 
 
-pbs-lammps training
-job_array.py => like dsq
-
-
-order	code		function		arguments								ATTENTION	
-1	recal	recal_relax	submit jobs		ip 		if						check if poscar generated make sense	
-2	post_recal	post_recal_relax	check how many submission finished, collect the failed runs, re-submit		ip 			f					check the flag, should not overlap with the existing ones	
-3	merge_out		 extract the OUTCAR		ip 	o				r			MUST wait until #2 output flags, START to remove files this step!	
-4	extract_deepmd		 extract the deepmd		ip 	o			bs				May experience force assertion error, NOT solved yet!	
-5	pre_train		output dp train folder		ip 						d		d could be deepmd, deepmd_relax2, whatever exists, or even deepmd-deepmd_relax2	
-					if not, then current folder		vasp inputs	finish flag	batch size	remove file?				
-6	pre_train													
-7	 													
-														
-														
-														
-	mis	remove_recal.py			we randomly generate files, repeatedly generate files, run this to remove the files which have not been submitted yet									
-		adjust_outcar.py			when P> 10000 GPa, VASP output misfunctions									
-		model_test.py			calculate errors with model			output all errors in as a file						
-		std_vs_t2.py			calculate std			output vol, sigma, e,f,v, stds						
-		dp_test.py			function used by std_vs_t2									
+## 6. Scale
+## 7. Util
+> Written with [StackEdit](https://stackedit.io/).
