@@ -3,6 +3,8 @@
 """
 Created on Sat Feb  6 20:47:45 2021
 
+https://pymatgen.org/pymatgen.io.vasp.outputs.html
+
 @author: jiedeng
 """
 
