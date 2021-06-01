@@ -2,6 +2,14 @@
 
 ## 1. Recalculate
 
+1. Generate Descriptor using `ASAP`
+2. PCA analysis `fps` to identify frames to re-calcualte
+3. `extract_deepmd.py` with `-id` flag and index file generated in last step
+4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence as well as NBANDS and NELEM are sufficient. `recal_dpdata.py` to recalculate selected frames
+5. `python ~/script/mldp/post_recal.py` in the parent directory of `recal`folder
+6. Inside `recal` folder, do `python ~/script/mldp/check_nbands_nelm.py -ip all`
+7. ``
+
 ## 2. Pertubation
 
 ##### Perturb systems and run simulations
@@ -21,7 +29,7 @@
 4. simulation with lammps
 ```lmp -in in.lammps``` login node usually can handle this. Do check the interatomic distance frequently. You do not want to waste time doing unnecessary runs
 5. check interatomic distance.
-```python ~/script/mldp/pert/post_pert.py -f mgsio3.dump -ft dump```
+  ```python ~/script/mldp/pert/post_pert.py -f mgsio3.dump -ft dump```
     ==WARNING: Dump file may have lost atoms. If so, corresponding frames should be deleted==
 6. recal with `recal_lmp.py`
 ```python ~/script/mldp/recal_lmp.py -if /u/home/j/jd848/project-lstixrud/pv+hf/dp-train/lmp_run/6k/rp5/160-cpu/pert/4k_mgo_swap_p2/inputs -r 0-7```
@@ -33,10 +41,10 @@ If not, `bash out`
 ```python ~/script/mldp/check_nbands_nelm.py -ip all```
 if not, increase NBANDS, NELM in INCAR
 9. Merge all vasp runs to one single `OUTCAR`
-```python ~/script/mldp/merge_out.py -o OUTCAR -r y``` 
+  ```python ~/script/mldp/merge_out.py -o OUTCAR -r y``` 
     ==Be cautious about the -r (remove everything) flag==
 10. Build `deepmd` input file from `OUTCAR`
-```python ~/script/mldp/extract_deepmd.py -t  -bs 1000```
+  ```python ~/script/mldp/extract_deepmd.py -t  -bs 1000```
     ==1000 is a random large number so that only one set is generated, -t means no test set==
 
 
@@ -59,7 +67,7 @@ Fingerprint analysis using ASAP and Dscribe
 ---------------------------
 -`ASAP`
 -`Dscribe`
- 
+
 ## 5. Model deviation 
 
 ## 6. Scale

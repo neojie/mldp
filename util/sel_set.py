@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--cutoff","-c",type=float,default=4,help="cutoff of force difference")
 #parser.add_argument("--cutoff","-c",type=float,default=4,help="cutoff of force difference")
 parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs")
-parser.add_argument('--set',"-s", type=str,default='set.001',help="manually exclude indexs")
+parser.add_argument('--set',"-s", type=str,default='set.001',help="set name")
 
 args   = parser.parse_args()
 

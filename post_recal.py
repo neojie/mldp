@@ -46,7 +46,7 @@ if args.inputpath:
     tmp = load_paths(inputpath)
     paths = [os.path.join(path,'recal') for path in tmp]
 else:
-    print("No folders point are provided. Use default value folders")
+    print("No folders are provided. Use default value folders")
     paths = [os.path.join(cwd,'recal')]
 
 def build_dsq_file(path):

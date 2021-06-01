@@ -13,8 +13,8 @@ cwd    = os.getcwd()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputpath","-ip",help="input path file.\
-                    1-None, 1 folder, current folder\
-                    2-all all subfolders \
+                    1-None, current folder\
+                    2-all, all subfolders \
                     3-file, folders stored at file")
 
 parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
