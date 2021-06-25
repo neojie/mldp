@@ -3,12 +3,22 @@
 ## 1. Recalculate
 
 1. Generate Descriptor using `ASAP`
+
 2. PCA analysis `fps` to identify frames to re-calcualte
+
 3. `extract_deepmd.py` with `-id` flag and index file generated in last step
+
 4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence as well as NBANDS and NELEM are sufficient. `recal_dpdata.py` to recalculate selected frames
-5. `python ~/script/mldp/post_recal.py` in the parent directory of `recal`folder
+
+5. Outside`recal`folder`python ~/script/mldp/post_recal.py` 
+
 6. Inside `recal` folder, do `python ~/script/mldp/check_nbands_nelm.py -ip all`
-7. ``
+
+7. Inside `recal` folder, do`python ~/script/mldp/merge_out.py -o OUTCAR -r y`
+
+8. Inside `recal` folder, do `python ~/script/mldp/extract_deepmd.py -d deepmd -ttr 10000`
+
+   
 
 ## 2. Pertubation
 
