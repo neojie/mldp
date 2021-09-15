@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import os
+#import os
 
 import numpy as np
 
@@ -24,12 +24,21 @@ nkeep: The number of representative samples to select
 algorithm: 'the algorithm for selecting frames ([random], [fps], [cur])')
 fmat: Location of descriptor or kernel matrix file. Needed if you select [fps] or [cur].
 """
-dirctory = '/Users/jiedeng/Documents/tmp/jd848/project_folder/liquid_vapor/water1/r6-6k/cont1/asap'
-fxyz = dirctory+'/ASAP-desc.xyz'
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--input","-i",type=str,default='ASAP-desc.xyz',help="input fxyz file")
+parser.add_argument("--number","-n",type=int,default=50,help="number of frames kept")
+parser.add_argument("--method","-m",type=str,default='fps',help="method, 3 options: 'random', 'cur', 'fps'")
+args   = parser.parse_args()
+
+
+#dirctory = '/Users/jiedeng/Documents/tmp/jd848/project_folder/liquid_vapor/water1/r6-6k/cont1/asap'
+#fxyz = dirctory+'/ASAP-desc.xyz'
+fxyz = args.input
 #fxyz = os.path.join(os.path.split(__file__)[0], 'small_molecules-SOAP.xyz')
 #    fmat = ['SOAP-n4-l3-c1.9-g0.23']
 fmat = ['*']
-nkeep = 50
+nkeep = args.number #50
 prefix = "test-frame-select"
 
 # read the xyz file
@@ -39,13 +48,13 @@ desc, _ = asapxyz.get_descriptors(fmat)
 print("shape of the descriptor matrix: ", np.shape(desc), "number of descriptors: ", np.shape(desc[0]))
 
 
-algorithm = 'fps' # 3 options: 'random', 'cur', 'fps'
+algorithm = args.method#'fps' # 3 options: 'random', 'cur', 'fps'
 #algorithm = 'random' # 3 options: 'random', 'cur', 'fps'
 
 sparsifier = Sparsifier(algorithm)
 sbs = sparsifier.sparsify(desc, nkeep)
 sbs.sort()
-np.savetxt(dirctory+'/'+prefix + "-" + algorithm + "-n-" + str(nkeep) + '.index', sbs, fmt='%d')
+np.savetxt(prefix + "-" + algorithm + "-n-" + str(nkeep) + '.index', sbs, fmt='%d')
 # save
 #selection = np.zeros(asapxyz.get_num_frames(), dtype=int)
 #for i in sbs:

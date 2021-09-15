@@ -4,21 +4,39 @@
 
 1. Generate Descriptor using `ASAP`
 
+   ```bash
+   asap gen_desc -s 10 --fxyz npt.dump soap -e -c 6 -n 6 -l 6 -g 0.44
+   asap gen_desc -s 10 --fxyz OUTCAR soap -e -c 6 -n 6 -l 6 -g 0.44
+   ```
+
 2. PCA analysis `fps` to identify frames to re-calcualte
+
+   ```bash
+   python ~/script/mldp/asap/select_frames.py
+   ```
 
 3. `extract_deepmd.py` with `-id` flag and index file generated in last step
 
-4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence as well as NBANDS and NELEM are sufficient. `recal_dpdata.py` to recalculate selected frames
+   ```bash
+   python ~/script/mldp/extract_deepmd.py -i OUTCAR -id index_file
+   python ~/script/mldp/extract_deepmd.py -i npt.dump -f dump -id index_file
+   ```
+
+4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence. Also NBANDS and NELEM should be sufficient. Use `recal_dpdata.py` to recalculate selected frames
 
 5. Outside`recal`folder`python ~/script/mldp/post_recal.py` 
 
-6. Inside `recal` folder, do `python ~/script/mldp/check_nbands_nelm.py -ip all`
+6. Inside `recal` folder, do `python ~/script/mldp/check_nbands_nelm.py -ip all -v`
 
 7. Inside `recal` folder, do`python ~/script/mldp/merge_out.py -o OUTCAR -r y`
 
 8. Inside `recal` folder, do `python ~/script/mldp/extract_deepmd.py -d deepmd -ttr 10000`
 
-   
+9. `dp test`
+
+10. `dp train based on new model`
+
+     
 
 ## 2. Pertubation
 
