@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jun 21 13:51:58 2020
-merge to 
+1- support dump data
+
 @author: jiedeng
 """
 
@@ -12,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--inputpath","-ip",help="input path file")
 parser.add_argument("--train_test_ratio","-ttr",type = float,default=3, help="input path file")
 parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
+parser.add_argument("--format","-fmt",type = str, default = 'outcar', help="format, e.g., outcar, dump supported by DPDATA,")
 parser.add_argument("--deepmd","-d",type = str, default = 'deepmd', help="deepmd folder name")
 parser.add_argument("--vaspidx","-vid",type = str, help="idx file, vasp idx, idx[0] >= 1")
 parser.add_argument("--idx","-id",type = str, help="idx file, idx[0] >= 0")
@@ -24,6 +26,7 @@ args   = parser.parse_args()
 
 import os
 from dpdata import LabeledSystem
+from dpdata import System
 import glob
 import numpy as np
 import shutil
@@ -75,7 +78,10 @@ def build_fparam(path, outcar, deepmd): # deepmd/..
 
 def check_deepmd(path,nsw,outcar,deepmd):
     build_deepmd(path,nsw,outcar,deepmd)
-    build_fparam(path, outcar, deepmd)
+    try:
+        build_fparam(path, outcar, deepmd)
+    except:
+        print("INPUT file does not allow generating energy.npy")
 
 
 def build_deepmd(path,nsw,outcar,deepmd):
@@ -83,8 +89,11 @@ def build_deepmd(path,nsw,outcar,deepmd):
     sub_ls = ls.sub_system(idx)
     
     """
-
-    ls = LabeledSystem(outcar,fmt='outcar')
+    try:
+        ls = LabeledSystem(outcar,fmt=args.format)
+    except:
+        ls = System(outcar,fmt=args.format)
+        
     if args.exclude:
         oldsize = len(ls)
         idx_new = [i for i in range(len(ls)) if i not in args.exclude]
@@ -170,8 +179,8 @@ for path in paths:
     print(path)
     if os.path.exists(os.path.join(path,args.deepmd)):
         print("deepmd foler already exist=> skip")
-    elif not os.path.exists(os.path.join(path,args.OUTCAR)):
-        print("OUTCAR folder do not exists")
+#    elif not os.path.exists(os.path.join(path,args.OUTCAR)):
+#        print("OUTCAR folder do not exists")
     else: # has required OUTCAR folder but no deepmd 
         print("Build {0}".format(args.deepmd))
         nsw =extract_nsw_outcar(os.path.join(path,args.OUTCAR))

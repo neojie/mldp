@@ -65,11 +65,12 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--test_folder","-tf",help="folder storing model test ")
 parser.add_argument("--recal_foler","-rf",help="recal folder")
-parser.add_argument("--model_prefix","-mp",default='mm2',help="recal folder, support one model or multiple models, e.g., re4-re5-re6")
+parser.add_argument("--model_prefix","-mp",nargs="+",default='mm2',help="recal folder, support one model or multiple models, e.g., re4 re5 re6")
 parser.add_argument("--energy_lower_cutoff","-elc",default=0.0044*2,type=float,help="lower cutoff for energy")
 parser.add_argument("--energy_upper_cutoff","-euc",default=0.1,type=float,help="upper cutoff for energy")
 parser.add_argument("--force_lower_cutoff","-flc",default=0.27,type=float,help="lower cutoff for force")
 parser.add_argument("--force_upper_cutoff","-fuc",default=1,type=float,help="upper cutoff for force")
+parser.add_argument("--natoms","-n",default=160,type=int,help="# of atoms in the system")
 
 
 args        = parser.parse_args()
@@ -90,10 +91,10 @@ test_folder = args.test_folder
 
 #test_folder = args.test_folder
 #recal_foler = args.recal_foler
-prefixs     = args.model_prefix.split('-')
+prefixs     = args.model_prefix
 
 
-natoms = 160
+natoms = args.natoms
 if mode == 'nn_vasp':
     # nn and vasp results are stored togheter, no special nsw chosen needed
     es_org,fs_org,vs_org, es,fs,vs   = extract_org_nn_pred(test_folder,prefixs,natoms=natoms)
