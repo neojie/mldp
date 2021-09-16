@@ -98,6 +98,17 @@ Fingerprint analysis using ASAP and Dscribe
 
 ## 5. Model deviation 
 
+`extract_deepmd.py` extract configures
+
+`dp test` with all models, `model_dev/model_dev.py ` gives a example, do customize the code to your need
+
+`analysis.py` analysis the `test` results
+
+`post_model_dev.py` postprocess 
+
+
+
 ## 6. Scale
+
 ## 7. Util
 > Written with [StackEdit](https://stackedit.io/).
