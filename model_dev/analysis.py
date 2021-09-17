@@ -170,7 +170,7 @@ if mode == 'nn_vasp':
     fig.show()
 
 elif mode == 'nn_only':
-    max_dpgen_fs, mean_std_f = dev_nn(es,fs,vs)
+    max_dpgen_fs, mean_std_f = dev_nn(es,fs,vs,natoms)
 
     f_idx1 = np.where(abs(mean_std_f)<args.force_upper_cutoff)[0]
     f_idx2 = np.where(abs(mean_std_f)>args.force_lower_cutoff)[0]    

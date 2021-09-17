@@ -10,15 +10,17 @@ Created on Sun Jun 21 13:51:58 2020
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--inputpath","-ip",help="input path file")
+#parser.add_argument("--inputpath","-ip",help="input path file")
 parser.add_argument("--train_test_ratio","-ttr",type = float,default=3, help="input path file")
-parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
+#parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR name")
+parser.add_argument("--file","-f",type = str, default = 'OUTCAR', help="file name, default: OUTCAR")
+parser.add_argument("--temp","-t",type = float, help="temperature in K, only needed if file does not contain temperature info")
 parser.add_argument("--format","-fmt",type = str, default = 'outcar', help="format, e.g., outcar, dump supported by DPDATA,")
 parser.add_argument("--deepmd","-d",type = str, default = 'deepmd', help="deepmd folder name")
 parser.add_argument("--vaspidx","-vid",type = str, help="idx file, vasp idx, idx[0] >= 1")
 parser.add_argument("--idx","-id",type = str, help="idx file, idx[0] >= 0")
-parser.add_argument('--test',"-t", default=True, action='store_false',help="Default: save test as set.001? ")
-parser.add_argument('--force_limit',"-f", type=float,nargs="+",help="force limit max and min, order does not matter.")
+parser.add_argument('--savetest',"-st", default=True, action='store_false',help="Default: save test as set.001? ")
+parser.add_argument('--force_limit',"-fl", type=float,nargs="+",help="force limit max and min, order does not matter.")
 parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs")
 
 args   = parser.parse_args()
@@ -31,24 +33,6 @@ import glob
 import numpy as np
 import shutil
 
-cwd    = os.getcwd()
-if args.inputpath:
-    from shared_functions import load_paths
-    print("Check files in {0}  ".format(args.inputpath))
-    inputpath = args.inputpath
-    tmp = load_paths(inputpath)
-    if isinstance(tmp[0],list):
-        paths = []
-        for i in range(len(tmp[2])):
-            if tmp[1][i] >0: # only keep relax > 0
-                paths.append(os.path.join(tmp[2][i],'recal'))
-    else:
-        paths = [os.path.join(path,'recal') for path in tmp]
-
-else:
-    print("No folders point are provided. Use default value folders")
-    inputpath = os.path.join(cwd)
-    paths = [cwd]
 
 def extract_sigma_outcar(outcar):
 
@@ -65,26 +49,38 @@ def extract_sigma_outcar(outcar):
             outcar_file.close()
             return sigma
         
-def build_fparam(path, outcar, deepmd): # deepmd/..
-#    kb = 8.617333262e-5
-#    incar = os.path.join(subfolders[0],'INCAR')
-    sigma = extract_sigma_outcar(outcar)
+def build_fparam(path, sigma, deepmd): # deepmd/..
+#    
     sets=glob.glob(deepmd+"/set*")
     for seti in sets:
-        energy=np.load(seti+'/energy.npy')
-        size = energy.size
-        all_te = np.ones(size)*sigma
+        nframe=np.load(seti+'/coord.npy').shape[0]
+        print("set {0} : {1}".format(seti,nframe))
+        all_te = np.ones(nframe)*sigma
         np.save( os.path.join(seti,'fparam.npy'), all_te)
 
-def check_deepmd(path,nsw,outcar,deepmd):
-    build_deepmd(path,nsw,outcar,deepmd)
-    try:
-        build_fparam(path, outcar, deepmd)
-    except:
-        print("INPUT file does not allow generating energy.npy")
 
+def build_deepmd(path,outcar,deepmd):
+    sigma = extract_sigma_outcar(outcar)
 
-def build_deepmd(path,nsw,outcar,deepmd):
+    build_deepmd_frames(path,outcar,deepmd)
+    
+    # get temperature!
+    static= False
+    if args.temp is None:       
+        if args.fmt=='outcar':
+            sigma = extract_sigma_outcar(outcar)
+        else:
+            static= True
+    else:
+        kb = 8.617333262e-5
+        sigma = args.temp*kb
+    
+    if not static:
+        build_fparam(path,sigma, deepmd)
+    else:
+        print("No temperature info")
+
+def build_deepmd_frames(path,outcar,deepmd):
     """
     sub_ls = ls.sub_system(idx)
     
@@ -152,37 +148,18 @@ def build_deepmd(path,nsw,outcar,deepmd):
     ls.to_deepmd_npy(deepmd,set_size=1000000) # give a *large* value, default is 5000
     if len(ls2) == 0:
         print('test set has no data')
-    elif args.test and len(ls2)>0:
+    elif args.savetest and len(ls2)>0:
         ls2.to_deepmd_npy('test_tmp',set_size=1000000)
         shutil.copytree('test_tmp/set.000',os.path.join(deepmd,'set.001'))
         shutil.rmtree('test_tmp')
 
-def extract_nsw_outcar(outcar):
 
-    """
-    length of outcar
-    
-    """
-    outcar_file = open(outcar)
-    nsw = 0
-    for _ in range(100000000):
-        line = outcar_file.readline()
-        if 'nsw_tot' in line:
-            nsw = float(line.split('=')[1].split()[0])
-            outcar_file.close()
-            return nsw
-        elif 'free  energy   TOTEN' in line:
-            nsw += 1
-    return nsw
-
-for path in paths:
-    print(path)
-    if os.path.exists(os.path.join(path,args.deepmd)):
-        print("deepmd foler already exist=> skip")
-#    elif not os.path.exists(os.path.join(path,args.OUTCAR)):
-#        print("OUTCAR folder do not exists")
-    else: # has required OUTCAR folder but no deepmd 
-        print("Build {0}".format(args.deepmd))
-        nsw =extract_nsw_outcar(os.path.join(path,args.OUTCAR))
-        check_deepmd(path,nsw,os.path.join(path,args.OUTCAR), os.path.join(path,args.deepmd))
+cwd    = os.getcwd()
+if os.path.exists(os.path.join(cwd,args.deepmd)):
+    print("deepmd foler already exist=> skip")
+else:
+    print("Build {0}".format(args.deepmd))
+    build_deepmd(cwd,os.path.join(cwd,args.file), os.path.join(cwd,args.deepmd))
+    if args.format =='dump':
+        print("!!!** Modify the {0}/type.raw **!!!".format(args.deepmd))
 

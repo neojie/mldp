@@ -100,9 +100,9 @@ Fingerprint analysis using ASAP and Dscribe
 
 `extract_deepmd.py` extract configures
 
-`dp test` with all models, `model_dev/model_dev.py ` gives a example, do customize the code to your need
+`dp test` with all models, `model_dev/model_dev.py ` gives an example. Do customize the code to your need
 
-`analysis.py` analysis the `test` results
+`analysis.py` analyze the `test` results
 
 `post_model_dev.py` postprocess 
 
