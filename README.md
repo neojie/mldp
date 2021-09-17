@@ -91,6 +91,9 @@ scripts used for analyzing lammps output
 -a specifcy average between step 500 to 1500
  ## 4. ASAP
 Fingerprint analysis using ASAP and Dscribe
+
+dpkit environment works
+
 #### dependencies
 ---------------------------
 -`ASAP`

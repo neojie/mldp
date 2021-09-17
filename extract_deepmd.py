@@ -60,8 +60,6 @@ def build_fparam(path, sigma, deepmd): # deepmd/..
 
 
 def build_deepmd(path,outcar,deepmd):
-    sigma = extract_sigma_outcar(outcar)
-
     build_deepmd_frames(path,outcar,deepmd)
     
     # get temperature!

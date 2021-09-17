@@ -28,6 +28,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--input","-i",type=str,default='ASAP-desc.xyz',help="input fxyz file")
 parser.add_argument("--number","-n",type=int,default=50,help="number of frames kept")
+parser.add_argument("--stride","-s",type=int,help="stride for asap gen_desc command; this function will be deprecated")
 parser.add_argument("--method","-m",type=str,default='fps',help="method, 3 options: 'random', 'cur', 'fps'")
 args   = parser.parse_args()
 
@@ -54,6 +55,10 @@ algorithm = args.method#'fps' # 3 options: 'random', 'cur', 'fps'
 sparsifier = Sparsifier(algorithm)
 sbs = sparsifier.sparsify(desc, nkeep)
 sbs.sort()
+if args.stride is None:
+    pass
+else:
+    sbs = sbs*args.stride
 np.savetxt(prefix + "-" + algorithm + "-n-" + str(nkeep) + '.index', sbs, fmt='%d')
 # save
 #selection = np.zeros(asapxyz.get_num_frames(), dtype=int)
