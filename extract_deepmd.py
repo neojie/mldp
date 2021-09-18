@@ -65,7 +65,7 @@ def build_deepmd(path,outcar,deepmd):
     # get temperature!
     static= False
     if args.temp is None:       
-        if args.fmt=='outcar':
+        if args.format=='outcar':
             sigma = extract_sigma_outcar(outcar)
         else:
             static= True
@@ -159,5 +159,5 @@ else:
     print("Build {0}".format(args.deepmd))
     build_deepmd(cwd,os.path.join(cwd,args.file), os.path.join(cwd,args.deepmd))
     if args.format =='dump':
-        print("!!!** Modify the {0}/type.raw **!!!".format(args.deepmd))
+        print("!!!** Modify the {0}/type_amp.raw **!!!".format(args.deepmd))
 
