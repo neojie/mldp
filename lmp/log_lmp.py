@@ -26,7 +26,8 @@ parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num shoul
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
 parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
-
+parser.add_argument("-ls", "--linestyle", type=str,default='-', help="line style supported by Matplotlib, e.g., None means no lines")
+parser.add_argument("-m", "--marker", type=str,default='.', help="marker style supported by Matplotlib")
 
 args = parser.parse_args()
 
@@ -96,11 +97,11 @@ if args.plot:
     horizontal_scale = len(args.y)*3
     fig,ax = plt.subplots(len(args.y),1,figsize=(6,horizontal_scale),sharex=True,sharey=False)
     if len(args.y) == 1:
-        ax.plot(x,ys[0],label=args.y[0])
+        ax.plot(x,ys[0],label=args.y[0],marker=args.marker, linestyle=args.linestyle)
         ax.legend();ax.grid()
     else:
         for i in range(len(args.y)):
-            ax[i].plot(x,ys[i],label=args.y[i])
+            ax[i].plot(x,ys[i],label=args.y[i],marker=args.marker, linestyle=args.linestyle)
             ax[i].legend();ax[i].grid()
     plt.show()
 

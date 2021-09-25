@@ -2,6 +2,8 @@
 
 ## 1. Recalculate
 
+#### 1.1:  recalculate with VASP
+
 1. Generate Descriptor using `ASAP`
 
    ```bash
@@ -36,13 +38,74 @@
 
 7. Inside `recal` folder, do`python ~/script/mldp/merge_out.py -o OUTCAR -r y`
 
-8. Inside `recal` folder, do `python ~/script/mldp/extract_deepmd.py -d deepmd -ttr 10000`
+8. Inside `recal` folder, remove the old deepmd folder, do 
+
+   ````bash
+   python ~/script/mldp/extract_deepmd.py -d deepmd -ttr 10000
+   ````
 
 9. `dp test`
 
-10. `dp train based on new model`
+   ```bash
+   dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/pvh/m1/m2/pvh4.comp.pb -d m2-pvh4
+   ```
 
-     
+10. analyze nn and vasp
+
+    ```bash
+    python ~/script/mldp/model_dev/analysis.py -tf . -mp m2-pvh4 -rf . -euc 10 -n 163
+    ```
+
+11. build `deepmd` based on the idx file generated and remove the old deepmd
+
+12. `dp train `
+
+
+
+####1.2:  model deviation
+
+1. extract frames
+
+   ```bash
+   python ~/script/mldp/extract_deepmd.py -f ./0.dump -fmt dump -ttr 1000000 -t 3000 -st
+   ```
+
+2. dp test with different models
+
+   ```
+   dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/pvh/m3/m3v1/m3v1.comp.pb -d m3v1 -n 2000
+   dp test -m /u/project/ESS/lstixrud/jd848/pv_hf_copy/pvh/m1/m2/pvh4.comp.pb -d m3v2
+   ```
+
+3. analyze model deviation
+
+   ```
+   python ~/script/mldp/model_dev/analysis.py -tf . -mp m2-pvh4 -euc 10 -n 163
+   ```
+
+   the upper/lower limits of force and energy RMSEs should be benchmarked with VASP runs at least ones
+
+   idx file `idx_model_deviaton` is derived
+
+4. A new `dump` file that contatins a subset of the frames of the original dump file is built based on  `idx_model_deviaton`  with `dump.py`
+
+   ```bash
+   python ~/script/mldp/lmp/subset_dump.py -h
+   ```
+
+   
+
+5. Generate Descriptor using `ASAP` on the new dump file
+
+   ```bash
+   asap
+   ```
+
+   visual inspection!
+
+6. follow the section **1.2** for the rest of steps.
+
+   
 
 ## 2. Pertubation
 
