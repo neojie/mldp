@@ -36,7 +36,6 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--test_folder","-tf",help="folder storing model test ")
 parser.add_argument("--recal_foler","-rf",help="recal folder, the model deivation will be calcualted if this is given")
-parser.add_argument("--natoms","-n",default=160,type=int,help="# of atoms in the system")
 parser.add_argument("--model_prefix","-mp",nargs="+",default='mm2',help="recal folder, support one model or multiple models, e.g., re4 re5 re6")
 parser.add_argument("--energy_lower_cutoff","-elc",default=0.0044*2,type=float,help="lower cutoff for energy")
 parser.add_argument("--energy_upper_cutoff","-euc",default=0.1,type=float,help="upper cutoff for energy")
@@ -52,23 +51,23 @@ if args.recal_foler:
 else:
     ## only nn test results are given
     print("mode is {0}, nn model deviation is analyzed".format(mode))
+    print("nns are compared with their average values")
+
 test_folder = args.test_folder
-
 prefixs     = args.model_prefix
-natoms      = args.natoms
-
 
 
 if mode == 'nn_vasp':
     # nn and vasp results are stored togheter, no special nsw chosen needed
-    es_org,fs_org,vs_org, es,fs,vs   = extract_org_nn_pred(test_folder,prefixs,natoms=natoms)
+    es_org,fs_org,vs_org, es,fs,vs,  nframes, natoms   = extract_org_nn_pred(test_folder,prefixs)
     etot,forces ,stress              = es_org[0],fs_org[0],vs[0]
     vasp                             = [etot,forces,stress]    
     nsw                              = np.array(range(len(es_org[0])))
 else:
-    es,fs,vs               = extract_nn_pred(test_folder,prefixs,natoms=natoms)
-    
-nn   = [np.mean(es,axis=0),np.mean(fs,axis=0),np.mean(vs,axis=0)]
+    es,fs,vs, nframes, natoms        = extract_nn_pred(test_folder,prefixs)
+
+print('Systems consist of {0} atoms and {1} frames'.format(natoms, nframes))
+nn   = [np.mean(es,axis=0),np.mean(fs,axis=0),np.mean(vs,axis=0)]  # build a new nn of average values of nns
 
 
 if mode == 'nn_vasp':
@@ -139,16 +138,17 @@ elif mode == 'nn_only':
     f_idx2 = np.where(abs(mean_std_f)>args.force_lower_cutoff)[0]    
     f_idx=np.intersect1d(f_idx1,f_idx2)
 
-    fig,ax = plt.subplots(3,1,figsize=(6,10),sharex=True)
+    fig,ax = plt.subplots(3,1,figsize=(8,10),sharex=True)
 #    ax[0].plot(nsw+1,etot[nsw],'-',label='VASP')
     for i in range(len(es)):
-        ax[0].plot(es[i],'.',markersize=.5,alpha=.6,label=prefixs[i])
+        ax[0].plot(es[i],'.',markersize=.5,alpha=.8,label=prefixs[i])
     dif_e = (es - nn[0])/natoms
     for i in range(len(es)):
-        ax[1].plot(dif_e[i],'.',markersize=.5,alpha=.6,label=prefixs[i])
+        ax[1].plot(dif_e[i],'.',markersize=.5,alpha=.8,label=prefixs[i])
 #    ax[2].plot(rmsd_f,'-',label='RMSE of force by nn and vasp)')
-    ax[2].plot(mean_std_f,  label=' meand std f = {0}-{1}, {2}/{3}'.format(args.force_lower_cutoff,args.force_upper_cutoff,
-                                                           len(f_idx), len(mean_std_f)))
+    ax[2].plot(mean_std_f,  label=' meand std f = {0}-{1}, {2}/{3}'.format(
+            args.force_lower_cutoff, args.force_upper_cutoff, 
+            len(f_idx), len(mean_std_f)))
     ax[2].plot([0,len(mean_std_f)],[args.force_upper_cutoff, args.force_upper_cutoff],'k--')
     ax[2].plot([0,len(mean_std_f)],[args.force_lower_cutoff, args.force_lower_cutoff],'k--')
 
@@ -163,4 +163,4 @@ elif mode == 'nn_only':
     np.savetxt(os.path.join(test_folder,'model_dev_id'),
                f_idx,fmt='%d',
                header=' meand std f = {0}-{1}'.format(args.force_lower_cutoff, args.force_upper_cutoff))
-    
+    fig.show()    

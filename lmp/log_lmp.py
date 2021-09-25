@@ -97,11 +97,11 @@ if args.plot:
     horizontal_scale = len(args.y)*3
     fig,ax = plt.subplots(len(args.y),1,figsize=(6,horizontal_scale),sharex=True,sharey=False)
     if len(args.y) == 1:
-        ax.plot(x,ys[0],label=args.y[0],marker=args.marker, linestyle=args.linestyle)
+        ax.plot(x,ys[0],label=args.y[0],marker=args.marker, alpha=0.6,linestyle=args.linestyle)
         ax.legend();ax.grid()
     else:
         for i in range(len(args.y)):
-            ax[i].plot(x,ys[i],label=args.y[i],marker=args.marker, linestyle=args.linestyle)
+            ax[i].plot(x,ys[i],label=args.y[i],marker=args.marker, alpha=0.6, linestyle=args.linestyle)
             ax[i].legend();ax[i].grid()
     plt.show()
 

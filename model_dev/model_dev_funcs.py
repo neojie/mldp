@@ -37,10 +37,9 @@ def extract_outcar(outcar):
     forces = ls['forces']
     return etot, stress, forces, nsw
 
-def extract_nn_pred(test_folder,prefix,natoms=160):
+def extract_nn_pred(test_folder,prefix):
     """
     extract e, f, v
-    TODO: natoms should be self contained
     """
     es_dirs = []; fs_dirs = []; vs_dirs = [];  
     if type(prefix) is str:
@@ -62,13 +61,14 @@ def extract_nn_pred(test_folder,prefix,natoms=160):
         tmp = np.loadtxt(dire)
         es.append(tmp[:,1])
     es = np.array(es)
+    nmodels, nframes = es.shape
 
     for dire in fs_dirs:
         tmp = np.loadtxt(dire)
         tmp = tmp[:,3:6]
-        length = len(tmp)
-        yy =tmp.reshape((length//natoms,natoms,3))
-        zz = yy.reshape((length//natoms,natoms*3))
+        natoms = tmp.shape[0]//nframes
+        yy =tmp.reshape((nframes,natoms,3))
+        zz = yy.reshape((nframes,natoms*3))
         fs.append(zz)    
     fs = np.array(fs)
     for dire in vs_dirs:
@@ -76,9 +76,9 @@ def extract_nn_pred(test_folder,prefix,natoms=160):
         tmp = tmp[:,9:]
         vs.append(tmp)   
     vs = np.array(vs)
-    return es,fs,vs
+    return es,fs,vs, nframes, natoms
 
-def extract_org_nn_pred(test_folder,prefix,natoms=160):
+def extract_org_nn_pred(test_folder,prefix):
     """
     extract e, f, v
     TODO: natoms should be self contained
@@ -105,16 +105,18 @@ def extract_org_nn_pred(test_folder,prefix,natoms=160):
         es_org.append(tmp[:,0])
     es = np.array(es)
     es_org = np.array(es_org)
+    nmodels, nframes = es.shape
 
     for dire in fs_dirs:
         tmp = np.loadtxt(dire)
         tmp2, tmp1  = tmp[:,:3], tmp[:,3:6]
-#        tmp2 = tmp[:,0:3]
-        length = len(tmp1)
-        yy =tmp1.reshape((length//natoms,natoms,3))
-        zz = yy.reshape((length//natoms,natoms*3))
-        yy2 =tmp2.reshape((length//natoms,natoms,3))
-        zz2 = yy2.reshape((length//natoms,natoms*3))
+#        tmp2 = tmp[:,0:3]        
+        natoms = tmp.shape[0]//nframes
+        
+        yy  = tmp1.reshape((nframes,natoms,3))
+        zz  = yy.reshape((nframes,natoms*3))
+        yy2 = tmp2.reshape((nframes,natoms,3))
+        zz2 = yy2.reshape((nframes,natoms*3))
         fs.append(zz)   
         fs_org.append(zz2)
     fs = np.array(fs)
@@ -127,7 +129,7 @@ def extract_org_nn_pred(test_folder,prefix,natoms=160):
         vs_org.append(tmp2) 
     vs = np.array(vs)
     vs_org = np.array(vs_org)
-    return es_org,fs_org,vs_org,es,fs,vs
+    return es_org,fs_org,vs_org,es,fs,vs, nframes, natoms
 
 
 def _make_dir(test_folder,prefix):
@@ -149,11 +151,11 @@ def dev_nn(es,fs,vs,natom=160):
     
     dfs = fs - np.mean(fs,axis=0)
     
-    dpgen_fs =np.sqrt(np.sum(dfs**2,axis=0))
-    dpgen_fs_per_atom = dpgen_fs.reshape((len(dpgen_fs),natom,3))
+    dpgen_fs                = np.sqrt(np.sum(dfs**2,axis=0))
+    dpgen_fs_per_atom       = dpgen_fs.reshape((len(dpgen_fs),natom,3))
     mean_dpgen_fs_per_atom  = np.sqrt(np.sum(dpgen_fs_per_atom,axis=2))
-    max_dpgen_fs = np.max(mean_dpgen_fs_per_atom,axis=1)
-    mean_std_f=np.mean(std_f,axis=1)
+    max_dpgen_fs            = np.max(mean_dpgen_fs_per_atom,axis=1)
+    mean_std_f              = np.mean(std_f,axis=1)
 
     return max_dpgen_fs, mean_std_f
 

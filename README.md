@@ -67,7 +67,10 @@
 1. extract frames
 
    ```bash
-   python ~/script/mldp/extract_deepmd.py -f ./0.dump -fmt dump -ttr 1000000 -t 3000 -st
+   python ~/script/mldp/extract_deepmd.py -f ./0.dump -fmt dump -ttr 1000000 -st -t 6500 
+   python ~/script/mldp/extract_deepmd.py -f ./dump.0 -fmt dump -ttr 1000000 -t 3000 -st
+   4500
+   
    ```
 
 2. dp test with different models
