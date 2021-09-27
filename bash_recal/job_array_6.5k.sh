@@ -7,7 +7,7 @@
 #
 #  Resources requested
 #$ -pe dc* 1
-#$ -l h_data=4096M,h_rt=8:00:00
+#$ -l h_data=4096M,h_rt=24:00:00
 #
 #  Job is not rerunable
 #$ -r n

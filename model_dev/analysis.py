@@ -163,4 +163,5 @@ elif mode == 'nn_only':
     np.savetxt(os.path.join(test_folder,'model_dev_id'),
                f_idx,fmt='%d',
                header=' meand std f = {0}-{1}'.format(args.force_lower_cutoff, args.force_upper_cutoff))
-    fig.show()    
+    fig.show()
+fig.show()

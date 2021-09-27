@@ -15,7 +15,7 @@ import os
 import datetime
 import argparse
 import sys
-sys.setrecursionlimit(100000)
+sys.setrecursionlimit(1000000)
 recal_path = os.path.join(os.getcwd(),'recal')
 try:
     os.mkdir(recal_path)     
@@ -25,6 +25,7 @@ except:
 parser = argparse.ArgumentParser()
 parser.add_argument("--max_job","-mj",type=int,help="max job allowed")
 parser.add_argument("--deepmd","-d",help="deepmd path file")
+parser.add_argument("--inputfile","-if",help="input files for vasp cal, default is cwd+inputs, if input, please input the absolute path")
 args   = parser.parse_args()
 def get_waiting_jobs():
     call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat -u jd848 | grep qw |wc|awk '{print $1}'>tmp.txt",shell=True)
@@ -58,7 +59,8 @@ def foo():
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
               num_waiting_jobs,threshold, max_job_id, max_job_id+next_batch,time))
         nsw_range = '{0}-{1}'.format(max_job_id,max_job_id+next_batch)
-        call("python ~/script/mldp/recal_dpdata.py -r {0} -d {1}".format(nsw_range,args.deepmd),shell=True)
+        call("python ~/script/mldp/recal_dpdata.py -r {0} -d {1} -if {2}".format(
+                nsw_range,args.deepmd, args.inputfile),shell=True)
     elif num_waiting_jobs > threshold:
         print("{3}: # of waiting jobs: {0} > {1}, wait for {2} sec(s)".format(
               num_waiting_jobs,threshold, time_gap,time))

@@ -10,12 +10,16 @@
    asap gen_desc -s 10 --fxyz npt.dump soap -e -c 6 -n 6 -l 6 -g 0.44
    asap gen_desc -s 10 --fxyz dump.0 soap -e -c 6 -n 4 -l 4 -g 0.44
    asap gen_desc -s 10 --fxyz OUTCAR soap -e -c 6 -n 6 -l 6 -g 0.44
+   
+   asap gen_desc -s 1 --fxyz dump.0 soap -e -c 6 -n 4 -l 4 -g 0.44
+   asap gen_desc -s 1 --fxyz 0.dump soap -e -c 6 -n 4 -l 4 -g 0.44
    ```
 
 2. PCA analysis `fps` to identify frames to re-calcualte
 
    ```bash
    python ~/script/mldp/asap/select_frames.py -i ASAP-desc.xyz -n 70 -s 10
+   python ~/script/mldp/asap/select_frames.py -i ASAP-desc.xyz -n 200 -s 1
    ```
 
 3. `extract_deepmd.py` with `-id` flag and index file generated in last step
@@ -24,6 +28,8 @@
    python ~/script/mldp/extract_deepmd.py -f OUTCAR -id index_file
    python ~/script/mldp/extract_deepmd.py -f npt.dump -fmt dump -id index_file
    python ~/script/mldp/extract_deepmd.py -f ../dump.0 -fmt dump -id test-frame-select-fps-n-70.index -t 4000 -st
+   python ~/script/mldp/extract_deepmd.py -f ../dump.0 -fmt dump -id ../test-frame-select-fps-n-200.index -t 3000 -st
+   python ~/script/mldp/extract_deepmd.py -f ../0.dump -fmt dump -id ../test-frame-select-fps-n-200.index -t 3000 -st
    ```
 
 4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence. Also NBANDS and NELEM should be sufficient. Use `recal_dpdata.py` to recalculate selected frames
