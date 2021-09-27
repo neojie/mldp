@@ -15,4 +15,4 @@
 #
 . "/u/local/apps/anaconda3/2020.11/etc/profile.d/conda.sh"
 conda activate /u/home/j/jd848/project-lstixrud/dpkit2;
-python job_array_dpdata.py -mj 3000 -d deepmd -if /u/project/ESS/lstixrud/jd848/metad/pvh/inputs/inputs_6.5k/ > job.log
+python ~/script/mldp/bash_recal/job_array_dpdata.py -mj 3000 -d deepmd -if /u/project/ESS/lstixrud/jd848/metad/pvh/inputs/inputs_6.5k/ > job.log

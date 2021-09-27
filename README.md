@@ -29,7 +29,7 @@
    python ~/script/mldp/extract_deepmd.py -f npt.dump -fmt dump -id index_file
    python ~/script/mldp/extract_deepmd.py -f ../dump.0 -fmt dump -id test-frame-select-fps-n-70.index -t 4000 -st
    python ~/script/mldp/extract_deepmd.py -f ../dump.0 -fmt dump -id ../test-frame-select-fps-n-200.index -t 3000 -st
-   python ~/script/mldp/extract_deepmd.py -f ../0.dump -fmt dump -id ../test-frame-select-fps-n-200.index -t 3000 -st
+   python ~/script/mldp/extract_deepmd.py -f ../0.dump -fmt dump -id ../test-frame-select-fps-n-200.index -st -t 6500
    ```
 
 4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence. Also NBANDS and NELEM should be sufficient. Use `recal_dpdata.py` to recalculate selected frames
