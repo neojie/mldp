@@ -10,15 +10,15 @@ Created on Thu Jul 11 10:14:45 2019
 @author: jiedeng
 """
 
-from shared_functions import check_outcar_done, check_outcar_done_slow, load_paths
+from shared_functions import check_outcar_done, check_outcar_done_slow
 import argparse
 import os
 import glob
 from subprocess import call
 
 print("=="*40)
-print(" "*20, "MUST HAVE DSQ MODULE AVAIL!!!", " "*20)
-print(" "*20, "Make sure running job not overlapped with here", " "*20)
+#print(" "*20, "MUST HAVE DSQ MODULE AVAIL!!!", " "*20)
+print(" "*20, "Running jobs are not considered", " "*20)
 print("=="*40)
 
 print()
@@ -36,15 +36,18 @@ for job in running_jobs:
 print("exist jobs are", existing_jobs)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--inputpath","-ip",help="input path file")
+parser.add_argument("--inputpath","-if",help="where the recal folder is, default is cwd")
+parser.add_argument("--submissionscript","-ss",help="input path file")
+
 args   = parser.parse_args()
 
 cwd    = os.getcwd()
+
 if args.inputpath:
     print("Check files in {0}  ".format(args.inputpath))
-    inputpath = args.inputpath
-    tmp = load_paths(inputpath)
-    paths = [os.path.join(path,'recal') for path in tmp]
+#    inputpath = args.inputpath
+#    tmp = load_paths(inputpath)
+    paths = [args.inputpath]
 else:
     print("No folders are provided. Use default value folders")
     paths = [os.path.join(cwd,'recal')]
@@ -73,10 +76,7 @@ def build_dsq_file(path):
             fail += 1
             target_folder = cwd
             failpath = os.path.join(target_folder,folder)     
-#            if fail < 500:
-            out.append('cd '+failpath+'; ' + 'qsub ../../inputs/sub_vasp.sh' +'\n')
-#            else:
-#                raise ValueError("job cannot exceed 500!")
+            out.append('cd '+failpath+'; ' + 'qsub {0}'.format(args.submissionscript) +'\n')
 
     fw   = open(os.path.join(path,'out'),'w')
     fw.writelines(out)
