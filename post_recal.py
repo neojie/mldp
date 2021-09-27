@@ -50,7 +50,7 @@ if args.inputpath:
     paths = [args.inputpath]
 else:
     print("No folders are provided. Use default value folders")
-    paths = [os.path.join(cwd,'recal')]
+    paths = [cwd]
 
 def build_dsq_file(path):
 
