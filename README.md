@@ -11,8 +11,7 @@
    asap gen_desc -s 10 --fxyz dump.0 soap -e -c 6 -n 4 -l 4 -g 0.44
    asap gen_desc -s 10 --fxyz OUTCAR soap -e -c 6 -n 6 -l 6 -g 0.44
    
-   asap gen_desc -s 1 --fxyz dump.0 soap -e -c 6 -n 4 -l 4 -g 0.44
-   asap gen_desc -s 1 --fxyz 0.dump soap -e -c 6 -n 4 -l 4 -g 0.44
+   asap gen_desc -s 1 --fxyz npt.dump soap -e -c 6 -n 4 -l 4 -g 0.44
    ```
 
 2. PCA analysis `fps` to identify frames to re-calcualte
@@ -20,6 +19,7 @@
    ```bash
    python ~/script/mldp/asap/select_frames.py -i ASAP-desc.xyz -n 70 -s 10
    python ~/script/mldp/asap/select_frames.py -i ASAP-desc.xyz -n 200 -s 1
+   python ~/script/mldp/asap/select_frames.py -i ASAP-desc.xyz -n 50
    ```
 
 3. `extract_deepmd.py` with `-id` flag and index file generated in last step
@@ -27,8 +27,7 @@
    ```bash
    python ~/script/mldp/extract_deepmd.py -f OUTCAR -id index_file
    python ~/script/mldp/extract_deepmd.py -f npt.dump -fmt dump -id index_file
-   python ~/script/mldp/extract_deepmd.py -f ../dump.0 -fmt dump -id test-frame-select-fps-n-70.index -t 4000 -st
-   python ~/script/mldp/extract_deepmd.py -f ../dump.0 -fmt dump -id ../test-frame-select-fps-n-200.index -t 3000 -st
+   python ~/script/mldp/extract_deepmd.py -f ../npt.dump -fmt dump -id ../test-frame-select-fps-n-50.index -st -t 5500
    python ~/script/mldp/extract_deepmd.py -f ../0.dump -fmt dump -id ../test-frame-select-fps-n-200.index -st -t 6500
    ```
 
@@ -38,7 +37,9 @@
    python ~/script/mldp/recal_dpdata.py -d deepmd/ -if /u/project/ESS/lstixrud/jd848/metad/pvh/inputs/inputs_
    ```
 
-5. Outside`recal`folder`python ~/script/mldp/post_recal.py` 
+5. Inside`recal`folder
+
+   `python ~/script/mldp/post_recal.py -ss /u/project/ESS/lstixrud/jd848/metad/pvh/inputs/sub_vasp.sh ` 
 
 6. Inside `recal` folder, do `python ~/script/mldp/check_nbands_nelm.py -ip all -v`
 
@@ -58,9 +59,9 @@
 
 10. analyze nn and vasp
 
-    ```bash
-    python ~/script/mldp/model_dev/analysis.py -tf . -mp m2-pvh4 -rf . -euc 10 -n 163
-    ```
+   ```bash
+   python ~/script/mldp/model_dev/analysis.py -tf . -mp m2-pvh4 -rf . -euc 10 -n 163
+   ```
 
 11. build `deepmd` based on the idx file generated and remove the old deepmd
 
@@ -89,12 +90,19 @@
 3. analyze model deviation
 
    ```
-   python ~/script/mldp/model_dev/analysis.py -tf . -mp m2-pvh4 -euc 10 -n 163
+   python ~/script/mldp/model_dev/analysis.py -tf . -mp m2-pvh4 -euc 10 
+   python ~/script/mldp/model_dev/analysis.py -rf . -tf . -mp m3v1 m3v2 m3v3 m3v4 
    ```
 
    the upper/lower limits of force and energy RMSEs should be benchmarked with VASP runs at least ones
 
    idx file `idx_model_deviaton` is derived
+
+   ```
+   python ~/script/mldp/model_dev/analysis.py -rf . -tf . -mp m3v1 m3v2 m3v3 m3v4 -elc 0.01 -euc 2 -flc 0.4 -fuc 1
+   ```
+
+   
 
 4. A new `dump` file that contatins a subset of the frames of the original dump file is built based on  `idx_model_deviaton`  with `dump.py`
 
