@@ -21,6 +21,8 @@ parser.add_argument("--OUTCAR","-o",type = str, default = 'OUTCAR', help="OUTCAR
 #parser.add_argument("--verbose","-v",type = bool, default = True, help="OUTCAR name")
 
 parser.add_argument('--verbose',"-v", default=True, action='store_false')
+parser.add_argument('--remove_outcar',"-ro", default=False, action='store_true')
+
 args   = parser.parse_args()
 
 if not args.inputpath:
@@ -87,5 +89,9 @@ for path in paths:
         print("bad iter",path)
     if not good_nbands:
         print("bad nbands",path)
+    if args.remove_outcar and ((not good_iter) or (not good_nbands)):
+        os.remove(os.path.join(path,args.OUTCAR))
+        print("** remove outcar successfully")
+        
   
             
