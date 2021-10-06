@@ -43,7 +43,7 @@ else:
 
 
 def check(path):
-    outcar = os.path.join(path,args.OUTCAR)    
+    outcar = os.path.join(path,args.OUTCAR)
     fp=open(outcar)
     flag_nelm, flag_nbands, flag_iter, flag_occ = False, False, False, False
     check_iter, check_nbands = False, False
@@ -84,14 +84,17 @@ def check(path):
     return good_iter, good_nbands  
 
 for path in paths:
-    good_iter, good_nbands  = check(path)
-    if not good_iter:
-        print("bad iter",path)
-    if not good_nbands:
-        print("bad nbands",path)
-    if args.remove_outcar and ((not good_iter) or (not good_nbands)):
-        os.remove(os.path.join(path,args.OUTCAR))
-        print("** remove outcar successfully")
-        
+    if os.path.exists(os.path.join(path,args.OUTCAR)):
+        good_iter, good_nbands  = check(path)
+        if not good_iter:
+            print("bad iter",path)
+        if not good_nbands:
+            print("bad nbands",path)
+        if args.remove_outcar and ((not good_iter) or (not good_nbands)):
+            os.remove(os.path.join(path,args.OUTCAR))
+            print("** remove outcar successfully")
+    else:
+        if args.verbose:
+            print("NO OUTCAR")
   
             
