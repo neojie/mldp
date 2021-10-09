@@ -58,7 +58,7 @@ def foo():
     if num_waiting_jobs < threshold and (num_tot_jobs+next_batch) < job_lim:    
         max_job_id = get_max_job_id(path)
         if max_job_id+next_batch>args.max_job:
-            end_job = args.max_job
+            end_job = args.max_job+1
         else:
             end_job = max_job_id+next_batch
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
@@ -75,7 +75,7 @@ def foo():
               num_tot_jobs, job_lim, threshold, num_waiting_jobs,timex))
         time.sleep(threshold)
     max_job_id = get_max_job_id(path)
-    if  max_job_id <= args.max_job:          
+    if  max_job_id < args.max_job:          
         threading.Timer(num_waiting_jobs, foo).start()
     else:
         quit()
