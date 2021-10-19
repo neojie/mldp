@@ -51,6 +51,7 @@ def lmp2pos(ls,sel_nsw,copybs=False):
             copy(os.path.join(inputfile, 'KPOINTS'),target_path)
             copy(os.path.join(inputfile, 'POTCAR'),target_path)  
             if run_vasp:
+                print("run vasp",target_path)
                 run(cwd,target_path)
 
 from subprocess import call
