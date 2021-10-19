@@ -167,7 +167,7 @@ scripts used for analyzing lammps output
 #### dependencies
 ---------------------------
 -`lammps_logfile`
-### 2.1. Workflow for thermal conductivity calculation
+### 3.1. Workflow for thermal conductivity calculation
 1. run lammps calculation 
 2. `log_lmp.py` extract the v_Jx, v_Jy, v_Jz heat current 
 ```python ~/script/mldp/lmp/log_lmp.py -i log.lammps -y v_Jx v_Jy v_Jz -s -p```
