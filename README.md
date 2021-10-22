@@ -200,4 +200,3 @@ dpkit environment works
 ## 6. Scale
 
 ## 7. Util
-> Written with [StackEdit](https://stackedit.io/).

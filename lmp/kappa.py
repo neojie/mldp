@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description="Plot contents from lammps log file
 parser.add_argument("--input_file", "-i",type=str, default="log.properties",  help="log_lmp generated file")
 
 #parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
-#parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
+parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
 #parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
 parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
 parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
@@ -98,7 +98,7 @@ ev2j = 1.60218e-19
 A2m  = 1.0e-10
 ps2s = 1.0e-12
 convert     = ev2j*ev2j/ps2s/A2m
-timestep    = 1e-3    # in ps this is different from post_corr
+timestep    = args.timestep*1e-3#1e-3    # in ps this is different from post_corr
 sample_rate = 1       # for all mgsio3 syste, sample every single step
 
 scale = convert/kB/T/T/V*sample_rate*timestep
