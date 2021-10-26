@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description="Cv for vasp")
 parser.add_argument("--input_dir","-i", type=str,default='.', help="out directory, default: cwd")
 parser.add_argument("--beg","-b", type=int,default=0, help="begin from index")
+parser.add_argument("--num","-n", type=int, help="number of atoms in the system")
+
 args = parser.parse_args()
 
 input_dir = args.input_dir
@@ -65,7 +67,7 @@ def fluct(data):
 
 t = round(dat[:,0].mean())
 kb =  8.617e-5 # eV/K
-kb_natoms = kb*160
+kb_natoms = kb*args.num
 
 
 cv_ion = fluct(dat[args.beg:,2])/(t**2)/kb/kb_natoms
@@ -75,6 +77,7 @@ for i in range(len(dat)):
     tmp.append(cv_i)
 
 s_ele = -dat[:,1].mean()/t
+print('Temperature K |', 'Volume A3 |', 'Cv ionic Nkb |', 'Sele (eV/K)')
 print('{0} \t {1} \t {2} \t {3}'.format(t,vol,cv_ion,s_ele))
 
 fig,ax = plt.subplots(2,1,figsize=(6,6),sharex=True,sharey=False)
