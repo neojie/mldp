@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue May 12 19:16:57 2020
-
+run the pet.py in the same folder first, which generates pet.dat dataset in the same folder
+Cv = Cv_ion + Cv_kinetic + Cv_ele
+This script only compute the Cv_ion
 @author: jiedeng
 """
 import os
@@ -13,6 +15,7 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description="Cv for vasp")
 parser.add_argument("--input_dir","-i", type=str,default='.', help="out directory, default: cwd")
 parser.add_argument("--beg","-b", type=int,default=0, help="begin from index")
+parser.add_argument("--end","-e", type=int,default=-1, help="end at index")
 parser.add_argument("--num","-n", type=int, help="number of atoms in the system")
 
 args = parser.parse_args()
@@ -55,7 +58,7 @@ outcar   = os.path.join(input_dir,'OUTCAR')
 fo      = open(outcar)
 lines   = fo.readlines()
 
-dat = np.array(dat)[args.beg:,:]
+dat = np.array(dat)[args.beg:args.end,:]
 
 #dat = np.array(dat)[3000:,:]
 
