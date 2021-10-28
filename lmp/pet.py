@@ -9,8 +9,6 @@ Created on Thu Oct 28 08:19:41 2021
 
 @author: jiedeng
 """
-
-
 import os
 import ase.io
 import ase
@@ -94,17 +92,16 @@ else:
     call("paste p.dat temp >pet.dat",shell=True)
     call("rm e.dat t.dat p.dat",shell=True)
 
-
 pet= np.loadtxt('pet.dat')
 pet_be = pet[args.beg:args.end,:]
-np.mean(pet_be,axis=0)
-print(f'{pet_be[-1,0]/10}\t\t{pet_be[-1,1]}\t{pet_be[-1,2]}\t{dummy.get_volume()}')
+ave=np.mean(pet_be,axis=0)
+print(f'{ave[0]/10}\t\t{ave[1]}\t{ave[2]}\t{dummy.get_volume()}')
 
 import matplotlib.pyplot as plt
 fig,ax = plt.subplots(3,1,figsize=(5,4),sharex=True)
 ax[0].plot(pet[:,0]/10,label='P (GPa)')
 ax[0].plot(args.beg, pet[args.beg,0]/10, 'ko')
-ax[0].plot(args.end, pet[args.end,0]/10, 'ko')
+ax[0].plot(nsw_tot, pet[args.end,0]/10, 'ko')
 ax[1].plot(pet[:,1],label='E (eV)')
 ax[2].plot(pet[:,2],label='T (K)')
 ax[2].set_xlabel("Step")
@@ -112,10 +109,6 @@ ax[0].legend()
 ax[1].legend()
 ax[2].legend()
 plt.show()
-
-
-
-
 
 
 #fig.savefig("stress.png")
