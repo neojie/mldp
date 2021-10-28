@@ -83,14 +83,16 @@ print("System:", dummy.get_chemical_formula(), dummy.get_global_number_of_atoms(
 #nsw_i = 0
 #ewithout = []
 
-from subprocess import call
-
-call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
-call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
-call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
-call("paste e.dat t.dat > temp",shell=True)
-call("paste p.dat temp >pet.dat",shell=True)
-call("rm e.dat t.dat p.dat",shell=True)
+if 'pet.dat' in os.listdir():
+    pass
+else:
+    from subprocess import call
+    call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
+    call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
+    call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
+    call("paste e.dat t.dat > temp",shell=True)
+    call("paste p.dat temp >pet.dat",shell=True)
+    call("rm e.dat t.dat p.dat",shell=True)
 
 
 pet= np.loadtxt('pet.dat')
