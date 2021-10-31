@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser(description="extract P E T V from OUTCAR")
 parser.add_argument("--beg","-b", type=int,default=0, help="begin from index")
 parser.add_argument("--end","-e", type=int,default=-1, help="end at index")
 parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
+parser.add_argument("-ep", "--extract_pet", default=True, action='store_false', help="Defualt: plot")
 
 args = parser.parse_args()
 
@@ -159,15 +160,18 @@ print("System:", dummy.get_chemical_formula(),'\t', dummy.get_global_number_of_a
 #    call("paste e.dat t.dat > temp",shell=True)
 #    call("paste p.dat temp >pet.dat",shell=True)
 #    call("rm e.dat t.dat p.dat",shell=True)
-
-print("**Extracting P E T data**")
-from subprocess import call
-call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
-call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
-call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
-call("paste e.dat t.dat > temp",shell=True)
-call("paste p.dat temp >pet.dat",shell=True)
-call("rm e.dat t.dat p.dat",shell=True)
+if args.extract_pet:
+    print("**Extracting P E T data**")
+    from subprocess import call
+    call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
+    call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
+    call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
+    call("paste e.dat t.dat > temp",shell=True)
+    call("paste p.dat temp >pet.dat",shell=True)
+    call("rm e.dat t.dat p.dat",shell=True)
+else:
+    print("**use existing P E T data pet.dat in the current folder**")
+   
 
 try:
     pet= np.loadtxt('pet.dat')
