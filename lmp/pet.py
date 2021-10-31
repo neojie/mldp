@@ -198,7 +198,7 @@ print("%.2f \t %.2f \t %.2f" % (bpmean[-1]/10,bemean[-1],btmean[-1]))
 print("%.2f \t %.2f \t %.2f" % (bpvar[-1]/10,bevar[-1],btvar[-1]))
 
 def running_average(x):
-    return np.flip(x).cumsum()/(np.array(range(0,len(x)))+1)
+    return np.flip(np.flip(x).cumsum()/(np.array(range(0,len(x)))+1))
 
 import matplotlib.pyplot as plt
 fig,ax = plt.subplots(3,2,figsize=(8,12),sharex=True)
