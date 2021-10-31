@@ -202,7 +202,11 @@ import matplotlib.pyplot as plt
 fig,ax = plt.subplots(3,1,figsize=(5,10),sharex=True)
 ax[0].plot(pet[:,0]/10,label='P (GPa)')
 ax[0].plot(args.beg, pet[args.beg,0]/10, 'ko')
-ax[0].plot(nsw_tot, pet[args.end,0]/10, 'ko')
+if args.end<0:
+    end = args.end + nsw_tot
+else:
+    end = args.end
+ax[0].plot(end, pet[args.end,0]/10, 'ko')
 ax[1].plot(pet[:,1],label='E (eV)')
 ax[2].plot(pet[:,2],label='T (K)')
 ax[2].set_xlabel("Step")
