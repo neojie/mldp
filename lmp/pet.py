@@ -23,6 +23,8 @@ parser = argparse.ArgumentParser(description="extract P E T V from OUTCAR")
 
 parser.add_argument("--beg","-b", type=int,default=0, help="begin from index")
 parser.add_argument("--end","-e", type=int,default=-1, help="end at index")
+parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
+
 args = parser.parse_args()
 
 def get_nsw_tot(vasp_dir = '.'):
@@ -199,27 +201,27 @@ print("%.2f \t %.2f \t %.2f" % (bpvar[-1]/10,bevar[-1],btvar[-1]))
 
 def running_average(x):
     return np.flip(np.flip(x).cumsum()/(np.array(range(0,len(x)))+1))
-
-import matplotlib.pyplot as plt
-fig,ax = plt.subplots(3,2,figsize=(8,12),sharex=True)
-ax[0][0].plot(pet[:,0]/10,label='P (GPa)')
-ax[0][0].plot(pet[:,0]/10,label='P (GPa)')
-ax[0][0].plot(args.beg, pet[args.beg,0]/10, 'ko')
-if args.end<0:
-    end = args.end + nsw_tot
-else:
-    end = args.end
-ax[0][0].plot(end, pet[args.end,0]/10, 'ko')
-
-ax[1][0].plot(pet[:,1],label='E (eV)')
-ax[2][0].plot(pet[:,2],label='T (K)')
-ax[2][0].set_xlabel("Step")
-ax[0][0].legend();ax[0][0].grid()
-ax[1][0].legend();ax[1][0].grid()
-ax[2][0].legend();ax[2][0].grid()
-
-ax[0][1].plot(running_average(pet[:,0]/10));ax[0][1].grid()
-ax[1][1].plot(running_average(pet[:,1]));ax[1][1].grid()
-ax[2][1].plot(running_average(pet[:,2]));ax[2][1].grid()
-
-plt.show()
+if args.plot:
+    import matplotlib.pyplot as plt
+    fig,ax = plt.subplots(3,2,figsize=(8,12),sharex=True)
+    ax[0][0].plot(pet[:,0]/10,label='P (GPa)')
+    ax[0][0].plot(pet[:,0]/10,label='P (GPa)')
+    ax[0][0].plot(args.beg, pet[args.beg,0]/10, 'ko')
+    if args.end<0:
+        end = args.end + nsw_tot
+    else:
+        end = args.end
+    ax[0][0].plot(end, pet[args.end,0]/10, 'ko')
+    
+    ax[1][0].plot(pet[:,1],label='E (eV)')
+    ax[2][0].plot(pet[:,2],label='T (K)')
+    ax[2][0].set_xlabel("Step")
+    ax[0][0].legend();ax[0][0].grid()
+    ax[1][0].legend();ax[1][0].grid()
+    ax[2][0].legend();ax[2][0].grid()
+    
+    ax[0][1].plot(running_average(pet[:,0]/10));ax[0][1].grid()
+    ax[1][1].plot(running_average(pet[:,1]));ax[1][1].grid()
+    ax[2][1].plot(running_average(pet[:,2]));ax[2][1].grid()
+    
+    plt.show()
