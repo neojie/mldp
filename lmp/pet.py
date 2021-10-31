@@ -137,7 +137,7 @@ atoms = []
 dummy = ase.io.vasp.read_vasp_out(outcar)
 natoms = dummy.get_global_number_of_atoms()
 
-print("System:", dummy.get_chemical_formula(),'\t', dummy.get_global_number_of_atoms()) # can also be done via grep NION
+print("System:", dummy.get_chemical_formula(),'\t', dummy.get_global_number_of_atoms(),'\t', nsw_tot) # can also be done via grep NION
 
 
 #property_list = []
@@ -197,20 +197,29 @@ print("**P(GPA)/E(eV)/T(K) value and SR, blockaverage**")
 print("%.2f \t %.2f \t %.2f" % (bpmean[-1]/10,bemean[-1],btmean[-1]))
 print("%.2f \t %.2f \t %.2f" % (bpvar[-1]/10,bevar[-1],btvar[-1]))
 
+def running_average(x):
+    return np.flip(x).cumsum()/(np.array(range(0,len(x)))+1)
 
 import matplotlib.pyplot as plt
-fig,ax = plt.subplots(3,1,figsize=(5,10),sharex=True)
-ax[0].plot(pet[:,0]/10,label='P (GPa)')
-ax[0].plot(args.beg, pet[args.beg,0]/10, 'ko')
+fig,ax = plt.subplots(3,2,figsize=(8,12),sharex=True)
+ax[0][0].plot(pet[:,0]/10,label='P (GPa)')
+ax[0][0].plot(pet[:,0]/10,label='P (GPa)')
+ax[0][0].plot(args.beg, pet[args.beg,0]/10, 'ko')
 if args.end<0:
     end = args.end + nsw_tot
 else:
     end = args.end
-ax[0].plot(end, pet[args.end,0]/10, 'ko')
-ax[1].plot(pet[:,1],label='E (eV)')
-ax[2].plot(pet[:,2],label='T (K)')
-ax[2].set_xlabel("Step")
-ax[0].legend();ax[0].grid()
-ax[1].legend();ax[1].grid()
-ax[2].legend();ax[2].grid()
+ax[0][0].plot(end, pet[args.end,0]/10, 'ko')
+
+ax[1][0].plot(pet[:,1],label='E (eV)')
+ax[2][0].plot(pet[:,2],label='T (K)')
+ax[2][0].set_xlabel("Step")
+ax[0][0].legend();ax[0][0].grid()
+ax[1][0].legend();ax[1][0].grid()
+ax[2][0].legend();ax[2][0].grid()
+
+ax[0][1].plot(running_average(pet[:,0]/10));ax[0][1].grid()
+ax[1][1].plot(running_average(pet[:,1]));ax[1][1].grid()
+ax[2][1].plot(running_average(pet[:,2]));ax[2][1].grid()
+
 plt.show()
