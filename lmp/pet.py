@@ -176,13 +176,13 @@ except:
     pet=tmp[~np.isnan(tmp).any(axis=1)]
 
 
-pet = pet[args.beg:args.end,:]
-ave=np.mean(pet,axis=0)
+pet_be = pet[args.beg:args.end,:]
+ave=np.mean(pet_be,axis=0)
 print("vanilla mean of P E T V")
 print(f'{ave[0]/10}\t{ave[1]}\t{ave[2]}\t{dummy.get_volume()}')
 
 #
-p, e, t = pet[:,0], pet[:,1], pet[:,2]
+p, e, t = pet_be[:,0], pet_be[:,1], pet_be[:,2]
 
 vp, bpvar, bpmean=blockAverage(p)
 ve, bevar, bemean=blockAverage(e)
@@ -199,7 +199,7 @@ print("%.2f \t %.2f \t %.2f" % (bpvar[-1]/10,bevar[-1],btvar[-1]))
 
 
 import matplotlib.pyplot as plt
-fig,ax = plt.subplots(3,1,figsize=(5,4),sharex=True)
+fig,ax = plt.subplots(3,1,figsize=(5,10),sharex=True)
 ax[0].plot(pet[:,0]/10,label='P (GPa)')
 ax[0].plot(args.beg, pet[args.beg,0]/10, 'ko')
 ax[0].plot(nsw_tot, pet[args.end,0]/10, 'ko')
