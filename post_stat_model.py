@@ -41,7 +41,10 @@ if args.inputpath:
         import json
         with open(inputpath) as f:
             tmp = json.load(f)
-            paths = tmp['training']['systems']
+            try:
+                paths = tmp['training']['systems']
+            except:
+                paths = tmp['training']['training_data']['systems']
     else:
         from shared_functions import load_paths
         paths = load_paths(inputpath,level='recal')
@@ -53,6 +56,13 @@ else:
     
 eV_A3_2_GPa  = 160.21766208 # 1 eV/Å3 = 160.2176621 GPa
 
+import csv
+file = open('stat_'+args.detail_file, 'w', newline='')
+fieldnames = ['path','natoms','ntrain', 'ntest','fparam','e_tr','f_tr','v_tr',
+              'e_ts','f_ts','v_ts']
+writer = csv.DictWriter(file,fieldnames=fieldnames)
+writer.writeheader()
+    
 count = 0
 for path in paths:
     print('--'*40)
@@ -121,14 +131,20 @@ for path in paths:
         # force cannot be 1 d datal as it is for every atom
         v_gpa_test = v_test/vol*eV_A3_2_GPa            
  
+    log = np.loadtxt(logfile)
+    logdict= {'path':path, 'natoms':log[0]}
     
-#    log = np.loadtxt(logfile)
+#    writer.writerow({'path':path, 'natoms':log[0],'ntrain':log[2],
+#                         'ntest':log[8], 'fparam':log[1],
+#                         'e_tr':log[4], 'f_tr':log[5], 'v_tr':log[7],
+#                         'e_ts':log[10], 'f_ts':log[11], 'v_ts':log[13]})    
     
     if count == 0:
         if train_exist:
             e_tr_all = e_tr
             f_tr_all = f_tr
             v_tr_all = v_tr; v_gpa_tr_all = v_gpa_tr
+            logdict['ntrain']=log[2]; logdict['e_tr']=log[4];  logdict['f_tr']=log[5];  logdict['v_tr']=log[7];             
         if test_exist:
             e_test_all = e_test
             f_test_all = f_test
@@ -137,13 +153,17 @@ for path in paths:
         if train_exist: #  corner case not considered: 1st directory only has train or test
             e_tr_all = np.concatenate((e_tr_all,e_tr),axis=0)
             f_tr_all = np.concatenate((f_tr_all,f_tr),axis=0)
-            v_tr_all = np.concatenate((v_tr_all,v_tr),axis=0); v_gpa_tr_all = np.concatenate((v_gpa_tr_all,v_gpa_tr),axis=0)           
+            v_tr_all = np.concatenate((v_tr_all,v_tr),axis=0); v_gpa_tr_all = np.concatenate((v_gpa_tr_all,v_gpa_tr),axis=0)
+            logdict['ntrain']=log[2]; logdict['e_tr']=log[4];  logdict['f_tr']=log[5];  logdict['v_tr']=log[7];
         if test_exist:
             e_test_all = np.concatenate((e_test_all,e_test),axis=0)
             f_test_all = np.concatenate((f_test_all,f_test),axis=0)
             v_test_all = np.concatenate((v_test_all,v_test),axis=0); v_gpa_test_all = np.concatenate((v_gpa_test_all,v_gpa_test),axis=0)           
-    
+    writer.writerow(logdict)
     count += 1
+
+file.close()
+   
 
 def rmse(org,pred): # same as dp_test l2err
     dif = pred - org

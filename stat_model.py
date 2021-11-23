@@ -51,7 +51,10 @@ if args.inputpath:
         import json
         with open(inputpath) as f:
             tmp = json.load(f)
-            paths = tmp['training']['systems']
+            try:
+                paths = tmp['training']['systems']
+            except:
+                paths = tmp['training']['training_data']['systems']
     else:
         from shared_functions import load_paths
         paths = load_paths(inputpath,level='recal')
@@ -123,4 +126,4 @@ for path in paths:
         log.write ("# Virial L2err        : %e eV" % l2v_test);log.write ('\n')
         log.write ("# Virial L2err/Natoms : %e eV" % (l2v_test/natoms));log.write ('\n')
         log.writelines([str(i)+'\n' for i in [num_test,l2e_test,l2ea_test,l2f_test,l2v_test,l2v_test/natoms]])                
-        log.close()           
+        log.close() 

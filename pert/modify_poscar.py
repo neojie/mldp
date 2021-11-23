@@ -7,6 +7,11 @@ p0-x: append all newatom position in the end also change the title line
 
 all: append all newatom position in the end also change the title line
 
+After making the files
+
+for i in {0..9};do echo $i;mkdir $i;cp p$i.vasp $i/POSCAR;cp /u/project/ESS/lstixrud/jd848/metad/pvh/inputs/inputs_4000/* $i;cd $i;qsub sub_vasp.sh;cd ..;done
+for i in {0..8};do echo $i;mkdir $i;cp p$i.vasp $i/POSCAR;cp /u/project/ESS/lstixrud/jd848/metad/pvh/inputs/inputs_4000/* $i;cd $i;qsub sub_vasp.sh;cd ..;done
+
 @author: jiedeng
 """
 print('--'*40)
@@ -19,7 +24,7 @@ import copy
 import argparse
 
 parser = argparse.ArgumentParser(description="modify poscar")
-parser.add_argument("-i", type=int, nargs="+", help="index")
+parser.add_argument("-i", type=int, nargs="+", help="index, the 1st approaches the 2nd")
 parser.add_argument("-num", type=int, help="num")
 
 args = parser.parse_args()

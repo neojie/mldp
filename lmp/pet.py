@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser(description="extract P E T V from OUTCAR")
 parser.add_argument("--beg","-b", type=int,default=0, help="begin from index")
 parser.add_argument("--end","-e", type=int,default=-1, help="end at index")
 parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
+parser.add_argument("-s", "--save", default=False, action='store_true', help="Defualt: DONOT save plot")
 parser.add_argument("-ep", "--extract_pet", default=True, action='store_false', help="Defualt: plot")
 
 args = parser.parse_args()
@@ -61,6 +62,15 @@ def get_nsw_tot(vasp_dir = '.'):
             if "Iteration" in tmp:
                 nsw_tot = int(tmp.split()[2].split('(')[0])
                 break
+    elif os.path.exists(os.path.join(vasp_dir,'pet.dat')):
+        try:
+            pet= np.loadtxt('pet.dat')
+        except:
+            ## may be text exist, one corner case that is not considered yet is
+            ## each column may be of different length
+            tmp=np.genfromtxt('pet.dat')
+            pet=tmp[~np.isnan(tmp).any(axis=1)]
+        nsw_tot = len(pet)  
     return nsw_tot
 
 def read_outcar(vasp_dir,index):
@@ -133,14 +143,23 @@ def blockAverage(datastream, isplot=False, maxBlockSize=0):
 	return v, np.sqrt(blockVar), blockMean
 
 nsw_tot = get_nsw_tot()
+    
 target_dir = '.'
 vasp_dir   = '.'
 outcar = os.path.join(vasp_dir,'OUTCAR')
 atoms = []
-dummy = ase.io.vasp.read_vasp_out(outcar)
-natoms = dummy.get_global_number_of_atoms()
+try:
+    dummy = ase.io.vasp.read_vasp_out(outcar)
+    natoms = dummy.get_global_number_of_atoms()
+    formula =  dummy.get_chemical_formula()
+    natoms = dummy.get_global_number_of_atoms()
+    volume = dummy.get_volume()
+except:
+    formula= 'unknown'
+    natoms = 'unknown'
+    volume = 'unknown'
 
-print("System:", dummy.get_chemical_formula(),'\t', dummy.get_global_number_of_atoms(),'\t', nsw_tot) # can also be done via grep NION
+print("System:", formula,'\t', natoms,'\t', nsw_tot) # can also be done via grep NION
 
 
 #property_list = []
@@ -148,24 +167,15 @@ print("System:", dummy.get_chemical_formula(),'\t', dummy.get_global_number_of_a
 #nsw_i = 0
 #ewithout = []
 
-#if 'pet.dat' in os.listdir():
-#    print("**pet.dat already exists, skip extracting P E T data**")
-#    pass
-#else:
-#    print("**Extracting P E T data**")
-#    from subprocess import call
-#    call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
-#    call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
-#    call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
-#    call("paste e.dat t.dat > temp",shell=True)
-#    call("paste p.dat temp >pet.dat",shell=True)
-#    call("rm e.dat t.dat p.dat",shell=True)
+
 if args.extract_pet:
     print("**Extracting P E T data**")
     from subprocess import call
     call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
     call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
     call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
+    call("grep 'EENTRO' OUTCAR | awk '{print $5}' > eentro.dat",shell=True)
+
     call("paste e.dat t.dat > temp",shell=True)
     call("paste p.dat temp >pet.dat",shell=True)
     call("rm e.dat t.dat p.dat",shell=True)
@@ -181,11 +191,11 @@ except:
     tmp=np.genfromtxt('pet.dat')
     pet=tmp[~np.isnan(tmp).any(axis=1)]
 
-
+eentro = np.loadtxt('eentro.dat')
 pet_be = pet[args.beg:args.end,:]
 ave=np.mean(pet_be,axis=0)
 print("vanilla mean of P E T V")
-print(f'{ave[0]/10}\t{ave[1]}\t{ave[2]}\t{dummy.get_volume()}')
+print(f'{ave[0]/10}\t{ave[1]}\t{ave[2]}\t{volume}')
 
 #
 p, e, t = pet_be[:,0], pet_be[:,1], pet_be[:,2]
@@ -200,7 +210,7 @@ tmean  = np.round(t.mean(),2); tst  = np.round(t.std(),2);
 
 # PET order
 print("**P(GPA)/E(eV)/T(K) value and SR, blockaverage**")
-print("%.2f \t %.2f \t %.2f" % (bpmean[-1]/10,bemean[-1],btmean[-1]))
+print("%.2f \t %.2f \t %.2f \t %.6f" % (bpmean[-1]/10,bemean[-1],btmean[-1], np.mean(eentro)))
 print("%.2f \t %.2f \t %.2f" % (bpvar[-1]/10,bevar[-1],btvar[-1]))
 
 def running_average(x):
@@ -227,5 +237,6 @@ if args.plot:
     ax[0][1].plot(running_average(pet[:,0]/10));ax[0][1].grid()
     ax[1][1].plot(running_average(pet[:,1]));ax[1][1].grid()
     ax[2][1].plot(running_average(pet[:,2]));ax[2][1].grid()
-    
+    if args.save:
+        fig.savefig('pet.png',bbox_inches='tight')
     plt.show()

@@ -45,7 +45,7 @@ for i in range(1000,len(lines)):  # can start from a large number since typicall
     if 'mean temperature' in line:
         get_temperature = True
         temperature =  float(line.split()[-1])
-    if 'energy without entropy' in line:
+    if 'energy  without entropy' in line:
         get_e = True
         e = float(line.split()[4])
     if get_eentropy and get_temperature and get_e:

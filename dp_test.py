@@ -5,11 +5,16 @@
 #import sys
 #import argparse
 import numpy as np
-
-from deepmd.Data import DataSets
+try:
+    from deepmd.Data import DataSets
+except:
+    from deepmd.utils.data import DataSets
 #from deepmd.Data import DeepmdData
 #from deepmd import DeepEval
-from deepmd import DeepPot
+try:
+    from deepmd import DeepPot
+except:
+    from deepmd.infer import DeepPot
 #from deepmd import DeepDipole
 #from deepmd import DeepPolar
 #from deepmd import DeepWFC
