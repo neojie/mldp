@@ -169,9 +169,16 @@ scripts used for analyzing lammps output
 -`lammps_logfile`
 ### 3.1. Workflow for thermal conductivity calculation
 1. run lammps calculation 
+
 2. `log_lmp.py` extract the v_Jx, v_Jy, v_Jz heat current 
-```python ~/script/mldp/lmp/log_lmp.py -i log.lammps -y v_Jx v_Jy v_Jz -s -p```
-4. If ave/correlate output file is stored, which is NOT recommended for liquid since many auto-correlation needs to be done, `post_corr.py` can be used to analyze the results
+  ```python ~/script/mldp/lmp/log_lmp.py -i log.lammps -y v_Jx v_Jy v_Jz -s -p```
+
+  for multicomponent liquid system, one should alos subtract the partial enthalpy term $h_a$ (Eq 4 in Deng and Stixrude, 2021) , so the correct command should be
+
+  ```python ~/script/mldp/lmp/log_lmp.py -i log.lammps -y v_jhx v_jhy v_jhz -s -p```
+
+  If ave/correlate output file is stored, which is NOT recommended for liquid since many auto-correlation needs to be done, `post_corr.py` can be used to analyze the results
+
 5. If no ave/correlate output file, use `kappa.py` analyze the output of step 2)
 ```python ~/script/mldp/lmp/kappa.py -s -a 500 1500```
 -a specifcy average between step 500 to 1500
