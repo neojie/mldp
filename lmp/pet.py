@@ -171,12 +171,12 @@ print("System:", formula,'\t', natoms,'\t', nsw_tot) # can also be done via grep
 if args.extract_pet:
     print("**Extracting P E T data**")
     from subprocess import call
-    # call("grep SCALEE OUTCAR | awk '{print $3}' > scalee.dat",shell=True)
-    call("grep '  FREE ENERGIE OF THE ION-ELECTRON SYSTEM (eV)' OUTCAR | awk '{print $3}' > scalee.dat",shell=True)
+    call("grep SCALEE OUTCAR | awk '{print $3}' > scalee.dat",shell=True)
+    call(" | awk '{print $3}' > scalee.dat",shell=True)
     scalee = np.loadtxt('scalee.dat')
     if scalee < 1:
         print("scalee = {0}< 1".format(scalee))
-        call("grep -A 4 SCALED OUTCAR | grep 'energy  without entropy' | awk '{print $4}' >e.dat",shell=True)
+        call("grep -A 4 '  FREE ENERGIE OF THE ION-ELECTRON SYSTEM (eV)' OUTCAR | grep 'energy  without entropy' | awk '{print $4}' >e.dat",shell=True)
     else:
         call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
     call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
