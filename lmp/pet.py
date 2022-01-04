@@ -171,14 +171,20 @@ print("System:", formula,'\t', natoms,'\t', nsw_tot) # can also be done via grep
 if args.extract_pet:
     print("**Extracting P E T data**")
     from subprocess import call
+    scalee = np.loadtxt('scalee.dat')
+    if scalee < 1:
+        print("scalee < 1")
+        call("grep -A 4 SCALED OUTCAR | grep 'energy  without entropy' | awk '{print $4}' >e.dat",shell=True)
+    else:
+        call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
     call("grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",shell=True)
-    call("grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",shell=True)
     call("grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",shell=True)
     call("grep 'EENTRO' OUTCAR | awk '{print $5}' > eentro.dat",shell=True)
+    call("grep SCALEE OUTCAR | awk '{print $3}' > scalee.dat",shell=True)
 
     call("paste e.dat t.dat > temp",shell=True)
     call("paste p.dat temp >pet.dat",shell=True)
-    call("rm e.dat t.dat p.dat",shell=True)
+    call("rm e.dat t.dat p.dat scalee.dat",shell=True)
 else:
     print("**use existing P E T data pet.dat in the current folder**")
    
