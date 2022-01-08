@@ -37,14 +37,20 @@ Created on Thu Oct 28 08:19:41 2021
 @author: jiedeng
 """
 import os
-import ase.io
-import ase
-import ase.io.vasp
+import sys
 import re
 import numpy as np
 import warnings
 import argparse
 import matplotlib.pyplot as plt
+
+try:
+    import ase.io
+    import ase
+    import ase.io.vasp
+except:
+    print("No ASE installed")
+    
 
 # get nsw_tot
 parser = argparse.ArgumentParser(description="extract quantities from OUTCAR")
@@ -56,7 +62,8 @@ helper = 'what to show?  Default:p, ewithout,t\n'\
         'vol :  volume\n'\
         'toten :  free  energy   TOTEN\n'\
         'ewithout :  energy  without entropy\n'\
-        'scalee :  E(ab-initio) - E(wca)'\
+        'scalee_wca :  E(ab-initio) - E(wca)\n'\
+        'scalee_ig :  E(ab-initio) - E(ig)\n'\
         'eentro :  EENTRO'
 print(helper)
 parser.add_argument("--beg","-b", type=int,default=0, help="begin from index")
@@ -69,16 +76,19 @@ parser.add_argument("-m", "--marker", type=str,default='', help="marker style su
 parser.add_argument("-ls", "--linestyle", type=str,default='-', help="line style supported by Matplotlib, e.g., None means no lines")
 args = parser.parse_args()
 
+# scalee_command = "grep ab-initio OSZICAR | awk '{print $2}' > ab.dat ;"\
+#                 "grep wca OSZICAR | awk '{print $4}' > wca.dat;"\
+#                 "paste -d- ab.dat wca.dat | bc > du.dat" # does not work, bc does not do scientfic notation
 scalee_command = "grep ab-initio OSZICAR | awk '{print $2}' > ab.dat ;"\
-                "grep wca OSZICAR | awk '{print $4}' > wca.dat;"\
-                "paste -d- ab.dat wca.dat | bc > du.dat"
+                "grep wca OSZICAR | awk '{print $4}' > wca.dat;"
 # print(scalee_command)
 commands = {'p':"grep 'total pressure' OUTCAR | awk '{print $4}' > p.dat",
             't' :  "grep '(temperature' OUTCAR | awk '{print $6}' > t.dat",
             'vol' : "grep 'volume of cell' OUTCAR | awk '{print $5}' > vol.dat",
             'toten' :  "grep 'free  energy   TOTEN' OUTCAR | awk '{print $5}' > toten.dat" ,
             'ewithout' : "grep 'energy  without entropy' OUTCAR | awk '{print $4}' >e.dat",
-            'scalee' :  scalee_command,
+            'scalee_wca' :  scalee_command,
+            'scalee_ig' :  "grep -A 4 '  FREE ENERGIE OF THE ION-ELECTRON SYSTEM (eV)' OUTCAR | grep 'free  energy   TOTEN' | awk '{print $5}' > du_ig.dat",
             'eentro' :  "grep 'EENTRO' OUTCAR | awk '{print $5}' > eentro.dat",
             }
 
@@ -87,9 +97,23 @@ files = {'p':"p.dat",
         'vol' : "vol.dat",
         'toten' :  "toten.dat" ,
         'ewithout' : "e.dat",
-        'scalee' :  "du.dat",
+        'scalee_wca' :  "du_wca.dat",
+        'scalee_ig' :  "du_ig.dat",
         'eentro' :  "eentro.dat",
             }
+## sanity check
+
+for li in args.list:
+    if not (li in commands):
+        print("cannot proccess ", li)
+        sys.exit()
+if os.path.exists('OUTCAR'):
+    pass
+else:
+    print("OUTCAR does not exist")
+    sys.exit()
+    
+
 
 def get_nsw_tot(vasp_dir = '.'):
     if os.path.exists(os.path.join(vasp_dir,'XDATCAR')):
@@ -227,8 +251,8 @@ if args.extract_pet:
     from subprocess import call
     for li in args.list:
         call(commands[li],shell=True)
-        if li == 'scalee':
-            np.savetxt('du.dat',np.loadtxt('ab.dat')-np.loadtxt('wca.dat'))
+        if li == 'scalee_wca':
+            np.savetxt('du_wca.dat',np.loadtxt('ab.dat')-np.loadtxt('wca.dat'))
 else:
     print("**use existing P E T data pet.dat in the current folder**")
 
