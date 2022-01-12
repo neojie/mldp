@@ -89,6 +89,9 @@ else:
     print("No folders point are provided. Use default value folders")
     inputfile = os.path.join(cwd,'inputs')
 
+# change inputfile to absolute path, chdir occurs when submitting job
+
+inputfile = os.path.abspath(inputfile)
 sel_nsw = None
 if args.range:
     tmp     = [int(i) for i in args.range.split('-')]

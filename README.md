@@ -25,7 +25,7 @@
 3. `extract_deepmd.py` with `-id` flag and index file generated in last step
 
    ```bash
-   python ~/script/mldp/extract_deepmd.py -f OUTCAR -id index_file
+   python ~/script/mldp/extract_deepmd.py -f OUTCAR -id index_file -st
    python ~/script/mldp/extract_deepmd.py -f npt.dump -fmt dump -id index_file
    python ~/script/mldp/extract_deepmd.py -f ../npt.dump -fmt dump -id ../test-frame-select-fps-n-50.index -st -t 5500
    python ~/script/mldp/extract_deepmd.py -f ../0.dump -fmt dump -id ../test-frame-select-fps-n-200.index -st -t 6500
