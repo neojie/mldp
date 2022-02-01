@@ -23,7 +23,8 @@ parser.add_argument("--inputpath","-ip",help="input path file. support txt file,
 parser.add_argument("-de", "--deepmd", type=str,default = 'deepmd',help="deepmd folder")
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
-
+parser.add_argument("-p", "--plot", default=False,action='store_true',
+                        help="plot mode, default, False assuming ummarized file should exist. If True no file would generated")
 parser.add_argument("-mg", "--merge", default=False,action = 'store_true',
                         help="merge test and set, if test and set is the same, only merge once > should be considered in stat_model.py, not here")
 args   = parser.parse_args()
@@ -33,6 +34,65 @@ import os
 import matplotlib.pyplot as plt
 cwd    = os.getcwd()
 
+def rmse(org,pred): # same as dp_test l2err
+    dif = pred - org
+    return np.sqrt(np.mean(dif**2))
+
+def min_max(dat):
+    MIN = np.min(np.min(dat,axis=0))
+    MAX = np.max(np.max(dat,axis=0))
+    return MIN,MAX
+
+def save(dat,name,header):
+    np.savetxt(os.path.join(cwd,args.detail_file+name), dat, header = header)
+
+def plot(e,f,v):
+    fig, ax = plt.subplots(1,3,figsize=(14,4))
+    ax[0].plot(e[:,0],e[:,1],'.')
+    ax[0].plot(min_max(e), min_max(e),'k--')
+    ax[0].set_xlabel('DFT energy/atom (eV)')
+    ax[0].set_ylabel('NN energy/atom (eV)')
+    
+    
+    ax[1].plot(f[:,0],f[:,3],'.')
+    ax[1].plot(f[:,1],f[:,4],'.')
+    ax[1].plot(f[:,2],f[:,5],'.')
+    ax[1].plot(min_max(f_tr_all), min_max(f_tr_all),'k--')
+    ax[1].set_xlabel('DFT force (eV/A)')
+    ax[1].set_ylabel('NN force (eV/A)')
+    
+    ax[2].plot(v[:,0],v[:,9],'.')
+    ax[2].plot(v[:,1],v[:,10],'.')
+    ax[2].plot(v[:,2],v[:,11],'.')
+    ax[2].plot(v[:,3],v[:,12],'.')
+    ax[2].plot(v[:,4],v[:,13],'.')
+    ax[2].plot(v[:,5],v[:,14],'.')
+    ax[2].plot(v[:,6],v[:,15],'.')
+    ax[2].plot(v[:,7],v[:,16],'.')
+    ax[2].plot(v[:,8],v[:,17],'.')
+    ax[2].plot(min_max(v), min_max(v),'k--')
+    ax[2].set_xlabel('DFT stress (GPa)')
+    ax[2].set_ylabel('NN stress (GPa)')
+    plt.show()
+    
+if args.plot:
+    print("plotting mode, plot and exit")
+    e_tr_all = np.loadtxt(os.path.join(cwd,args.detail_file+".all.e.tr.out"))
+    f_tr_all = np.loadtxt(os.path.join(cwd,args.detail_file+".all.f.tr.out"))
+    v_gpa_tr_all = np.loadtxt(os.path.join(cwd,args.detail_file+".all.v.gpa.tr.out"))
+
+    e_test_all = np.loadtxt(os.path.join(cwd,args.detail_file+".all.e.test.out"))
+    f_test_all = np.loadtxt(os.path.join(cwd,args.detail_file+".all.f.test.out"))
+    v_gpa_test_all = np.loadtxt(os.path.join(cwd,args.detail_file+".all.v.gpa.test.out"))
+    
+    plot(e_tr_all,f_tr_all,v_gpa_tr_all)
+    plot(e_test_all,f_test_all,v_gpa_test_all)
+    
+    import sys
+    sys.exit()
+    
+    
+    
 if args.inputpath:
     print("Check files in {0}  ".format(args.inputpath))
     inputpath = args.inputpath
@@ -57,7 +117,7 @@ else:
 eV_A3_2_GPa  = 160.21766208 # 1 eV/Å3 = 160.2176621 GPa
 
 import csv
-file = open('stat_'+args.detail_file, 'w', newline='')
+file = open('stat_'+args.detail_file+'.csv', 'w', newline='')
 fieldnames = ['path','natoms','ntrain', 'ntest','fparam','e_tr','f_tr','v_tr',
               'e_ts','f_ts','v_ts']
 writer = csv.DictWriter(file,fieldnames=fieldnames)
@@ -138,7 +198,7 @@ for path in paths:
 #                         'ntest':log[8], 'fparam':log[1],
 #                         'e_tr':log[4], 'f_tr':log[5], 'v_tr':log[7],
 #                         'e_ts':log[10], 'f_ts':log[11], 'v_ts':log[13]})    
-    
+    logdict['fparam']=log[1]
     if count == 0:
         if train_exist:
             e_tr_all = e_tr
@@ -149,6 +209,8 @@ for path in paths:
             e_test_all = e_test
             f_test_all = f_test
             v_test_all = v_test; v_gpa_test_all = v_gpa_test
+            logdict['ntest']=log[8]; logdict['e_ts']=log[10];  logdict['f_ts']=log[11];  logdict['v_ts']=log[13];             
+
     else:
         if train_exist: #  corner case not considered: 1st directory only has train or test
             e_tr_all = np.concatenate((e_tr_all,e_tr),axis=0)
@@ -158,53 +220,13 @@ for path in paths:
         if test_exist:
             e_test_all = np.concatenate((e_test_all,e_test),axis=0)
             f_test_all = np.concatenate((f_test_all,f_test),axis=0)
-            v_test_all = np.concatenate((v_test_all,v_test),axis=0); v_gpa_test_all = np.concatenate((v_gpa_test_all,v_gpa_test),axis=0)           
+            v_test_all = np.concatenate((v_test_all,v_test),axis=0); v_gpa_test_all = np.concatenate((v_gpa_test_all,v_gpa_test),axis=0)
+            logdict['ntest']=log[8]; logdict['e_ts']=log[10];  logdict['f_ts']=log[11];  logdict['v_ts']=log[13];                         
     writer.writerow(logdict)
     count += 1
 
 file.close()
    
-
-def rmse(org,pred): # same as dp_test l2err
-    dif = pred - org
-    return np.sqrt(np.mean(dif**2))
-
-def min_max(dat):
-    MIN = np.min(np.min(dat,axis=0))
-    MAX = np.max(np.max(dat,axis=0))
-    return MIN,MAX
-
-def save(dat,name,header):
-    np.savetxt(os.path.join(cwd,args.detail_file+name), dat, header = header)
-
-def plot(e,f,v):
-    fig, ax = plt.subplots(1,3,figsize=(14,4))
-    ax[0].plot(e[:,0],e[:,1],'.')
-    ax[0].plot(min_max(e), min_max(e),'k--')
-    ax[0].set_xlabel('DFT energy/atom (eV)')
-    ax[0].set_ylabel('NN energy/atom (eV)')
-    
-    
-    ax[1].plot(f[:,0],f[:,3],'.')
-    ax[1].plot(f[:,1],f[:,4],'.')
-    ax[1].plot(f[:,2],f[:,5],'.')
-    ax[1].plot(min_max(f_tr_all), min_max(f_tr_all),'k--')
-    ax[1].set_xlabel('DFT force (eV/A)')
-    ax[1].set_ylabel('NN force (eV/A)')
-    
-    ax[2].plot(v[:,0],v[:,9],'.')
-    ax[2].plot(v[:,1],v[:,10],'.')
-    ax[2].plot(v[:,2],v[:,11],'.')
-    ax[2].plot(v[:,3],v[:,12],'.')
-    ax[2].plot(v[:,4],v[:,13],'.')
-    ax[2].plot(v[:,5],v[:,14],'.')
-    ax[2].plot(v[:,6],v[:,15],'.')
-    ax[2].plot(v[:,7],v[:,16],'.')
-    ax[2].plot(v[:,8],v[:,17],'.')
-    ax[2].plot(min_max(v), min_max(v),'k--')
-    ax[2].set_xlabel('DFT stress (GPa)')
-    ax[2].set_ylabel('NN stress (GPa)')
-    plt.show()
 
 if args.merge:
     print("merge train and test")
@@ -231,6 +253,7 @@ else:
     print("test v rmse:", rmse(v_test_all[:,:9],v_test_all[:,9:]))
     print("test v (gpa) rmse:", rmse(v_gpa_test_all[:,:9],v_gpa_test_all[:,9:]))
 
+    
 # save 
 print("##"*100)
 if args.merge:
@@ -241,7 +264,7 @@ else:
     save(e_tr_all,".all.e.tr.out",'data_e pred_e')
     save(f_tr_all,".all.f.tr.out",'data_fx data_fy data_fz pred_fx pred_fy pred_fz')
     save(v_tr_all,".all.v.tr.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
-    save(v_gpa_tr_all,".all.v.gpa.test.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
+    save(v_gpa_tr_all,".all.v.gpa.tr.out",'data_vxx data_vxy data_vxz data_vyx data_vyy data_vyz data_vzx data_vzy data_vzz pred_vxx pred_vxy pred_vxz pred_vyx pred_vyy pred_vyz pred_vzx pred_vzy pred_vzz')
     
     save(e_test_all,".all.e.test.out",'data_e pred_e')
     save(f_test_all,".all.f.test.out",'data_fx data_fy data_fz pred_fx pred_fy pred_fz')

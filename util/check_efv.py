@@ -37,7 +37,10 @@ if args.inputpath:
         import json
         with open(inputpath) as f:
             tmp = json.load(f)
-            paths = tmp['training']['systems']
+            try:
+                paths = tmp['training']['systems']
+            except:
+                paths = tmp['training']['training_data']['systems']
     else:
         from shared_functions import load_paths
         paths = load_paths(inputpath,level='recal')

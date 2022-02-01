@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 
 if args.key_val_sub:
-    com =  '/{0}/s/\([0-9].\+\)/{1}/g'.format(args.key_sub[0],args.key_sub[1])
+    com =  '/{0}/s/\([0-9].\+\)/{1}/g'.format(args.key_val_sub[0],args.key_val_sub[1])
     com = "sed -i -e '{0} ' {1}".format(com,args.file)
     print(com)
     call(com,shell=True) # sed to replace numbers after SIGMA, 
@@ -26,6 +26,6 @@ if args.key_sub:
     print('TODO')
 
 if args.add_line:
-    com = 'cat {0} >> {1}'.format(args.add_line, args.file)
+    com = 'echo {0} >> {1}'.format(args.add_line[0], args.file)
     print(com)
     call(com,shell=True) 
