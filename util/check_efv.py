@@ -3,6 +3,9 @@
 """
 Created on Thu Feb  4 11:21:25 2021
 
+example
+python ~/script/mldp/util/check_efv.py -ct -ip input_v2_compat.json -d m12v3 -bf 20
+python check_efv.py -ip input_v2_compat.json -d m12v3 -v -100 300 -vb -ct
 @author: jiedeng
 """
 
@@ -16,7 +19,7 @@ parser.add_argument("--inputpath","-ip",help="input path file. support txt file,
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
 parser.add_argument("--bad_force_prediction", "-bf", type=float, 
-                        help="Default: None, recommended 4, bad force prediction criterion, as difference between force and predictio")   
+                        help="Default: None, recommended 4, bad force prediction criterion, as difference between force and prediction")   
 parser.add_argument("--force_range",'-f', type=float,nargs="+", 
                         help="Default: None, force (eV/A) range") 
 parser.add_argument("--energy_peratom_range",'-e',type=float,nargs="+", 
@@ -25,6 +28,8 @@ parser.add_argument("--virial_range",'-v', type=float,nargs="+",
                         help="Default: None, virial (GPa) range peratom")  
 parser.add_argument('--check_test',"-ct", default=True, action='store_false',
                     help="Default: check test, if false, check train")
+parser.add_argument("--verbose", "-vb", default=True,action='store_false',
+                        help="verbose? True show details, False only erroneous ones")
 
 args   = parser.parse_args()
 cwd    = os.getcwd()
@@ -52,9 +57,10 @@ else:
 
 count = 0
 for path in paths:
-    print('--'*40)
-    print(path)
-    print('--'*40)
+    if args.verbose:
+        print('--'*40)
+        print(path)
+        print('--'*40)
     ## check the source data, some only has deepmd, not deepmd_relax2
     ## and vice versa. deepmd_relax2 is for relax process only
     ## to do the statisitics, we only care where there is deepmd
@@ -90,7 +96,7 @@ for path in paths:
     
     e_test = np.loadtxt(e_test_file)
     f_test = np.loadtxt(f_test_file)
-    v_test = np.loadtxt(v_test_file)
+    v_test = np.loadtxt(v_test_file,ndmin=2) # ndim, corner case, only one frame
     v_gpa_test = v_test/vol*eV_A3_2_GPa 
     
 #    print(v_gpa_test)
@@ -127,14 +133,22 @@ for path in paths:
     if args.virial_range:
         max_v = max(args.virial_range)
         min_v = min(args.virial_range)
+        # print(max(v_gpa_test[:,:9].max(axis=1)))
         tmp1= np.where(v_gpa_test[:,:9].max(axis=1)>max_v)[0]
         tmp2= np.where(v_gpa_test[:,:9].min(axis=1)<min_v)[0]
         virial_exclude_idx  = np.union1d(tmp1,tmp2)
         out=np.union1d(out,virial_exclude_idx)
     if len(out)>0:
+        if args.verbose:
+            pass
+        else:
+            print('--'*40)
+            print(path)
+            print('--'*40)
         print("Frames dis-satfitisfy", out.astype(int)) 
     else:
-        print("**good**")
+        if args.verbose:
+            print("**good**")
 
 
 

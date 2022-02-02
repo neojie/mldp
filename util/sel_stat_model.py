@@ -15,20 +15,29 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-d", "--detail_file", type=str, 
                         help="The file containing details of energy force and virial accuracy")
-parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs") 
+parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs")
+parser.add_argument('--check_test',"-ct", default=True, action='store_false',
+                    help="Default: check test, if false, check train")
 args   = parser.parse_args()
 
 
 exclude = args.exclude
-natoms = 160
+
 deepmd_path = '.'
-e_test_file = os.path.join(deepmd_path, args.detail_file+".e.out")
-f_test_file = os.path.join(deepmd_path, args.detail_file+".f.out")
-v_test_file = os.path.join(deepmd_path, args.detail_file+".v.out")
+if args.check_test:
+	e_test_file = os.path.join(deepmd_path, args.detail_file+".e.out")
+	f_test_file = os.path.join(deepmd_path, args.detail_file+".f.out")
+	v_test_file = os.path.join(deepmd_path, args.detail_file+".v.out")
+else:
+	e_test_file = os.path.join(deepmd_path, args.detail_file+".e.tr.out")
+	f_test_file = os.path.join(deepmd_path, args.detail_file+".f.tr.out")
+	v_test_file = os.path.join(deepmd_path, args.detail_file+".v.tr.out")   
 
 e_test = np.loadtxt(e_test_file)
 f_test = np.loadtxt(f_test_file)
 v_test = np.loadtxt(v_test_file)
+
+natoms = f_test.shape[0]//e_test.shape[0]
 
 idx_new = [i for i in range(len(e_test)) if i not in exclude]
 exclude_f = []
