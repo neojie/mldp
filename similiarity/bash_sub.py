@@ -36,8 +36,11 @@ export PLUMED_KERNEL=/u/home/j/jd848/project-lstixrud/plumed/lib/libplumedKernel
 export PATH=/u/home/j/jd848/project-lstixrud/plumed/bin:$PATH
 export LD_LIBRARY_PATH=/u/home/j/jd848/project-lstixrud/plumed/lib:$LD_LIBRARY_PATH
 """
-
-log = open('log.sub','w')
+import os
+if os.path.exists('log.sub'):
+    log = open('log.sub','a')
+else:
+    log = open('log.sub','w')
 for i in range(beg,end,interval):
     file = open('sub_{0}'.format(i//interval),'w')
     file.writelines(string)
@@ -49,5 +52,5 @@ for i in range(beg,end,interval):
     log.writelines('stat_{0}_{1}.sh\n'.format(i,endidx-1))
     file.close()
     if run:
-        call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat sub_{0}".format(i//interval),shell=True)        
+        call("/u/systems/UGE8.6.4/bin/lx-amd64/qsub sub_{0}".format(i//interval),shell=True)        
 log.close()
