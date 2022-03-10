@@ -425,7 +425,7 @@ def save_ch(ch,start_idx, alpha, filepath,name):
     np.savetxt(name,ch,fmt=fmt,
                 header='{2} \n python start_idx = {0} alpha = {1} dim = ls+ll+w*2 \n id,cs,cl,cw,ls,ll.lw,hs,hl,hw,z0,z1_unpbc,reduced_chi'.format(start_idx, alpha, filepath))    
 
-def show(ch):
+def plot_ch(ch,name='stat.pdf'):
     # print
     fig,ax = plt.subplots(1,2,figsize=(12,4),sharey=False)
     ax[0].set_title('water content')
@@ -441,11 +441,48 @@ def show(ch):
     ax[1].plot(ch[:,0],ch[:,6]/2,label='w')
     ax[1].legend()
     ax[1].set_xlabel('step');ax[1].set_ylabel('length (A)')
-    fig.savefig('stat.pdf',bbox_inches='tight')
+    fig.savefig(name,bbox_inches='tight')
+    
+def select_chi(ch):
+    ch1 = ch[ch[:,-1]<0.2]
+    return ch1
+def select_nonzero_sl(ch):
+    ch = ch[ch[:,4]>0.1]
+    ch = ch[ch[:,5]>0.1]
+    return ch
+
+def step_analysis(begin,end,ch):
+    result2 = []
+    for i in range(begin,end):
+        tmp = ch[begin:i]
+        result2.append(np.mean(tmp[:,1][np.nonzero(tmp[:,2])]/tmp[:,2][np.nonzero(tmp[:,2])]))
+    plt.figure()
+    plt.plot(ch[range(begin,end)][:,0],result2)
+    plt.xlabel('step')
+    plt.ylabel('mean Cs/Cl')
+    plt.grid()
+    plt.savefig('stepvsD.pdf',bbox_inches='tight')
+    return result2
+
+def show(ch,beg=100,end=-1):
+    print('++'*20)
+    print(' '*10 + 'without selection' + ' '*10)
+    print('++'*20)
     result1=np.mean(ch[:,1])/np.mean(ch[:,2])
     result2=np.mean(ch[:,1][np.nonzero(ch[:,2])]/ch[:,2][np.nonzero(ch[:,2])])
     print("**"*25+'water in solid / water in liquid'+"**"*25)
     print("cs/cl",result1, result2, "(recommened)")
     print("**"*25+'frames with non-zero H in solid'+"**"*25)
     print(ch[:,0][np.nonzero(ch[:,1])])
+    plot_ch(ch)
+    print('++'*20)
+    print(' '*10 + 'selected chi and nonzero soli and liquid' + ' '*10)
+    print('++'*20)
+    ch1 = select_chi(ch)
+    ch1 = select_nonzero_sl(ch1)
+    save_ch(ch1,0, 0, 'filepath','stat_chi.txt')
+    plot_ch(ch1,'stat_chi.pdf')
+    if end<0:
+        end = len(ch1)
+    result2=step_analysis(beg,end,ch1)
     

@@ -12,6 +12,7 @@ parser.add_argument("--end","-e",type=int,help="end index, default is end of fil
 parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
 parser.add_argument("--step","-s",default=1,type=int,help="step")
 parser.add_argument("--file","-f",type=str,help="path to xyz file to analyze, default is merge.xyz in the cwd")
+parser.add_argument("--show","-sh",default=True,action='store_false',help="Default: show results")
 args   = parser.parse_args()
 
 
@@ -20,7 +21,12 @@ import sys,os
 try:
     sys.path.insert(1, '/Users/jiedeng/GD/papers/pv7_h/partition/codes/')
 except:
-    print("run in local")    
+    print("run in local")
+try:
+    sys.path.insert(1, '/Users/jiedeng/opt/anaconda3/lib/python3.7/site-packages/mldp/similiarity/')
+except:
+    print("run in local")
+
 from stat_lib import analyze, show
 
 if args.file:
@@ -43,4 +49,5 @@ if args.end:
 else:
     end = len(ase_xyz)
 ch = analyze(args.begin,end, xyz,ase_xyz,mda_xyz, project_axis,alpha, step=args.step, save=True,name='stat_{0}_{1}.txt'.format(args.begin,end-1), assert_chi = False)
-show(ch)
+if args.show:
+    show(ch)
