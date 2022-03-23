@@ -10,7 +10,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--begin","-b",default=0,type=int,help="begining index, default: 0 ")
 parser.add_argument("--end","-e",type=int,help="end index, default is end of file")
 parser.add_argument("--interval","-i",default=30,type=int,help="interval")
-parser.add_argument("--run","-r",default=True,action='store_false',help="submit?")
+parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
+parser.add_argument("--run","-r",default=True,action='store_false',help="submit? default : Yes")
 args   = parser.parse_args()
 
 # import numpy as np
@@ -48,7 +49,7 @@ for i in range(beg,end,interval):
         endidx = i+interval
     else:
         endidx = end
-    file.writelines('python ~/script/mldp/similiarity/stat.py -sh -b {0} -e {1}'.format(i,endidx))
+    file.writelines('python ~/script/mldp/similiarity/stat.py -sh -b {0} -e {1} -p {2}'.format(i,endidx,args.project_axis))
     log.writelines('stat_{0}_{1}.txt\n'.format(i,endidx-1))
     file.close()
     if run:
