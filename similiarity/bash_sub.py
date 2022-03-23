@@ -49,7 +49,7 @@ for i in range(beg,end,interval):
     else:
         endidx = end
     file.writelines('python ~/script/mldp/similiarity/stat.py -sh -b {0} -e {1}'.format(i,endidx))
-    log.writelines('stat_{0}_{1}.sh\n'.format(i,endidx-1))
+    log.writelines('stat_{0}_{1}.txt\n'.format(i,endidx-1))
     file.close()
     if run:
         call("/u/systems/UGE8.6.4/bin/lx-amd64/qsub sub_{0}".format(i//interval),shell=True)        
