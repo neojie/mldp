@@ -8,7 +8,7 @@ submit a batch of analyze scripts
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--begin","-b",default=0,type=int,help="begining index, default: 0 ")
-parser.add_argument("--end","-e",type=int,help="end index, default is end of file")
+parser.add_argument("--end","-e",type=int,help="end index, if file length is 100, then 100, not 99")
 parser.add_argument("--interval","-i",default=30,type=int,help="interval")
 parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
 parser.add_argument("--run","-r",default=True,action='store_false',help="submit? default : Yes")
@@ -20,7 +20,6 @@ from subprocess import call
 interval  = args.interval
 beg = args.begin
 end = args.end
-run = True
 
 string = """#!/bin/bash
 #$ -cwd
@@ -52,6 +51,6 @@ for i in range(beg,end,interval):
     file.writelines('python ~/script/mldp/similiarity/stat.py -sh -b {0} -e {1} -p {2}'.format(i,endidx,args.project_axis))
     log.writelines('stat_{0}_{1}.txt\n'.format(i,endidx-1))
     file.close()
-    if run:
+    if args.run:
         call("/u/systems/UGE8.6.4/bin/lx-amd64/qsub sub_{0}".format(i//interval),shell=True)        
 log.close()
