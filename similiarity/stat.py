@@ -28,11 +28,10 @@ except:
     print("run in local")
 
 from stat_lib import analyze, show
-
+import ase.io
 if args.file:
     xyz = args.file
 else:
-    import ase.io
     cwd = os.path.abspath(os.curdir)
     xyz     = os.path.join(cwd,'merge.xyz')
 

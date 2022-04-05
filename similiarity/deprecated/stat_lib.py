@@ -246,30 +246,6 @@ def unpbc_x(x0,dim):
         return x0-dim
 
 def count_z(z0,z1_unpbc, hz,w,dim,):
-    """
-    Given z coordinate, determine z that in liq and sol
-
-    Parameters
-    ----------
-    z0 : TYPE
-        DESCRIPTION.
-    z1_unpbc : TYPE
-        DESCRIPTION.
-    hz : TYPE
-        DESCRIPTION.
-    w : TYPE
-        DESCRIPTION.
-    dim : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    sol_z : TYPE
-        DESCRIPTION.
-    liq_z : TYPE
-        DESCRIPTION.
-
-    """
     # H in solid positions in the projected axis 
     if z0 <  z1_unpbc:
         if z0 - w/2 >0:
@@ -383,8 +359,7 @@ def analyze_single(idx,ase_xyz,mda_xyz, project_axis,solid_center0=-1,alpha = 2.
         tmp = z0
         z0 = z1
         z1 = tmp
-    dim      = ase_a.get_cell_lengths_and_angles()[project_axis]
-    lx,ly,lz = ase_a.get_cell_lengths_and_angles()[:3]
+    dim                  = ase_a.get_cell_lengths_and_angles()[project_axis]
     z1_unpbc = unpbc_x(z1,dim)
     
     ### solid z1, z1_unpbc
@@ -447,8 +422,213 @@ def analyze_single(idx,ase_xyz,mda_xyz, project_axis,solid_center0=-1,alpha = 2.
     cmgs, cmgl, cmgw = mgs/ls, mgl/ll, (len(mg_indices) - mgs - mgl)/2/w# interface width is 2w
     csis, csil, csiw = sis/ls, sil/ll, (len(si_indices) - sis - sil)/2/w
     cos, col, cow = os/ls, ol/ll, (len(o_indices) - os - ol)/2/w    
-    return chs, chl,chw, ls, ll, w,hs, hl , hw, z0, z1_unpbc, result.redchi, lx,ly,lz, mgs,mgl,mgw,sis,sil,siw,os,ol,ow    
+    return chs, chl,chw, ls, ll, w,hs, hl , hw, z0, z1_unpbc, result.redchi, mgs,mgl,mgw,sis,sil,siw,os,ol,ow    
     
+def analyze_single_h(idx,ase_xyz,mda_xyz, project_axis,solid_center0=-1,alpha = 2.5,plot=True,verbose=False, debug=False, assert_chi = True):
+    """
+    Analyze hydrogen only
+
+    Parameters
+    ----------
+    idx : TYPE
+        DESCRIPTION.
+    ase_xyz : TYPE
+        DESCRIPTION.
+    mda_xyz : TYPE
+        DESCRIPTION.
+    project_axis : TYPE
+        DESCRIPTION.
+    solid_center0 : TYPE, optional
+        DESCRIPTION. The default is -1.
+    alpha : TYPE, optional
+        DESCRIPTION. The default is 2.5.
+    plot : TYPE, optional
+        DESCRIPTION. The default is True.
+    verbose : TYPE, optional
+        DESCRIPTION. The default is False.
+    debug : TYPE, optional
+        DESCRIPTION. The default is False.
+    assert_chi : TYPE, optional
+        DESCRIPTION. The default is True.
+
+    Returns
+    -------
+    chs : TYPE
+        DESCRIPTION.
+    chl : TYPE
+        DESCRIPTION.
+    chw : TYPE
+        DESCRIPTION.
+    ls : TYPE
+        DESCRIPTION.
+    ll : TYPE
+        DESCRIPTION.
+    w : TYPE
+        DESCRIPTION.
+    hs : TYPE
+        DESCRIPTION.
+    hl : TYPE
+        DESCRIPTION.
+    hw : TYPE
+        DESCRIPTION.
+    z0 : TYPE
+        DESCRIPTION.
+    z1_unpbc : TYPE
+        DESCRIPTION.
+    TYPE
+        DESCRIPTION.
+
+    """
+    print('**'*25,idx,'**'*25)
+    num_atom = len(ase_xyz[0])
+    h_indices      = np.array(range(num_atom))[ase_xyz[0].get_atomic_numbers()==1]
+    # build interface, mda_xyz does not contain cell dim info, ase_xyz cannot by used by pytim
+    inter, k,ase_a,mda_a = cal_inter(ase_xyz,mda_xyz,idx,mesh=1., alpha=alpha, level=None)
+    # build density map and project to target direction
+    rho_zi,zi,rho_av     = temporal_mass_density_proj_coarse(inter,project_axis=project_axis,plot=plot,level=None);
+    # find solid_center
+    if solid_center0 <0: # if solid center is not specified, use the default value
+        solid_center0 = zi[np.argmax(rho_zi)]
+    for  solid_center in [solid_center0, solid_center0 -2, solid_center0+2, solid_center0-1, solid_center0+1]:
+        zi_new,rho_zi_new    = pbc_x(zi,rho_zi,solid_center)
+        # fit to double sided GDS function
+        result,z0,z1,w1 = fit_gds_double_sided(zi_new,rho_zi_new,plot=plot, verbose=verbose,debug=debug)
+        if result.redchi<0.2:
+            break
+    if debug:
+        print("solid center, initial solid center ::", solid_center, solid_center0)
+    if assert_chi:
+        assert result.redchi<0.5        
+    # choose inteface to be w or 2w
+    w=2*w1
+    # ensure z0 is close to solid center
+    if (z0 - solid_center) <= (z1 - solid_center):
+        pass
+    else:
+        tmp = z0
+        z0 = z1
+        z1 = tmp
+    dim                  = ase_a.get_cell_lengths_and_angles()[project_axis]
+    z1_unpbc = unpbc_x(z1,dim)
+    
+    ### solid z1, z1_unpbc
+    """
+    --------z0--------z1--
+    unpbc
+    --z1----z0------------
+    
+    or 
+    ----z0-----z1---------
+    -
+    """
+    # H positions in the projected axis
+    hz = ase_a.positions[h_indices][:,project_axis]
+    hz[hz<0]   += hz[hz<0] + dim
+    hz[hz>dim] -= hz[hz>dim] - dim
+        
+    # H in solid positions in the projected axis 
+    if z0 <  z1_unpbc:
+        if z0 - w/2 >0:
+            hs1 = hz[hz < (z0 - w/2)]
+            zs1_bound = dim
+        else:
+            zs1_bound = z0 - w/2 + dim
+            hs1 = np.array([])
+        if z1_unpbc + w/2 < dim:
+            tmp1 = hz[hz>(z1_unpbc + w/2)]
+            hs2 = tmp1[tmp1<zs1_bound]
+            zs2_bound = 0
+        else:
+            hs2 = np.array([])
+            zs2_bound = z1_unpbc + w/2 - dim
+        hs1   = hs1[hs1>zs2_bound]
+        sol_z = np.concatenate((hs1,hs2))
+    else:
+        if (z1_unpbc+w/2) < (z0-w/2):
+            tmp1=hz[hz < (z0 - w/2)]
+            sol_z = tmp1[tmp1>(z1_unpbc + w/2)]
+        else:
+            sol_z = np.array([])
+
+    if z0 <  z1_unpbc:
+       if (z0+w/2) < (z1_unpbc-w/2):
+           tmp1=hz[hz > (z0 + w/2)]
+           liq_z = tmp1[tmp1<(z1_unpbc - w/2)]
+       else:
+           liq_z = np.array([])
+    else:
+        if z1_unpbc - w/2 >0:
+            hl1 = hz[hz < (z1_unpbc - w/2)]
+            zl1_bound = dim
+        else:
+            zl1_bound = z1_unpbc - w/2 + dim
+            hl1 = np.array([])
+        if z0 + w/2 < dim:
+            tmp1 = hz[hz>(z0 + w/2)]
+            hl2 = tmp1[tmp1<zl1_bound]
+            zl2_bound = 0
+        else:
+            hl2 = np.array([])
+            zl2_bound = z0 + w/2 -dim
+        hl1 = hl1[hl1>zl2_bound]
+        liq_z = np.concatenate((hl1,hl2))
+        
+            
+    
+    # length of solid and liquid regime, interface thickness not considered
+    if z0 <  z1_unpbc:
+        ls,ll = dim -(z1_unpbc - z0) - w, (z1_unpbc - z0) - w
+    else:
+        ls, ll = z0-z1_unpbc - w, dim - (z0-z1_unpbc) - w
+    
+    if ls <0:
+        ls = 0.00001
+    if ll <0:
+        ll = 0.00001
+    # print(sol_z,liq_z)
+    # # of H in solid and liquid, respectively
+    hs, hl = len(sol_z), len(liq_z)
+    # print(hs,hl)
+    # concentration of h in solid and liquid, respectively
+    hw = len(h_indices) - hs - hl
+    chs, chl, chw = hs/ls, hl/ll, (len(h_indices) - hs - hl)/2/w# interface width is 2w
+    
+    return chs, chl,chw, ls, ll, w,hs, hl , hw, z0, z1_unpbc, result.redchi
+
+def analyze_h(start_idx,en_idx, filepath,ase_xyz,mda_xyz, project_axis,alpha, step=1,save=True,name='stat.txt', assert_chi=True):
+    """
+    analyze multiple frames 
+
+    Parameters
+    ----------
+    start_index : int, 
+        start index, count from 0.
+    length : int
+        num of frames to be analyzed.
+    save :  bool, optional
+        save output,. The default is True.
+    name : string, optional
+        output name. The default is 'stat.txt'.
+
+    Returns
+    -------
+    None.
+
+    """
+    size = len(range(start_idx,en_idx,step))
+    ch = np.zeros((size,13))  # 
+    for fn in range(start_idx,en_idx,step):
+        chs, chl,chw, ls, ll, w, hs, hl, hw,z0,z1_unpbc,chi = analyze_single(fn,ase_xyz,mda_xyz, project_axis,alpha=alpha,plot=False,assert_chi=assert_chi)
+        idx = (fn - start_idx)//step
+        ch[idx,0] = fn
+        ch[idx,1], ch[idx,2], ch[idx,3] = chs, chl, chw
+        ch[idx,4], ch[idx,5], ch[idx,6] = ls, ll, w
+        ch[idx,7], ch[idx,8], ch[idx,9] = hs, hl , hw
+        ch[idx,10], ch[idx,11] = z0,z1_unpbc
+        ch[idx,12] = chi
+    if save:
+        save_ch(ch, start_idx, alpha, filepath,name)
+    return ch
 def analyze(start_idx,en_idx, filepath,ase_xyz,mda_xyz, project_axis,alpha, step=1,save=True,name='stat.txt', assert_chi=True):
     """
     analyze multiple frames 
@@ -470,9 +650,9 @@ def analyze(start_idx,en_idx, filepath,ase_xyz,mda_xyz, project_axis,alpha, step
 
     """
     size = len(range(start_idx,en_idx,step))
-    ch = np.zeros((size,25))  # 
+    ch = np.zeros((size,22))  # 
     for fn in range(start_idx,en_idx,step):
-        chs, chl,chw, ls, ll, w, hs, hl, hw,z0,z1_unpbc,chi,lx,ly,lz,mgs,mgl,mgw,sis,sil,siw,os,ol,ow = analyze_single(fn,ase_xyz,mda_xyz, project_axis,alpha=alpha,plot=False,assert_chi=assert_chi)
+        chs, chl,chw, ls, ll, w, hs, hl, hw,z0,z1_unpbc,chi,mgs,mgl,mgw,sis,sil,siw,os,ol,ow = analyze_single(fn,ase_xyz,mda_xyz, project_axis,alpha=alpha,plot=False,assert_chi=assert_chi)
         idx = (fn - start_idx)//step
         ch[idx,0] = fn
         ch[idx,1], ch[idx,2], ch[idx,3] = chs, chl, chw
@@ -480,10 +660,9 @@ def analyze(start_idx,en_idx, filepath,ase_xyz,mda_xyz, project_axis,alpha, step
         ch[idx,7], ch[idx,8], ch[idx,9] = hs, hl , hw
         ch[idx,10], ch[idx,11] = z0,z1_unpbc
         ch[idx,12] = chi
-        ch[idx,13],ch[idx,14], ch[idx,15] = lx,ly,lz 
-        ch[idx,16],ch[idx,17], ch[idx,18] = mgs,mgl,mgw 
-        ch[idx,19],ch[idx,20], ch[idx,21] = sis,sil,siw
-        ch[idx,22],ch[idx,23], ch[idx,24] = os,ol,ow
+        ch[idx,13],ch[idx,14], ch[idx,15] = mgs,mgl,mgw
+        ch[idx,16],ch[idx,17], ch[idx,18] = sis,sil,siw
+        ch[idx,19],ch[idx,20], ch[idx,21] = os,ol,ow
 
     if save:
         save_ch(ch, start_idx, alpha, filepath,name)
@@ -513,9 +692,37 @@ def save_ch(ch,start_idx, alpha, filepath,name):
     None.
 
     """
-    fmt = '%d %.4f %.4f %.4f %.4f %.4f %.4f %d %d %d %.4f %.4f %.4f %.4f %.4f %.4f %d %d %d %d %d %d %d %d %d'
+    fmt = '%d %.4f %.4f %.4f %.4f %.4f %.4f %d %d %d %.4f %.4f %.4f %d %d %d %d %d %d %d %d %d'
     np.savetxt(name,ch,fmt=fmt,
-                header='{2} \n python start_idx = {0} alpha = {1} dim = ls+ll+w*2 \n id,cs,cl,cw,ls,ll.lw,hs,hl,hw,z0,z1_unpbc,reduced_chi, lx,ly,lz, mgs,mgl,mgw,sis,sil,siw,os,ol,ow'.format(start_idx, alpha, filepath))   
+                header='{2} \n python start_idx = {0} alpha = {1} dim = ls+ll+w*2 \n id,cs,cl,cw,ls,ll.lw,hs,hl,hw,z0,z1_unpbc,reduced_chi, mgs,mgl,mgw,sis,sil,siw,os,ol,ow'.format(start_idx, alpha, filepath)) 
+    
+def save_ch_h(ch,start_idx, alpha, filepath,name):
+    """
+    # cs (H content in solid), cl (H content in liquid), cw (H in interface)
+    # ls (solid slab length),ll (liquid slab length),w (interface), 
+    # hs (# of H in solid), hl (# of H in liquid),hw (# of H in inteface)
+
+    Parameters
+    ----------
+    ch : TYPE
+        DESCRIPTION.
+    start_idx : TYPE
+        DESCRIPTION.
+    alpha : TYPE
+        DESCRIPTION.
+    filepath : TYPE
+        DESCRIPTION.
+    name : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    fmt = '%d %.4f %.4f %.4f %.4f %.4f %.4f %d %d %d %.4f %.4f %.4f'
+    np.savetxt(name,ch,fmt=fmt,
+                header='{2} \n python start_idx = {0} alpha = {1} dim = ls+ll+w*2 \n id,cs,cl,cw,ls,ll.lw,hs,hl,hw,z0,z1_unpbc,reduced_chi'.format(start_idx, alpha, filepath))    
 
 def plot_ch(ch,name='stat.pdf'):
     # print
@@ -564,20 +771,12 @@ def step_analysis(begin,end,ch):
     plt.ylabel('mean Cs/Cl')
     plt.grid()
     plt.savefig('stepvsD.pdf',bbox_inches='tight')
-    # plt.figure()
-    # plt.plot(ch[range(begin,end)][:,0],result2)
-    # plt.xlabel('step')
-    # plt.ylabel('mean Cs/Cl')
-    # plt.grid()
-    # plt.savefig('stepvsD.pdf',bbox_inches='tight')
     return result2
 
 def show(ch,beg=100,end=-1,fu=360):
     print('++'*20)
     print(' '*10 + 'without selection' + ' '*10)
     print('++'*20)
-    ch1 = select_chi(ch)  # recommended that ch has already been selected based chi
-
     result1=np.mean(ch[:,1])/np.mean(ch[:,2])
     idx = np.nonzero(ch[:,2])
     result2=np.mean(ch[:,1][idx]/ch[:,2][idx])
@@ -598,7 +797,7 @@ def show(ch,beg=100,end=-1,fu=360):
     print('++'*20)
     print(' '*10 + 'selected chi and nonzero soli and liquid' + ' '*10)
     print('++'*20)
-
+    ch1 = select_chi(ch)
     ch1 = select_nonzero_sl(ch1)
     save_ch(ch1,0, 0, 'filepath','stat_chi.txt')
     plot_ch(ch1,'stat_chi.pdf')
