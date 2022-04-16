@@ -540,9 +540,11 @@ def plot_ch(ch,name='stat.pdf'):
     ax[2].legend()
     ax[2].set_xlabel('step');ax[2].set_ylabel('H count')
     fig.savefig(name,bbox_inches='tight')
+
+
     
 def select_chi(ch,chi=0.2):
-    ch1 = ch[ch[:,-1]<chi]
+    ch1 = ch[ch[:,12]<chi]
     return ch1
 
 def select_nonzero_sl(ch):
@@ -553,56 +555,117 @@ def select_nonzero_sl(ch):
 def select_cs_less_cl(ch):
     return ch[ch[:,1]<ch[:,2]]
 
-def step_analysis(begin,end,ch):
-    result2 = []
-    for i in range(begin,end):
-        tmp = ch[begin:i]
-        result2.append(np.mean(tmp[:,1][np.nonzero(tmp[:,2])]/tmp[:,2][np.nonzero(tmp[:,2])]))
+def show_atoms_num(ch):
+    fig,ax = plt.subplots(1,3,figsize=(15,4),sharey=True)
+    ax[0].set_title('solid')
+    ax[0].plot(ch[:,0],ch[:,16],label='Mg = {0:.1f}'.format(ch[:,16].mean()))
+    ax[0].plot(ch[:,0],ch[:,19],label='Si = {0:.1f}'.format(ch[:,19].mean()))
+    ax[0].plot(ch[:,0],ch[:,22],label='O = {0:.1f}'.format(ch[:,22].mean()))
+    ax[0].plot(ch[:,0],ch[:,7],label='H = {0:.1f}'.format(ch[:,7].mean()))
+    ax[0].set_xlabel('step');ax[0].set_ylabel('# of atoms')
+    ax[0].legend()
+    ax[1].set_title('liquid')
+    ax[1].plot(ch[:,0],ch[:,17],label='Mg = {0:.1f}'.format(ch[:,17].mean()))
+    ax[1].plot(ch[:,0],ch[:,20],label='Si =  {0:.1f}'.format(ch[:,20].mean()))
+    ax[1].plot(ch[:,0],ch[:,23],label='O = {0:.1f}'.format(ch[:,23].mean()))
+    ax[1].plot(ch[:,0],ch[:,8],label='H = {0:.1f}'.format(ch[:,8].mean()))
+    ax[1].legend()
+    ax[1].set_xlabel('step');
+    ax[2].set_title('interface')
+    ax[2].plot(ch[:,0],ch[:,18],label='Mg= {0:.1f}'.format(ch[:,18].mean()))
+    ax[2].plot(ch[:,0],ch[:,21],label='Si= {0:.1f}'.format(ch[:,21].mean()))
+    ax[2].plot(ch[:,0],ch[:,24],label='O= {0:.1f}'.format(ch[:,24].mean()))
+    ax[2].plot(ch[:,0],ch[:,9],label='H = {0:.1f}'.format(ch[:,9].mean()))
+    ax[2].legend()
+    ax[2].set_xlabel('step');
+    fig.savefig('atoms.pdf',bbox_inches='tight')
+    
+def show_water_step(ch,water):
+    w2step = []
+    for i in range(len(ch)):
+        w2step.append(np.mean(water[:i]))
     plt.figure()
-    plt.plot(ch[range(begin,end)][:,0],result2)
+    plt.plot(ch[:,0],w2step)
     plt.xlabel('step')
-    plt.ylabel('mean Cs/Cl')
+    plt.ylabel('D=Cs/Cl (Xh2O/(Xh2O+XSi))')
     plt.grid()
     plt.savefig('stepvsD.pdf',bbox_inches='tight')
-    # plt.figure()
-    # plt.plot(ch[range(begin,end)][:,0],result2)
-    # plt.xlabel('step')
-    # plt.ylabel('mean Cs/Cl')
-    # plt.grid()
-    # plt.savefig('stepvsD.pdf',bbox_inches='tight')
-    return result2
+    return w2step
 
-def show(ch,beg=100,end=-1,fu=360):
-    print('++'*20)
-    print(' '*10 + 'without selection' + ' '*10)
-    print('++'*20)
-    ch1 = select_chi(ch)  # recommended that ch has already been selected based chi
+def show_length_scale(ch):
+    fig,ax = plt.subplots(1,3,figsize=(15,4),sharey=False)
+    ax[0].plot(ch[:,0],ch[:,4],label='s = {0:.1f}'.format(ch[:,4].mean()))
+    ax[0].plot(ch[:,0],ch[:,5],label='l = {0:.1f}'.format(ch[:,5].mean()))
+    ax[0].plot(ch[:,0],ch[:,6]*2,label='4w = {0:.1f}'.format(ch[:,6].mean()*2))
+    ax[0].set_xlabel('step');
+    ax[0].legend()
+    ax[0].set_title('length (A)')
+    ax[1].set_title('volume (A^3)')
+    vs = ch[:,4]*ch[:,13]*ch[:,14]
+    vl = ch[:,5]*ch[:,13]*ch[:,14]
+    vw = ch[:,6]*2*ch[:,13]*ch[:,14]
+    ax[1].plot(ch[:,0],vs,label='s = {0:.1f}'.format(vs.mean()))
+    ax[1].plot(ch[:,0],vl,label='l =  {0:.1f}'.format(vl.mean()))
+    ax[1].plot(ch[:,0],vw,label='4w = {0:.1f}'.format(vw.mean()))
+    ax[1].legend()
+    ax[1].set_xlabel('step'); ax[1].set_ylabel('volume (A^3)')
+    
+    gmolA2gcm = 1/6.0221409e23/(1e-30)/1e6#
+    mmg, mgsi, mgo, mgh = 24.305, 28.085, 15.999, 1.008
+    rhos=(ch[:,16]*mmg+ch[:,19]*mgsi+ch[:,22]*mgo+ch[:,7]*mgh)/vs*gmolA2gcm
+    rhol=(ch[:,17]*mmg+ch[:,20]*mgsi+ch[:,23]*mgo+ch[:,8]*mgh)/vl*gmolA2gcm
+    rhow = (ch[:,18]*mmg+ch[:,21]*mgsi+ch[:,24]*mgo+ch[:,9]*mgh)/vw*gmolA2gcm
 
-    result1=np.mean(ch[:,1])/np.mean(ch[:,2])
-    idx = np.nonzero(ch[:,2])
-    result2=np.mean(ch[:,1][idx]/ch[:,2][idx])
-    lall = ch[:,4][idx] + ch[:,5][idx] + ch[:,6][idx]*2 # z lenght of the system = ls+ll+2*lw, here hw is 2w, but we have 2 interface
-    fueach  = np.zeros(ch[:,4:7][idx].shape)  # f.u. of pv in each phase
-    for i in range(len(lall)):
-        fueach[i] = ch[i,4:7]/lall[i]*fu
-        fueach[i,2] = fueach[i,2]*2    #again,two interface
-        
-    weach  = ch[:,7:10][idx]
-    wmolfraction = weach/2/(fueach+weach/2)  # H means .5 mol H2O
-    result3 = np.mean(wmolfraction[:,0]/wmolfraction[:,1])
-    print("**"*25+'water in solid / water in liquid'+"**"*25)
-    print("cs/cl",result1, result2, "(recommened)",result3, 'wmolfraction', np.mean(wmolfraction[:,0]), np.mean(wmolfraction[:,1]))
-    print("**"*25+'frames with non-zero H in solid'+"**"*25)
-    print(ch[:,0][np.nonzero(ch[:,1])])
-    plot_ch(ch)
-    print('++'*20)
-    print(' '*10 + 'selected chi and nonzero soli and liquid' + ' '*10)
-    print('++'*20)
+    ax[2].plot(ch[:,0],rhos,label='s = {0:.1f}'.format(rhos.mean()))
+    ax[2].plot(ch[:,0],rhol,label='l =  {0:.1f}'.format(rhol.mean()))
+    ax[2].plot(ch[:,0],rhow,alpha=0.5,label='4w = {0:.1f}'.format(rhow.mean()))
+    ax[2].legend()
+    ax[2].set_xlabel('step'); ax[2].set_title('rho (g/cm^3)')
+    fig.savefig('scale.pdf',bbox_inches='tight')
+    return vs, vl, vw, rhos, rhol, rhow
 
-    ch1 = select_nonzero_sl(ch1)
-    save_ch(ch1,0, 0, 'filepath','stat_chi.txt')
-    plot_ch(ch1,'stat_chi.pdf')
-    if end<0:
-        end = len(ch1)
-    result2=step_analysis(beg,end,ch1)
+def show_water_content(ch):
+    xs=ch[:,7]/2/(ch[:,19]+ch[:,7]/2)  # water molal fraction mol of water/(mole of H/2 + mol of Si)
+    xl=ch[:,8]/2/(ch[:,20]+ch[:,8]/2)
+    xw=ch[:,9]/2/(ch[:,21]+ch[:,9]/2)
+    fig,ax = plt.subplots(1,1,figsize=(5,4))
+    ax.plot(ch[:,0],xs,label='s = {0:.5f}'.format(xs.mean()))
+    ax.plot(ch[:,0],xl,label='l = {0:.5f}'.format(xl.mean()))
+    ax.plot(ch[:,0],xw,label='4w = {0:.5f}'.format(xw.mean()))
+    ax.set_xlabel('step');ax.set_ylabel('water content' )
+    ax.legend()
+    fig.savefig('water.pdf',bbox_inches='tight')
+    return xs, xl, xw
+       
+def show(ch,beg=0,end=-1):
+    ch = ch[beg:end]
+    print('++'*20)
+    print(' '*10 + 'Do select frames based on chi, and nonzero_sl' + ' '*10)
+    print('++'*20)
+    print(' '*10 + 'Step 1: # of atoms  in each phase vs. step' + ' '*10)
+    show_atoms_num(ch)
+    
+    print(' '*10 + 'Step 2: z length, volume, and density of each phase' + ' '*10)
+    vs, vl, vw, rhos, rhol, rhow = show_length_scale(ch)
+    
+    print(' '*10 + 'Step 3: water content in each phase (H/2)/(Si+H/2)' + ' '*10)
+    xs, xl, xw = show_water_content(ch)
+    
+    print(' '*10 + 'Step 4: water partitioning vs. step' + ' '*10)
+    w2step = show_water_step(ch,xs/xl)
+    print('++'*20)
+    
+    print(' '*10 + 'Step 5: Print out statistics' + ' '*10)
+    
+    print('solid: 2Mg+4Si+1H = {0}, 2O = {1}'.format(ch[:,16].mean()*2 + ch[:,19].mean()*4 + ch[:,7].mean(), 2*ch[:,22].mean()))
+    print('liquid: 2Mg+4Si+1H = {0}, 2O = {1}'.format(ch[:,17].mean()*2 + ch[:,20].mean()*4 + ch[:,8].mean(), 2*ch[:,23].mean()))
+    print('interface: 2Mg+4Si+1H = {0}, 2O = {1}'.format(ch[:,18].mean()*2 + ch[:,21].mean()*4 + ch[:,9].mean(), 2*ch[:,24].mean()))
+
+    print("solid (A^3):", vs.mean())
+    print("liquid (A^3):", vl.mean())
+    print("interface (A^3):", vw.mean())
+
+    print("solid xs:, water content(ppm)", xs.mean(), xs.mean()*18/(xs.mean()*18+100)*1e6 ) # add block average with errorbar
+    print("liquid xs:, liquid content(ppm)", xl.mean(), xl.mean()*18/(xl.mean()*18+100)*1e6) # add block average with errorbar
+    print("D", xs.mean()/xl.mean(), w2step[-1])
     

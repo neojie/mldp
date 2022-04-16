@@ -16,9 +16,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--inputpath","-ip",help="json")
 args   = parser.parse_args()
 
+
+
 with open(args.inputpath) as f:
     tmp = json.load(f)
-    paths = tmp['training']['systems']
+    try:
+        paths = tmp['training']['systems']
+    except:
+        paths = tmp['training']['training_data']['systems']
+                
 
 target_folder = '/u/project/ESS/lstixrud/jd848/dat_sum'
 
