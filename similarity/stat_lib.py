@@ -36,6 +36,33 @@ def _inter_density_two_end_equal(inter):
     inter.mass_density_field_reshape = rho
     
 def cal_inter(ase_xyz,mda_xyz,fn,mesh=1, alpha=2.5, level=None):
+    """
+    calculate the interface with weight of k
+
+    Parameters
+    ----------
+    ase_xyz : ase trajectories
+    mda_xyz : mdanalysis trajectories
+    fn : int, frame number
+    mesh : float, optional
+        DESCRIPTION. The default is 1.
+    alpha : TYPE, optional
+        DESCRIPTION. The default is 2.5.
+    level : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    inter : TYPE
+        DESCRIPTION.
+    k : TYPE
+        DESCRIPTION.
+    ase_a : TYPE
+        DESCRIPTION.
+    mda_a : TYPE
+        DESCRIPTION.
+
+    """
     ase_a = ase_xyz[fn]
     mda_a = mda_xyz.trajectory[fn]
     k     = ase_a.arrays['k']
@@ -47,6 +74,44 @@ def cal_inter(ase_xyz,mda_xyz,fn,mesh=1, alpha=2.5, level=None):
     _inter_density_two_end_equal(inter)
     return inter, k,ase_a,mda_a
 
+def cal_inter_mass(ase_xyz,mda_xyz,fn,mesh=1, alpha=2.5, level=None):
+    """
+    calculate the interface with weight of atomic mass
+
+    Parameters
+    ----------
+    ase_xyz : ase trajectories
+    mda_xyz : mdanalysis trajectories
+    fn : int, frame number
+    mesh : float, optional
+        DESCRIPTION. The default is 1.
+    alpha : TYPE, optional
+        DESCRIPTION. The default is 2.5.
+    level : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    inter : TYPE
+        DESCRIPTION.
+    k : TYPE
+        DESCRIPTION.
+    ase_a : TYPE
+        DESCRIPTION.
+    mda_a : TYPE
+        DESCRIPTION.
+
+    """
+    ase_a = ase_xyz[fn]
+    mda_a = mda_xyz.trajectory[fn]
+    k     = ase_a.get_masses()
+    mda_a.dimensions= ase_a.get_cell_lengths_and_angles()
+    inter     = pytim.WillardChandler(mda_xyz, mesh=mesh, alpha=alpha,level=level)
+    inter.density_field,inter.mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,k) # use similiarity as mass
+    inter.mass_density_field_reshape = inter.mass_density_field.reshape(
+        tuple(np.array(inter.ngrid).astype(int)))
+    _inter_density_two_end_equal(inter)
+    return inter, k,ase_a,mda_a
 
 
 def render(inter,k):
