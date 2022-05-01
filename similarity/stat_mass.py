@@ -23,7 +23,7 @@ try:
 except:
     print("run in local")
 try:
-    sys.path.insert(1, '/Users/jiedeng/opt/anaconda3/lib/python3.7/site-packages/mldp/similiarity/')
+    sys.path.insert(1, '/Users/jiedeng/opt/anaconda3/lib/python3.7/site-packages/mldp/similarity/')
 except:
     print("run in local")
 
@@ -50,3 +50,6 @@ else:
 ch = analyze(args.begin,end, xyz,ase_xyz,mda_xyz, project_axis,alpha, step=args.step, save=True,name='stat_{0}_{1}.txt'.format(args.begin,end-1), assert_chi = False)
 if args.show:
     show(ch)
+    
+    
+
