@@ -48,7 +48,7 @@ for i in range(beg,end,interval):
         endidx = i+interval
     else:
         endidx = end
-    file.writelines('python ~/script/mldp/similiarity/stat.py -sh -b {0} -e {1} -p {2}'.format(i,endidx,args.project_axis))
+    file.writelines('python ~/script/mldp/similarity/stat.py -sh -b {0} -e {1} -p {2}'.format(i,endidx,args.project_axis))
     log.writelines('stat_{0}_{1}.txt\n'.format(i,endidx-1))
     file.close()
     if args.run:
