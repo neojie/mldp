@@ -35,7 +35,9 @@ weight can be specify by the user
 
 3- flexibility of modulate the 
 
+4-more organized ch output
 
+l1 l2 l3 l4 .. s1 s2 s3 s4 ... int1 int2 s3 s4
 
 
 

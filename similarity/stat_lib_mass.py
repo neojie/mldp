@@ -12,6 +12,8 @@ import pytim
 import matplotlib.pyplot as plt
 from lmfit import Parameters, Model, report_fit
 
+params_global = None
+
 def _inter_density_two_end_equal(inter):
     """
     the 0, and end density does not match, probably due to some corner case
@@ -300,16 +302,30 @@ def fit_gds_double_sided(zi,rho_zi,weights=None,
 #    rho_filter = rho_zi[rho_zi>0]
     zi_filter  = zi
     rho_filter = rho_zi
-    z0, z1    = max(zi)/6, max(zi)*5/6
+    dl = max(zi) - min(zi)
+    z0, z1    = min(zi) + dl/6, max(zi) - dl/6
     rhol,rhov = min(rho_zi),max(rho_zi)
     zmin = zi[np.argmin(rho_zi)]
     
     params = Parameters()
     params.add('z0', value=z0,   min = min(zi),    max = zmin,   vary=True)
     params.add('z1', value=z1,   min = zmin,    max = max(zi),   vary=True)
-    params.add('w' , value=8,    min = .1,     max =  max(zi)/1.5,   vary=True)    
+    params.add('w' , value=3,    min = .1,     max =  max(zi),   vary=True)    
     params.add('rhov', value=rhov, min = rhol/4, max = rhov*4, vary=True)
     params.add('rhol', value=rhol, min = rhol/4, max = rhov*4, vary=True) 
+    if params_global is None:
+        pass
+    else:
+        params.add('z0', value=params_global.get('z0').value,   min = min(zi),    max = zmin,   vary=True)
+        params.add('z1', value=params_global.get('z1').value,   min = zmin,    max = max(zi),   vary=True)
+        params.add('w' , value=params_global.get('w').value,    min = .1,     max =  max(zi),   vary=True)    
+        params.add('rhov', value=params_global.get('rhov').value, min = rhol/4, max = rhov*4, vary=True)
+        params.add('rhol', value=params_global.get('rhol').value, min = rhol/4, max = rhov*4, vary=True)        
+    # params.add('z0', value=z0,   min = min(zi),    max = zmin,   vary=True)
+    # params.add('z1', value=z1,   min = zmin,    max = max(zi),   vary=True)
+    # params.add('w' , value=3,    min = .1,     max =  max(zi),   vary=True)    
+    # params.add('rhov', value=rhov, min = rhol/4, max = rhov*4, vary=True)
+    # params.add('rhol', value=rhol, min = rhol/4, max = rhov*4, vary=True) 
     model = Model(gds_double_sided)
     result = model.fit(rho_filter,params,z = zi_filter,weights=weights)
 
@@ -465,8 +481,14 @@ def analyze_single(idx,ase_xyz,mda_xyz, project_axis,solid_center0=-1,alpha = 2.
         zi_new,rho_zi_new    = pbc_x(zi,rho_zi,solid_center)
         # fit to double sided GDS function
         result,z0,z1,w1 = fit_gds_double_sided(zi_new,rho_zi_new,plot=plot, verbose=verbose,debug=debug)
+        # print("     result.redchi",result.redchi)
         if result.redchi<0.2:
+            ## store the best fitting params to params
+            params = result.params
             break
+    if params is None:  ## change solid center is not the key, let us adjust the initital values
+        pass
+        
     if debug:
         print("solid center, initial solid center ::", solid_center, solid_center0)
     if assert_chi:

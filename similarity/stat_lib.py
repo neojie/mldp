@@ -604,6 +604,7 @@ def plot_ch(ch,name='stat.pdf'):
     ax[2].plot(ch[:,0],ch[:,9],label='2w')
     ax[2].legend()
     ax[2].set_xlabel('step');ax[2].set_ylabel('H count')
+    plt.grid()
     fig.savefig(name,bbox_inches='tight')
 
 
@@ -623,24 +624,24 @@ def select_cs_less_cl(ch):
 def show_atoms_num(ch):
     fig,ax = plt.subplots(1,3,figsize=(15,4),sharey=True)
     ax[0].set_title('solid')
-    ax[0].plot(ch[:,0],ch[:,16],label='Mg = {0:.1f}'.format(ch[:,16].mean()))
-    ax[0].plot(ch[:,0],ch[:,19],label='Si = {0:.1f}'.format(ch[:,19].mean()))
-    ax[0].plot(ch[:,0],ch[:,22],label='O = {0:.1f}'.format(ch[:,22].mean()))
-    ax[0].plot(ch[:,0],ch[:,7],label='H = {0:.1f}'.format(ch[:,7].mean()))
+    ax[0].plot(ch[:,0],ch[:,16],label='Mg = {0:.3f}'.format(ch[:,16].mean()))
+    ax[0].plot(ch[:,0],ch[:,19],label='Si = {0:.3f}'.format(ch[:,19].mean()))
+    ax[0].plot(ch[:,0],ch[:,22],label='O = {0:.3f}'.format(ch[:,22].mean()))
+    ax[0].plot(ch[:,0],ch[:,7],label='H = {0:.3f}'.format(ch[:,7].mean()))
     ax[0].set_xlabel('step');ax[0].set_ylabel('# of atoms')
     ax[0].legend()
     ax[1].set_title('liquid')
-    ax[1].plot(ch[:,0],ch[:,17],label='Mg = {0:.1f}'.format(ch[:,17].mean()))
-    ax[1].plot(ch[:,0],ch[:,20],label='Si =  {0:.1f}'.format(ch[:,20].mean()))
-    ax[1].plot(ch[:,0],ch[:,23],label='O = {0:.1f}'.format(ch[:,23].mean()))
-    ax[1].plot(ch[:,0],ch[:,8],label='H = {0:.1f}'.format(ch[:,8].mean()))
+    ax[1].plot(ch[:,0],ch[:,17],label='Mg = {0:.3f}'.format(ch[:,17].mean()))
+    ax[1].plot(ch[:,0],ch[:,20],label='Si =  {0:.3f}'.format(ch[:,20].mean()))
+    ax[1].plot(ch[:,0],ch[:,23],label='O = {0:.3f}'.format(ch[:,23].mean()))
+    ax[1].plot(ch[:,0],ch[:,8],label='H = {0:.3f}'.format(ch[:,8].mean()))
     ax[1].legend()
     ax[1].set_xlabel('step');
     ax[2].set_title('interface')
-    ax[2].plot(ch[:,0],ch[:,18],label='Mg= {0:.1f}'.format(ch[:,18].mean()))
-    ax[2].plot(ch[:,0],ch[:,21],label='Si= {0:.1f}'.format(ch[:,21].mean()))
-    ax[2].plot(ch[:,0],ch[:,24],label='O= {0:.1f}'.format(ch[:,24].mean()))
-    ax[2].plot(ch[:,0],ch[:,9],label='H = {0:.1f}'.format(ch[:,9].mean()))
+    ax[2].plot(ch[:,0],ch[:,18],label='Mg= {0:.3f}'.format(ch[:,18].mean()))
+    ax[2].plot(ch[:,0],ch[:,21],label='Si= {0:.3f}'.format(ch[:,21].mean()))
+    ax[2].plot(ch[:,0],ch[:,24],label='O= {0:.3f}'.format(ch[:,24].mean()))
+    ax[2].plot(ch[:,0],ch[:,9],label='H = {0:.3f}'.format(ch[:,9].mean()))
     ax[2].legend()
     ax[2].set_xlabel('step');
     fig.savefig('atoms.pdf',bbox_inches='tight')
@@ -699,6 +700,7 @@ def show_water_content(ch):
     ax.plot(ch[:,0],xw,label='4w = {0:.5f}'.format(xw.mean()))
     ax.set_xlabel('step');ax.set_ylabel('water content' )
     ax.legend()
+    plt.grid()
     fig.savefig('water.pdf',bbox_inches='tight')
     return xs, xl, xw
        
@@ -721,6 +723,13 @@ def show(ch,beg=0,end=-1):
     print('++'*20)
     
     print(' '*10 + 'Step 5: Print out statistics' + ' '*10)
+    
+    print('solid Mg Si O H water(mol%)')
+    print('{0:.4f}'.format(ch[:,16].mean()), '{0:.4f}'.format(ch[:,19].mean()), '{0:.4f}'.format(ch[:,22].mean()), '{0:.4f}'.format(ch[:,7].mean()),'{0:.4f}'.format(xs.mean()))
+    print('liquid')
+    print('{0:.4f}'.format(ch[:,17].mean()), '{0:.4f}'.format(ch[:,20].mean()), '{0:.4f}'.format(ch[:,23].mean()), '{0:.4f}'.format(ch[:,8].mean()),'{0:.4f}'.format(xl.mean()))
+    print('interface')
+    print('{0:.4f}'.format(ch[:,18].mean()), '{0:.4f}'.format(ch[:,21].mean()), '{0:.4f}'.format(ch[:,24].mean()), '{0:.4f}'.format(ch[:,9].mean()),'{0:.4f}'.format(xw.mean()))
     
     print('solid: 2Mg+4Si+1H = {0}, 2O = {1}'.format(ch[:,16].mean()*2 + ch[:,19].mean()*4 + ch[:,7].mean(), 2*ch[:,22].mean()))
     print('liquid: 2Mg+4Si+1H = {0}, 2O = {1}'.format(ch[:,17].mean()*2 + ch[:,20].mean()*4 + ch[:,8].mean(), 2*ch[:,23].mean()))
