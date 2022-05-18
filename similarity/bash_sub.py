@@ -7,25 +7,40 @@ submit a batch of analyze scripts
 """
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--begin","-b",default=0,type=int,help="begining index, default: 0 ")
-parser.add_argument("--end","-e",type=int,help="end index, if file length is 100, then 100, not 99")
-parser.add_argument("--interval","-i",default=30,type=int,help="interval")
-parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
-parser.add_argument("--run","-r",default=True,action='store_false',help="submit? default : Yes")
-parser.add_argument("--mode","-m",default='mass',help="Default: mass mode")
-parser.add_argument("--file","-f",type=str,help="path to xyz file to analyze, default is merge.xyz in the cwd")
-parser.add_argument("--step","-s",default=1,type=int,help="step")
+
+## must set
 parser.add_argument("--num_interface_w","-nw",type=int,help="Default: larger, btetter, must set!")
+parser.add_argument("--mode","-m",help="Default: mass mode, must set!")
+
+# be alert the possible change, for instance, ppv
+parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
+
+# you may want to adjust
+parser.add_argument("--interval","-i",default=30,type=int,help="interval")
+parser.add_argument("--file","-f",type=str,help="path to xyz file to analyze, default is merge.xyz in the cwd")
+
+# normally leave them alone
+parser.add_argument("--end","-e",type=int,help="end index, if file length is 100, then 100, not 99")
+parser.add_argument("--begin","-b",default=0,type=int,help="begining index, default: 0 ")
+parser.add_argument("--run","-r",default=True,action='store_false',help="submit? default : Yes")
+parser.add_argument("--step","-s",default=1,type=int,help="step")
+
 
 args   = parser.parse_args()
 
 # import numpy as np
 from subprocess import call
 
+
 interval  = args.interval
 beg = args.begin
-end = args.end
 
+
+
+print('--'*20)
+print('summary of setting')
+print('interface width = ',args.num_interface_w)
+print('--'*20)
 string = """#!/bin/bash
 #$ -cwd
 #$ -o out.$JOB_ID
@@ -48,11 +63,19 @@ if args.file:
 else:
     cwd = os.path.abspath(os.curdir)
     xyz     = os.path.join(cwd,'merge.xyz')
-    
-if os.path.exists('log.sub'):
-    log = open('log.sub','a')
+
+if args.end:
+    end = args.end
 else:
-    log = open('log.sub','w')
+    import MDAnalysis as mda
+    mda_xyz = mda.Universe(xyz)
+    end = len(mda_xyz.trajectory)
+    
+# if os.path.exists('log.sub'):
+#     log = open('log.sub','a')
+# else:
+    # log = open('log.sub','w')
+log = open('log.sub','w')
 for i in range(beg,end,interval):
     file = open('sub_{0}'.format(i//interval),'w')
     file.writelines(string)

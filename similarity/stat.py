@@ -11,7 +11,7 @@ Created on Sat Feb 19 21:20:52 2022
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--begin","-b",default=0,type=int,help="begining index, default: 0 ")
-parser.add_argument("--end","-e",type=int,help="end index, default is end of file")
+parser.add_argument("--end","-e",type=int,default=-1,help="end index, default is end of file")
 parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
 parser.add_argument("--step","-s",default=1,type=int,help="step")
 parser.add_argument("--file","-f",type=str,help="path to xyz file to analyze, default is merge.xyz in the cwd")
