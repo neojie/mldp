@@ -15,6 +15,7 @@ parser.add_argument("--run","-r",default=True,action='store_false',help="submit?
 parser.add_argument("--mode","-m",default='mass',help="Default: mass mode")
 parser.add_argument("--file","-f",type=str,help="path to xyz file to analyze, default is merge.xyz in the cwd")
 parser.add_argument("--step","-s",default=1,type=int,help="step")
+parser.add_argument("--num_interface_w","-nw",type=int,help="Default: larger, btetter, must set!")
 
 args   = parser.parse_args()
 
@@ -59,7 +60,7 @@ for i in range(beg,end,interval):
         endidx = i+interval
     else:
         endidx = end
-    file.writelines('python ~/script/mldp/similarity/stat.py -sh -b {0} -e {1} -p {2} -f {3} -m {4} -s {5}'.format(i,endidx,args.project_axis, xyz,args.mode,args.step))
+    file.writelines('python ~/script/mldp/similarity/stat.py -sh -b {0} -e {1} -p {2} -f {3} -m {4} -s {5} -nw {6}'.format(i,endidx,args.project_axis, xyz,args.mode,args.step, args.num_interface_w))
     log.writelines('stat_{0}_{1}.txt\n'.format(i,endidx-1))
     file.close()
     if args.run:
