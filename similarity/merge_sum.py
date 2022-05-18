@@ -13,17 +13,19 @@ for line in log:
     if count ==0:
         line0 = line
         ch1 = np.loadtxt(line.strip().replace('sh','txt').replace('stat','sum_counts'))
+        ch2 = np.loadtxt(line.strip().replace('sh','txt').replace('stat','sum_dimensions'))
+
     else:
         ch1 = np.concatenate((ch1,np.loadtxt(line.strip().replace('sh','txt').replace('stat','sum_counts'))))
-    count += 1
-    
-for line in log:
-    if count ==0:
-        line0 = line
-        ch2 = np.loadtxt(line.strip().replace('sh','txt').replace('stat','sum_dimensions'))
-    else:
         ch2 = np.concatenate((ch2,np.loadtxt(line.strip().replace('sh','txt').replace('stat','sum_dimensions'))))
     count += 1
+
+    
+# for line in log:
+#     if count ==0:
+#         line0 = line
+#     else:
+#     count += 1
     
 def save_ch(ch,start_idx, alpha, filepath,name):
     """
