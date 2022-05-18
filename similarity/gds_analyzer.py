@@ -67,10 +67,10 @@ class GDSAnalyzer(object):
         
     def save_sum(self):
         name = 'sum_counts_{0}_{1}.txt'.format(self.begin,self.end-1)
-        fmt =  '%d    ' + '%d %d %d           '*len(self.ele_atomic_number) +'%.4f' # for each element, we have three phases
+        fmt =  '%d    ' + '%d %d %d    '*len(self.ele_atomic_number) +'%.4f' # for each element, we have three phases
         dat = np.concatenate((np.array([range(self.begin,self.end)]).T, self.sum_elements_counts,np.array([self.sum_rechi]).T),axis=1)
         np.savetxt(name,dat,fmt=fmt,
-                    header='{0} \n {3} \n {1} \n {2}'.format(self.xyz,'solid liquid interface','id '+'         '.join(self.ele_chemical_symbol) +'    chi', 'nw = {}'.format(self.nw)))   
+                    header='{0} \n {3} \n {1} \n {2}'.format(self.xyz,'solid liquid interface','id '+'           '.join(self.ele_chemical_symbol) +'    chi', 'nw = {}'.format(self.nw)))   
         
         name = 'sum_dimensions_{0}_{1}.txt'.format(self.begin,self.end-1)
         fmt = '%d ' + '%.4f '*len(self.sum_phase_dimension[0]) + '%.4f'
