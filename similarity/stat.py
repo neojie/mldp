@@ -38,5 +38,5 @@ else:
     cwd = os.path.abspath(os.curdir)
     xyz     = os.path.join(cwd,'merge.xyz')
     
-ana=GDSAnalyzer(xyz = xyz, begin = args.begin, end = args.end, mode = args.mode, project_axis= args.project_axis, setp = args.step)
+ana=GDSAnalyzer(xyz = xyz, begin = args.begin, end = args.end, mode = args.mode, project_axis= args.project_axis, step = args.step)
 
