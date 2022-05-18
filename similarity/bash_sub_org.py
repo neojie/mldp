@@ -12,10 +12,6 @@ parser.add_argument("--end","-e",type=int,help="end index, if file length is 100
 parser.add_argument("--interval","-i",default=30,type=int,help="interval")
 parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")
 parser.add_argument("--run","-r",default=True,action='store_false',help="submit? default : Yes")
-parser.add_argument("--mode","-m",default='mass',help="Default: mass mode")
-parser.add_argument("--file","-f",type=str,help="path to xyz file to analyze, default is merge.xyz in the cwd")
-parser.add_argument("--step","-s",default=1,type=int,help="step")
-
 args   = parser.parse_args()
 
 # import numpy as np
@@ -41,13 +37,6 @@ export PATH=/u/home/j/jd848/project-lstixrud/plumed/bin:$PATH
 export LD_LIBRARY_PATH=/u/home/j/jd848/project-lstixrud/plumed/lib:$LD_LIBRARY_PATH
 """
 import os
-
-if args.file:
-    xyz = args.file
-else:
-    cwd = os.path.abspath(os.curdir)
-    xyz     = os.path.join(cwd,'merge.xyz')
-    
 if os.path.exists('log.sub'):
     log = open('log.sub','a')
 else:
@@ -59,7 +48,7 @@ for i in range(beg,end,interval):
         endidx = i+interval
     else:
         endidx = end
-    file.writelines('python ~/script/mldp/similarity/stat.py -sh -b {0} -e {1} -p {2} -f {3} -m {4} -s {5}'.format(i,endidx,args.project_axis, xyz,args.mode,args.step))
+    file.writelines('python ~/script/mldp/similarity/stat.py -sh -b {0} -e {1} -p {2}'.format(i,endidx,args.project_axis))
     log.writelines('stat_{0}_{1}.txt\n'.format(i,endidx-1))
     file.close()
     if args.run:

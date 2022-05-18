@@ -1,0 +1,2 @@
+# /Users/jiedeng/GD/Computation/VESTA/VData/MgO/64mgo12he/5k/8he/cont1/tmp.xyz
+0.0288 

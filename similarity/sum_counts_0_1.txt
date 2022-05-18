@@ -1,0 +1,5 @@
+# /Users/jiedeng/GD/Computation/VESTA/VData/MgO/64mgo12he/5k/8he/cont1/tmp.xyz 
+#  solid liquid interface 
+#  He       O       Mg       Fe
+0 3 5    0 56 8    0 56 8    72 0 24    
+0 3 5    0 56 8    0 56 8    72 0 24    

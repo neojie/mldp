@@ -19,9 +19,7 @@ parser.add_argument("--mode","-m",default='mass',help="Default: mass mode")
 args   = parser.parse_args()
 
 
-from gds_analyzer import GDSAnalyzer
-
-
+import MDAnalysis as mda
 import sys,os
 try:
     sys.path.insert(1, '/Users/jiedeng/GD/papers/pv7_h/partition/codes/')
@@ -32,11 +30,26 @@ try:
 except:
     print("run in local")
 
+from stat_lib import analyze, show
+import ase.io
 if args.file:
     xyz = args.file
 else:
     cwd = os.path.abspath(os.curdir)
     xyz     = os.path.join(cwd,'merge.xyz')
-    
-ana=GDSAnalyzer(xyz = xyz, begin = args.begin, end = args.end, mode = args.mode, project_axis= args.project_axis, setp = args.step)
 
+project_axis = args.project_axis #0,1,2 => x,y,z
+start_idx = args.begin # 972   ## omit the first 100 ps, if D is 9e-10 m^2/s, this means 3 A of H diffusion
+end_idx    = args.end#2
+#----------------------------------------------------------------------#
+alpha = 2.5
+ase_xyz = ase.io.read(xyz,index=':') 
+mda_xyz = mda.Universe(xyz)
+# length  =  len(ase_xyz)
+if args.end:
+    end = args.end
+else:
+    end = len(ase_xyz)
+ch = analyze(args.begin,end, xyz,ase_xyz,mda_xyz, project_axis,alpha, step=args.step, save=True,name='stat_{0}_{1}.txt'.format(args.begin,end-1), assert_chi = False)
+if args.show:
+    show(ch)

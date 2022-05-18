@@ -1,0 +1,4 @@
+# /Users/jiedeng/GD/Computation/VESTA/VData/MgO/64mgo12he/5k/8he/cont1/tmp.xyz 
+#   ls, ll, lw, lx,ly,lz, z0, z1_unpbc
+9.7784 12.8412 5.9329 7.7204 7.7204 28.5526 28.5617 15.8168 
+9.7694 12.8482 5.9350 7.7204 7.7204 28.5526 28.5591 15.8222 
