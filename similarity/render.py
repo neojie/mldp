@@ -3,13 +3,15 @@
 """
 Created on Tue May 17 18:48:56 2022
 
+render
+
 @author: jiedeng
 """
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def render(inter,k):
+def plot_3d_density_field(inter,k):
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     triangles = inter.triangulated_surface[0][inter.triangulated_surface[1]]
     ###
@@ -48,7 +50,7 @@ def render(inter,k):
     plt.tight_layout()
     plt.show()
 
-def plot_rho(z,rho,xlabel = r'$z (\AA)$', ylabel = r'$\rho (g/cm^{3})$' ):
+def plot_1d_density(z,rho,xlabel = r'$z (\AA)$', ylabel = r'$\rho (g/cm^{3})$' ):
     """
     plot density
     """
@@ -83,3 +85,45 @@ def plot_ch(ch,name='stat.pdf'):
     ax[2].legend()
     ax[2].set_xlabel('step');ax[2].set_ylabel('H count')
     fig.savefig(name,bbox_inches='tight')
+
+
+## TODO
+def show_atoms_num():
+    pass
+
+def show_length_scale(ch):
+    """
+    rewrite!!
+    """
+    fig,ax = plt.subplots(1,3,figsize=(15,4),sharey=False)
+    ax[0].plot(ch[:,0],ch[:,4],label='s = {0:.1f}'.format(ch[:,4].mean()))
+    ax[0].plot(ch[:,0],ch[:,5],label='l = {0:.1f}'.format(ch[:,5].mean()))
+    ax[0].plot(ch[:,0],ch[:,6]*2,label='4w = {0:.1f}'.format(ch[:,6].mean()*2))
+    ax[0].set_xlabel('step');
+    ax[0].legend()
+    ax[0].set_title('length (A)')
+    ax[1].set_title('volume (A^3)')
+    vs = ch[:,4]*ch[:,13]*ch[:,14]
+    vl = ch[:,5]*ch[:,13]*ch[:,14]
+    vw = ch[:,6]*2*ch[:,13]*ch[:,14]
+    ax[1].plot(ch[:,0],vs,label='s = {0:.1f}'.format(vs.mean()))
+    ax[1].plot(ch[:,0],vl,label='l =  {0:.1f}'.format(vl.mean()))
+    ax[1].plot(ch[:,0],vw,label='4w = {0:.1f}'.format(vw.mean()))
+    ax[1].legend()
+    ax[1].set_xlabel('step'); ax[1].set_ylabel('volume (A^3)')
+    
+    gmolA2gcm = 1/6.0221409e23/(1e-30)/1e6#
+    mmg, mgsi, mgo, mgh = 24.305, 28.085, 15.999, 1.008
+    rhos=(ch[:,16]*mmg+ch[:,19]*mgsi+ch[:,22]*mgo+ch[:,7]*mgh)/vs*gmolA2gcm
+    rhol=(ch[:,17]*mmg+ch[:,20]*mgsi+ch[:,23]*mgo+ch[:,8]*mgh)/vl*gmolA2gcm
+    rhow = (ch[:,18]*mmg+ch[:,21]*mgsi+ch[:,24]*mgo+ch[:,9]*mgh)/vw*gmolA2gcm
+
+    ax[2].plot(ch[:,0],rhos,label='s = {0:.1f}'.format(rhos.mean()))
+    ax[2].plot(ch[:,0],rhol,label='l =  {0:.1f}'.format(rhol.mean()))
+    ax[2].plot(ch[:,0],rhow,alpha=0.5,label='4w = {0:.1f}'.format(rhow.mean()))
+    ax[2].legend()
+    ax[2].set_xlabel('step'); ax[2].set_title('rho (g/cm^3)')
+    fig.savefig('scale.pdf',bbox_inches='tight')
+    return vs, vl, vw, rhos, rhol, rhow
+
+ 

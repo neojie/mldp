@@ -8,12 +8,13 @@ Post-processing scripts for the soap similiarity analysis
 mkdir soap
 cp in.lammps_360pv108w /u/scratch/j/jd848/360pv108w_75g/2500/soap
 lmp -in in.lammps_360pv108w  # better sumbit job
-python ~/script/mldp/similarity/quick_merge.py
+python ~/script/mldp/similarity/merge_xyz.py
+python ~/script/mldp/similarity/bash_sub.py -nw 2 -m mass -p 2 -i 70
 ```
 
 
 
-`quick_merge.py` merges the soap similarity analyzed file of each element into one .xyz file => no speicial dependencies
+`merge_xyz.py` merges the soap similarity analyzed file of each element into one .xyz file => no speicial dependencies
 
 
 

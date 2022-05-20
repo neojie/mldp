@@ -13,7 +13,7 @@ sample sum file
 @author: jiedeng
 """
 import matplotlib.pyplot as plt
-
+import numpy as np
 def show_atoms_num(ch):
     fig,ax = plt.subplots(1,3,figsize=(15,4),sharey=True)
     ax[0].set_title('solid')
@@ -87,3 +87,14 @@ def show(ch,beg=0,end=-1):
     # print("D", xs.mean()/xl.mean(), w2step[-1])
 
 
+def show_water_step(ch,water):
+    w2step = []
+    for i in range(len(ch)):
+        w2step.append(np.mean(water[:i]))
+    plt.figure()
+    plt.plot(ch[:,0],w2step)
+    plt.xlabel('step')
+    plt.ylabel('D=Cs/Cl (Xh2O/(Xh2O+XSi))')
+    plt.grid()
+    plt.savefig('stepvsD.pdf',bbox_inches='tight')
+    return w2step
