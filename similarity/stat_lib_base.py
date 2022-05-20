@@ -11,7 +11,7 @@ import numpy as np
 import pytim
 import matplotlib.pyplot as plt
 from lmfit import Parameters, Model, report_fit
-from render import plot_rho
+
 params_global = None
 
 def _inter_density_two_end_equal(inter):
@@ -124,7 +124,8 @@ def temporal_mass_density_proj_coarse(inter,project_axis=1,plot=True,level=None)
     rho_zi,rho_av     = mass_density_proj_coarse(inter, project_axis)
     zi = np.linspace(0,inter.box[project_axis],inter.ngrid[project_axis])
     if plot:
-        plot_rho(zi,rho_zi)
+        from render import plot_1d_density
+        plot_1d_density(zi,rho_zi)
     return rho_zi,zi,rho_av
 
 
