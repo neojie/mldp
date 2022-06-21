@@ -160,10 +160,8 @@ if args.average:
             np.std(cumsum_JJ_sel)
             ))
     print('a,b,c')
-    print(np.mean(cumsum_JJ_selx),np.std(cumsum_JJ_selx))
-    print(np.mean(cumsum_JJ_sely),np.std(cumsum_JJ_sely))
-    print(np.mean(cumsum_JJ_selz),np.std(cumsum_JJ_selz))
-    
+    print(np.mean(cumsum_JJ_selx),'\t',np.mean(cumsum_JJ_sely),'\t',np.mean(cumsum_JJ_selz))
+    print(np.std(cumsum_JJ_selx),'\t', np.std(cumsum_JJ_sely),'\t', np.std(cumsum_JJ_selz) )
     
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt, JxJx*metal2SIps,label='x') # 
