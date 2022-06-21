@@ -44,3 +44,14 @@ with open('sum_dimensions.txt', 'w') as outfile:
             for line in infile:
                 if line.strip():
                     outfile.write(line)
+                    
+      
+                    
+
+# log = open('log.sub','r')
+# with open('sum_counts.txt', 'w') as outFile:
+#   with open('fort.13', 'r') as fort13:
+#     shutil.copyfileobj(com, outFile)
+#   with open('command.info', 'r') as com:
+#     shutil.copyfileobj(fort13, outFile)
+    

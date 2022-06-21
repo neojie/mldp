@@ -26,7 +26,7 @@ parser.add_argument("-r", "--run_num", type=int, default=-1, help="run_num shoul
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.properties', help="out file name")
 parser.add_argument("-p", "--plot", default=True, action='store_false', help="Defualt: plot")
-parser.add_argument("-si", "--starting_i", type=int, default=0, help="Defualt: plot starting from index, sometimes, first few frames are not physical and should be excluded")
+parser.add_argument("-b", "--starting_i", type=int, default=0, help="Defualt: plot starting from index, sometimes, first few frames are not physical and should be excluded")
 parser.add_argument("-ls", "--linestyle", type=str,default='-', help="line style supported by Matplotlib, e.g., None means no lines")
 parser.add_argument("-m", "--marker", type=str,default='.', help="marker style supported by Matplotlib")
 

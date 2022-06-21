@@ -215,7 +215,7 @@ def fit_gds_double_sided(zi,rho_zi,weights=None,
         params.add('w' , value=params_global.get('w').value,    min = .1,     max =  max(zi),   vary=True)    
         params.add('rhov', value=params_global.get('rhov').value, min = rhol/4, max = rhov*4, vary=True)
         params.add('rhol', value=params_global.get('rhol').value, min = rhol/4, max = rhov*4, vary=True)        
-    model = Model(gds_double_sided)
+    model = Model(gds_double_sided,independent_vars=['z'])
     result = model.fit(rho_filter,params,z = zi_filter,weights=weights)
 
     if verbose:

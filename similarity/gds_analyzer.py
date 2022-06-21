@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue May 17 19:07:16 2022
-
+TODO
+1- proximity for irregular plane
 @author: jiedeng
 """
 import numpy as np
@@ -22,8 +23,8 @@ class GDSAnalyzer(object):
              end = -1,
              step = 1,
              alpha = 2.5,
-             plot_gds = False,
-             verbose  = False):
+             verbose  = False,
+             analyze = True):
         self.xyz = xyz
         self.ase_xyz = ase.io.read(xyz,index=':') 
         self.mda_xyz = mda.Universe(xyz)
@@ -39,7 +40,6 @@ class GDSAnalyzer(object):
         self.alpha = alpha
         self.mesh = 1
         self.level = None
-        self.plot_gds = plot_gds
         self.verbose  = verbose
         
         self.num_atom = len(self.ase_xyz[0])
@@ -62,8 +62,9 @@ class GDSAnalyzer(object):
         self.sum_elements_counts = []
         self.sum_phase_dimension = []
         self.sum_rechi =[]        
-        self.analyze()
-        self.save_sum()
+        if analyze:
+            self.analyze()
+            self.save_sum()
         
     def save_sum(self):
         name = 'sum_counts_{0}_{1}.txt'.format(self.begin,self.end-1)
@@ -146,20 +147,20 @@ class GDSAnalyzer(object):
         # build interface, mda_xyz does not contain cell dim info, ase_xyz cannot by used by pytim
         inter, k,ase_a,mda_a = cal_inter(self.ase_xyz,self.mda_xyz,idx,self.mesh, self.alpha, self.level,self.mode)
         # build density map and project to target direction
-        rho_zi,zi,rho_av     = temporal_mass_density_proj_coarse(inter,project_axis=self.project_axis,plot=self.plot_gds,level=self.level);
+        self.rho_zi,self.zi,rho_av     = temporal_mass_density_proj_coarse(inter,project_axis=self.project_axis,plot=self.plot_gds,level=self.level)        
         # find solid_center
         if solid_center0 <0: # if solid center is not specified, use the default value
-            solid_center0 = zi[np.argmax(rho_zi)]
+            solid_center0 = self.zi[np.argmax(self.rho_zi)]
         for  solid_center in [solid_center0, solid_center0 -2, solid_center0+2, solid_center0-1, solid_center0+1, solid_center0-3, solid_center0+3]:
-            zi_new,rho_zi_new    = pbc_x(zi,rho_zi,solid_center)
+            self.zi_new,self.rho_zi_new    = pbc_x(self.zi,self.rho_zi,solid_center)
             # fit to double sided GDS function
-            result,z0,z1,w1 = fit_gds_double_sided(zi_new,rho_zi_new,plot=self.plot_gds, verbose=self.verbose)
+            self.result,z0,z1,w1 = fit_gds_double_sided(self.zi_new,self.rho_zi_new,plot=self.plot_gds, verbose=self.verbose)
             # print("     result.redchi",result.redchi)
-            if result.redchi<0.2:
+            if self.result.redchi<0.2:
                 ## store the best fitting params to params
-                params = result.params
+                params = self.result.params
                 break
-        if params is None:  ## change solid center is not the key, let us adjust the other initital values
+        if params is None:  ## changing solid center is not the key, let us adjust the other initital values
             pass
             
         # if assert_chi:
@@ -212,7 +213,54 @@ class GDSAnalyzer(object):
         if ll <0:
             ll = 0.00001
         lx,ly,lz = ase_a.get_cell_lengths_and_angles()[:3]
-        return sol_liq_inter, ls, ll, lw, lx,ly,lz, z0, z1_unpbc, result.redchi
+        self.solid_center = solid_center
+        self.z0 = z0
+        self.z1_unpbc = z1_unpbc
+        self.w = w
+        self.lw = lw
+        return sol_liq_inter, ls, ll, lw, lx,ly,lz, z0, z1_unpbc, self.result.redchi
 
 
- 
+    def plot_gds(self,out='gds.png'):
+        """
+        Show the density profile, fitted results, and GDS location
+        """
+        import matplotlib.pyplot as plt
+        yrange = [min(self.rho_zi)-.5, max(self.rho_zi)+.5]
+        xrange = [0,max(self.zi)]
+        dim = xrange[1]
+        z0s = [self.z0,self.z0]
+        z1s = [self.z1_unpbc,self.z1_unpbc]       
+        plt.figure()
+        plt.plot(self.zi, self.rho_zi,'bo')
+        plt.plot(z0s,yrange,'k--')
+        plt.plot(z0s+dim,yrange,'k--')
+        plt.plot(z0s-dim,yrange,'k--')
+
+        plt.plot(z1s,yrange,'k--')
+        plt.plot(z1s+dim,yrange,'k--')
+        plt.plot(z1s-dim,yrange,'k--')
+
+        rho_zi_new = self.result.best_fit
+        # more flexibility
+        # rho_zi_new = self.result.eval(self.result.params,z=self.zi_new)
+        plt.plot(self.zi_new, rho_zi_new,'k-')
+        plt.plot(self.zi_new+dim,rho_zi_new,'k-')
+        plt.plot(self.zi_new-dim, rho_zi_new,'k-')        
+        plt.plot([self.zi_new[-1]-dim,self.zi_new[0]],[rho_zi_new[-1], rho_zi_new[0]], 'k-')
+    
+        plt.fill_between([self.z0-self.lw/2,self.z0+self.lw/2], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+        plt.fill_between([self.z1_unpbc-self.lw/2,self.z1_unpbc+self.lw/2], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+        # consider PBC
+        plt.fill_between([self.z0-self.lw/2 - dim,self.z0+self.lw/2 -dim], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+        plt.fill_between([self.z0-self.lw/2 + dim,self.z0+self.lw/2 +dim], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+    
+        plt.fill_between([self.z1_unpbc-self.lw/2-dim,self.z1_unpbc+self.lw/2-dim], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+        plt.fill_between([self.z1_unpbc-self.lw/2+ dim,self.z1_unpbc+self.lw/2+ dim], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+        plt.ylim(yrange)
+        plt.xlim(xrange)
+        plt.minorticks_on()
+        plt.xlabel('z (A)')
+        plt.xlabel('z ' + r'$(\mathrm{\AA})$')
+        plt.ylabel(r'$\rho$'+' ' + r'$(\mathrm{g}/\mathrm{cm}^{3})$')
+        plt.savefig(out,dpi=300,bbox_inches='tight')

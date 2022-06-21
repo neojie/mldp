@@ -141,6 +141,10 @@ if args.store:
 if args.average:
     window = args.average
     cumsum_JJ_sel = cumsum_JJ[range(window[0],window[1])]
+    cumsum_JJ_selx = cumsum_JJ[range(window[0],window[1])]
+    cumsum_JJ_sely = cumsum_JJ[range(window[0],window[1])]
+    cumsum_JJ_selz = cumsum_JJ[range(window[0],window[1])]
+
 #    window_mean = cumsum_JJ[range(window[0],window[1])].mean()
     print('mean kappa within {0} ps - {1} ps is {2}   {3}(W m-1 K-1): '.format(
             dt[window[0]], 
@@ -155,6 +159,11 @@ if args.average:
             np.mean(cumsum_JJ_sel),
             np.std(cumsum_JJ_sel)
             ))
+    print('a,b,c')
+    print(np.mean(cumsum_JJ_selx),np.std(cumsum_JJ_selx))
+    print(np.mean(cumsum_JJ_sely),np.std(cumsum_JJ_sely))
+    print(np.mean(cumsum_JJ_selz),np.std(cumsum_JJ_selz))
+    
     
 fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
 ax[0].plot(dt, JxJx*metal2SIps,label='x') # 
