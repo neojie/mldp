@@ -159,5 +159,5 @@ else:
     print("Build {0}".format(args.deepmd))
     build_deepmd(cwd,os.path.join(cwd,args.file), os.path.join(cwd,args.deepmd))
     if args.format =='dump':
-        print("!!!** Modify the {0}/type_amp.raw **!!!".format(args.deepmd))
+        print("!!!** May want to modify the {0}/type_map.raw **!!!".format(args.deepmd))
 

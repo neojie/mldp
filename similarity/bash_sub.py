@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser()
 
 ## must set
 parser.add_argument("--num_interface_w","-nw",type=int,help="Default: larger, btetter, must set!")
-parser.add_argument("--mode","-m",help="Default: mass mode, must set!")
+parser.add_argument("--mode","-m",help="Default: mass mode, must set, only mass or k!")
 
 # be alert the possible change, for instance, ppv
 parser.add_argument("--project_axis","-p",default=2,type=int,help="default 2(z), 0,1,2 => x,y,z")

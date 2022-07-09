@@ -160,8 +160,8 @@ class GDSAnalyzer(object):
                 ## store the best fitting params to params
                 params = self.result.params
                 break
-        if params is None:  ## changing solid center is not the key, let us adjust the other initital values
-            pass
+        # if params is None:  ## changing solid center is not the key, let us adjust the other initital values
+        #     pass
             
         # if assert_chi:
         #     assert result.redchi<0.5        
