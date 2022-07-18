@@ -238,3 +238,4 @@ dpkit environment works
 ## 6. Scale
 
 ## 7. Util
+some useful routines
