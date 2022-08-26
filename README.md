@@ -166,7 +166,7 @@ run `bash config` before proceeding
 
 ### 2.1. Workflow
 ---------------------------
-1. analyze rdf with `MDAnayalysis`? search for which two pairs to swap so that the short interatomic distance of the corresponding pair can be reached. `velocity.py` calculate velocity of the atoms given timestep and temperature and determine the min interatomic distance should be reached given target pressure, temperature, and timestep
+1. analyze rdf with `MDAnayalysis` search for which two pairs to swap so that the short interatomic distance of the corresponding pair can be reached. `velocity.py` calculate velocity of the atoms given timestep and temperature and determine the min interatomic distance should be reached given target pressure, temperature, and timestep
 2. simulation using good POSCAR without pertubation, set temperature and teimstep based on 1), to make the system collapse as quickly as possible
 3. simulation using perturbed POSCAR
 `pert.py` perturbed POSCAR , input must be vasp/poscar format, for now this file is designed for MgSiO3 only, automatically swap Si-O, Mg-O, Mg-Si
@@ -174,7 +174,7 @@ run `bash config` before proceeding
 4. simulation with lammps
 ```lmp -in in.lammps``` login node usually can handle this. Do check the interatomic distance frequently. You do not want to waste time doing unnecessary runs
 5. check interatomic distance.
-  ```python ~/script/mldp/pert/post_pert.py -f mgsio3.dump -ft dump```
+    ```python ~/script/mldp/pert/post_pert.py -f mgsio3.dump -ft dump```
     ==WARNING: Dump file may have lost atoms. If so, corresponding frames should be deleted==
 6. recal with `recal_lmp.py`
 ```python ~/script/mldp/recal_lmp.py -if /u/home/j/jd848/project-lstixrud/pv+hf/dp-train/lmp_run/6k/rp5/160-cpu/pert/4k_mgo_swap_p2/inputs -r 0-7```
@@ -186,10 +186,10 @@ If not, `bash out`
 ```python ~/script/mldp/check_nbands_nelm.py -ip all```
 if not, increase NBANDS, NELM in INCAR
 9. Merge all vasp runs to one single `OUTCAR`
-  ```python ~/script/mldp/merge_out.py -o OUTCAR -r y``` 
+    ```python ~/script/mldp/merge_out.py -o OUTCAR -r y``` 
     ==Be cautious about the -r (remove everything) flag==
 10. Build `deepmd` input file from `OUTCAR`
-  ```python ~/script/mldp/extract_deepmd.py -t  -bs 1000```
+    ```python ~/script/mldp/extract_deepmd.py -t  -bs 1000```
     ==1000 is a random large number so that only one set is generated, -t means no test set==
 
 
@@ -202,7 +202,7 @@ scripts used for analyzing lammps output
 1. run lammps calculation 
 
 2. `log_lmp.py` extract the v_Jx, v_Jy, v_Jz heat current 
-  ```python ~/script/mldp/lmp/log_lmp.py -i log.lammps -y v_Jx v_Jy v_Jz -s -p```
+    ```python ~/script/mldp/lmp/log_lmp.py -i log.lammps -y v_Jx v_Jy v_Jz -s -p```
 
   for multicomponent liquid system, one should also subtract the partial enthalpy term $h_a$ (Eq 4 in Deng and Stixrude, 2021) , so the correct command should be
 
@@ -236,6 +236,7 @@ dpkit environment works
 
 
 ## 6. Scale
+`scale`
 
 ## 7. Util
 some useful routines
