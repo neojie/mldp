@@ -146,6 +146,8 @@ class GDSAnalyzer(object):
         sol_liq_inter = []
         # build interface, mda_xyz does not contain cell dim info, ase_xyz cannot by used by pytim
         inter, k,ase_a,mda_a = cal_inter(self.ase_xyz,self.mda_xyz,idx,self.mesh, self.alpha, self.level,self.mode)
+        self.inter = inter
+        self.k=k
         # build density map and project to target direction
         self.rho_zi,self.zi,rho_av     = temporal_mass_density_proj_coarse(inter,project_axis=self.project_axis,plot=self.plot_gds,level=self.level)        
         # find solid_center

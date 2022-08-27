@@ -84,6 +84,7 @@ def cal_inter(ase_xyz,mda_xyz,fn,mesh=1.5, alpha=2.5, level=None,mode='mass'):
     inter.mass_density_field_reshape = inter.mass_density_field.reshape(
         tuple(np.array(inter.ngrid).astype(int)))
     _inter_density_two_end_equal(inter)
+    inter.universe.atoms.masses = k   ## the intital masses for Si is problematic, bug in MDAnalysis
     return inter, k,ase_a,mda_a
 
 
@@ -109,8 +110,8 @@ def mass_density_proj_coarse(inter,project_axis):
     NA      = 6.022e23
     dens_re = inter.mass_density_field_reshape
     proj    = projection(dens_re,project_axis)
-    volume  = inter.box[0]*inter.box[1]*inter.box[2]*NA*1e-24
-    volume0 = volume/inter.ngrid[-1]
+    volume  = inter.box[0]*inter.box[1]*inter.box[2]*NA*1e-24  
+    volume0 = volume/inter.ngrid[-1]  ## somehow treat Si as 0
     rho_av  = sum(inter.universe.atoms.masses)/volume    
     norm_factor = sum(inter.universe.atoms.masses)/volume0/proj.sum()
     return proj*norm_factor,rho_av
