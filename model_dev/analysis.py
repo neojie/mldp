@@ -129,7 +129,7 @@ if mode == 'nn_vasp':
                                                            args.force_lower_cutoff,args.force_upper_cutoff,
                                                            len(e_and_f_idx)))
     plt.savefig('vasp_vs_nn.png')
-    fig.show()
+#    fig.show()
 
 elif mode == 'nn_only':
     max_dpgen_fs, mean_std_f = dev_nn(es,fs,vs,natoms)

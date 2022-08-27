@@ -90,7 +90,7 @@ run `bash config` before proceeding
 10. analyze nn and vasp
 
   ```bash
-  python $mldp/model_dev/analysis.py -tf . -mp m4v1 -rf . -euc 10 -fuc 10 -flc 0.35
+  python $mldp/model_dev/analysis.py -tf . -mp m4v1 -rf . -euc 10 -fuc 10 -flc 0.3
   python $mldp/model_dev/analysis.py -tf . -mp m1v2 -rf . -euc 10 -fuc 10 -flc 0.6
   python $mldp/model_dev/analysis.py -tf . -mp m2v1 -rf . -euc 10 -fuc 10 -flc 0.6 -elc 0.8
   python $mldp/model_dev/analysis.py -tf . -mp m5v1 -rf . -euc 10 -fuc 10 -flc 0.4  -elc 0.02
