@@ -18,6 +18,30 @@ parser.add_argument('--file',"-f", type=str,nargs="+",
                                'refo-local.xyz','refh-local.xyz'],help="path to file")
 args   = parser.parse_args()
 
+
+def pbc_wrap(lx, ly, lz):
+    a, b, c = lx, ly, lz
+    
+    def wrap(pos: list):  # must be a MutableList type
+        if len(pos) != 3:
+            raise TypeError("Only 3d vector can be wrapped!")
+        else:
+            if pos[0] < 0:
+                pos[0] += a
+            elif pos[0] > a:
+                pos[0] -= a
+            if pos[1] < 0:
+                pos[1] += b
+            elif pos[1] > b:
+                pos[1] -= b
+            if pos[2] < 0:
+                pos[2] += c
+            elif pos[2] > c:
+                pos[2] -= c
+    
+    return wrap
+
+
 def modify_cell(cell):
     cs=cell.split()
     cs.insert(1,'0.0000');cs.insert(1,'0.0000');cs.insert(1,'0.0000')
@@ -38,6 +62,7 @@ def merge(objects,num,ele,outname='out.xyz'):
             for ii in range(tot_ele_num):
                 atom_num.append(int(objects[ii].readline().rstrip('\r\n').rstrip('\n')))
                 cell = objects[ii].readline()
+            pbc_manip = pbc_wrap(*(float(x) for x in cell.split()))
             tot_atom_num = sum(atom_num)
             out.writelines(str(tot_atom_num)+'\n')
             ct = comment(modify_cell(cell))
@@ -45,8 +70,18 @@ def merge(objects,num,ele,outname='out.xyz'):
             
             for kk in range(tot_ele_num):
                 for ll in range(atom_num[kk]):
-                    out.writelines(objects[kk].readline().replace('X',ele[kk]))
+                    segs = objects[kk].readline().split()
+                    segs[0] = ele[kk]
+                    pos = [float(x) for x in segs[1:4]]
+                    pbc_manip(pos)
+                    segs[1:4] = '{:.6f} {:.6f} {:.6f}'.format(*pos).split()
+                    out.write(' '.join(segs) + '\n')
+                    # out.writelines(objects[kk].readline().replace('X',ele[kk]))
             atom_num = []
+        except TypeError as err:
+            print(err)
+            print("TypeError occured!")
+            exit(1)
         except:
             print('read {0} < {1}'.format(jj,num))
             break
