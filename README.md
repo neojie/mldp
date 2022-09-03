@@ -43,7 +43,7 @@ run `bash config` before proceeding
 
    ```bash
    asap gen_desc -s 10 --fxyz OUTCAR soap -e -c 6 -n 6 -l 6 -g 0.44
-   asap gen_desc -s 1 --fxyz npt.dump soap -e -c 6 -n 4 -l 4 -g 0.44
+   asap gen_desc -s 2 --fxyz npt.dump soap -e -c 6 -n 4 -l 4 -g 0.44
    ```
    
 2. PCA analysis `fps` to identify frames to re-calcualte
@@ -60,7 +60,7 @@ run `bash config` before proceeding
    python $mldp/extract_deepmd.py -f ../npt.dump -fmt dump -id ../test-frame-select-fps-n-100.index -st -t 4000
    ```
    
-4. prepare a folders named `input` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence. Also NBANDS and NELEM should be sufficient. Use `recal_dpdata.py` to recalculate selected frames
+4. prepare a folders named `inputs` with `INCAR`,`KPOINTS`, `POTCAR`,`sub_vasp.sh`. Files must be tested for convergence. Also NBANDS and NELEM should be sufficient. Use `recal_dpdata.py` to recalculate selected frames
 
    ```bash
    python $mldp/recal_dpdata.py -d deepmd/ -if $inputs/mgofe/inputs_5000 -rv no
@@ -84,13 +84,13 @@ run `bash config` before proceeding
 9. `dp test`
 
    ```bash
-   dp test -m $nn/m4/v1/pv.pb -d m4v1 -n 400
+   dp test -m $nn/m7/v1/pv.pb -d m7v1 -n 400
    ```
 
 10. analyze nn and vasp
 
   ```bash
-  python $mldp/model_dev/analysis.py -tf . -mp m4v1 -rf . -euc 10 -fuc 10 -flc 0.3
+  python $mldp/model_dev/analysis.py -tf . -mp m5v1 -rf . -euc 10 -fuc 10 -flc 0.4 -elc 0.02
   python $mldp/model_dev/analysis.py -tf . -mp m1v2 -rf . -euc 10 -fuc 10 -flc 0.6
   python $mldp/model_dev/analysis.py -tf . -mp m2v1 -rf . -euc 10 -fuc 10 -flc 0.6 -elc 0.8
   python $mldp/model_dev/analysis.py -tf . -mp m5v1 -rf . -euc 10 -fuc 10 -flc 0.4  -elc 0.02
@@ -108,7 +108,6 @@ run `bash config` before proceeding
 
    ```bash
    python $mldp/extract_deepmd.py -f ./dump.0 -fmt dump -ttr 1000000 -t 3000 -st 4500
-   
    ```
    
 2. dp test with different models
