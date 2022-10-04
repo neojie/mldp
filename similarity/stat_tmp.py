@@ -24,6 +24,7 @@ parser.add_argument("--mode","-m",help="Default: mass mode, k or mass, must set!
 
 args   = parser.parse_args()
 import sys,os
+
 try:
     sys.path.insert(1, '/Users/jiedeng/GD/papers/pv7_h/partition/codes/')
 except:
@@ -36,12 +37,14 @@ except:
 
 from gds_analyzer import GDSAnalyzer
 
+xyz = '/Users/jiedeng/GD/papers/paper21_mgofe/npts/8064atoms_cube/5k/ex/iso/tmp/merge.xyz'
 
-if args.file:
-    xyz = args.file
-else:
-    cwd = os.path.abspath(os.curdir)
-    xyz     = os.path.join(cwd,'merge.xyz')
-    
+args.begin=0
+args.end =1
+args.mode='mass'
+args.project_axis=2
+args.num_interface_w=1
 ana=GDSAnalyzer(xyz = xyz, begin = args.begin, end = args.end, mode = args.mode, project_axis= args.project_axis, step = args.step,nw=args.num_interface_w)
+
+inter = ana.inter
 

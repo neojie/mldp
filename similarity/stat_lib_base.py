@@ -11,6 +11,8 @@ import numpy as np
 import pytim
 import matplotlib.pyplot as plt
 from lmfit import Parameters, Model, report_fit
+from scipy.interpolate import RegularGridInterpolator
+
 
 params_global = None
 
@@ -69,20 +71,21 @@ def cal_inter(ase_xyz,mda_xyz,fn,mesh=1.5, alpha=2.5, level=None,mode='mass'):
         DESCRIPTION.
 
     """
+
     ase_a = ase_xyz[fn]
     mda_a = mda_xyz.trajectory[fn]
+    mda_a.dimensions= ase_a.get_cell_lengths_and_angles()
+    inter     = pytim.WillardChandler(mda_xyz, mesh=mesh, alpha=alpha,level=level)
     if mode == 'mass':
         k     = ase_a.get_masses()
     elif mode == 'k':
         k     = ase_a.arrays['k']
+        ## re-calculate the density field using the fictious mass k
+        inter.density_field,inter.mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,k) 
+        inter.mass_density_field_reshape = inter.mass_density_field.reshape(
+            tuple(np.array(inter.ngrid).astype(int)))
     else:
         print('Weighting mode of {} is not supported!'.format(mode))
-        
-    mda_a.dimensions= ase_a.get_cell_lengths_and_angles()
-    inter     = pytim.WillardChandler(mda_xyz, mesh=mesh, alpha=alpha,level=level)
-    inter.density_field,inter.mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,k) 
-    inter.mass_density_field_reshape = inter.mass_density_field.reshape(
-        tuple(np.array(inter.ngrid).astype(int)))
     _inter_density_two_end_equal(inter)
     inter.universe.atoms.masses = k   ## the intital masses for Si is problematic, bug in MDAnalysis
     return inter, k,ase_a,mda_a
@@ -111,7 +114,7 @@ def mass_density_proj_coarse(inter,project_axis):
     dens_re = inter.mass_density_field_reshape
     proj    = projection(dens_re,project_axis)
     volume  = inter.box[0]*inter.box[1]*inter.box[2]*NA*1e-24  
-    volume0 = volume/inter.ngrid[-1]  ## somehow treat Si as 0
+    volume0 = volume/inter.ngrid[project_axis]  ## somehow treat Si as 0
     rho_av  = sum(inter.universe.atoms.masses)/volume    
     norm_factor = sum(inter.universe.atoms.masses)/volume0/proj.sum()
     return proj*norm_factor,rho_av
@@ -144,20 +147,17 @@ def gds_single_sided(z,w,rhol,rhov,z0=0):
     rho = .5*(rhol + rhov) + .5*(rhol-rhov)*np.tanh((z-z0)/w)
     return rho
 
-def fit_gds_single_sided(zi,rho_zi,plot=True,verbose=True):
+def fit_gds_single_sided(zi,rho_zi,plot=True,verbose=True,vary_z0=True):
     """
-    LS fitting to GDS
+    LS fitting to GDS, usually used for proximity vs. rho
     """
-    zi_filter  = zi[rho_zi>0]
-    rho_filter = rho_zi[rho_zi>0]
     params = Parameters()
-    params.add('z0', value=15,vary=True)
+    params.add('z0', value=0,vary=vary_z0)
     params.add('w' , value=1.5,vary=True)    
-    params.add('rhov', value=0.2,min = 0.1,vary=True)
-    params.add('rhol', value=2.3,min = 0,vary=True) 
+    params.add('rhov', value=min(rho_zi),min = 0.1,vary=True)
+    params.add('rhol', value=max(rho_zi),min = 0,vary=True) 
     model = Model(gds_single_sided)
-    half = int(len(rho_filter))
-    result = model.fit(rho_filter[:half],params,z = zi_filter[:half])
+    result = model.fit(rho_zi,params,z = zi)
     if verbose:
         report_fit(result)
         result.params.pretty_print
@@ -267,9 +267,9 @@ def count_z(z0,z1_unpbc, hz,w,dim,):
 
     Returns
     -------
-    sol_z : TYPE
+    sol_z : array
         DESCRIPTION.
-    liq_z : TYPE
+    liq_z : array
         DESCRIPTION.
 
     """
@@ -336,7 +336,110 @@ def select_chi(ch,chi=0.2):
 #     return ch[ch[:,1]<ch[:,2]]
     
 
+    
+############## proximity analysis
 
 
+def cal_proximity(inter):
+    """
+    calculate proximity
+    """
+    pos   = inter.original_positions
+    ### calculate distance    
+    verts, faces, normals = inter.triangulated_surface  
+    proximity = np.zeros(len(pos))
+    tag = np.zeros(len(pos))  
+    for num, point in enumerate(pos):
+        RS = (point - verts) # R to surface vector
+        tmp = RS**2
+        dis = np.sum(tmp,axis=1)**.5
+        min_ind = np.argmin(np.abs(dis))      # min distance index for the vertex
+        min_nor = normals[min_ind]            # normal vector corresponding to min distance
+        min_dis = dis[min_ind]
+        tmp2    = np.sum(min_nor*RS[min_ind])
+        min_dis = -tmp2/np.abs(tmp2)*min_dis # same direction, out of the interface
+        proximity[num] = min_dis              # based on test
+        if normals[min_ind,2]>0:
+            tag[num] = 1                #upper interface
+        else:
+            tag[num] = -1
+    return proximity,tag
+
+
+def cal_local_rho(inter):
+    x = np.unique(inter.grid[0])
+    y = np.unique(inter.grid[1])
+    z = np.unique(inter.grid[2])
+    V = inter.mass_density_field_reshape
+    # mass_density_field_reshape shape is ngrid[0]*ngrid[1]*ngrid[2]
+    fn = RegularGridInterpolator([x,y,z], V)
+    out_rho = []
+    selected_indice = []
+    # out_prox = []
+    for num,pos in enumerate(inter.original_positions):
+        try:
+            out_rho.append(fn(pos))
+            selected_indice.append(num)
+            # out_prox.append(proximity[num])
+        except:
+            pass
+    out_rho =  np.array(out_rho)
+    return out_rho, selected_indice
+
+    
+def plot_3d_interface(inter):
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+    triangles = inter.triangulated_surface[0][inter.triangulated_surface[1]]
+    ###
+    pos   = inter.original_positions
+    ### calculate distance
+    verts, faces, normals = inter.triangulated_surface   
+    # calculate proximity
+    prox, tag = cal_proximity(inter)
+    
+    liq_in = prox>0
+    vap_in = prox<0
+    
+    fig = plt.figure(figsize=(4, 5))
+    ax1 = fig.add_subplot(111, projection='3d')
+    # Fancy indexing: `verts[faces]` to generate a collection of triangles
+    mesh1 = Poly3DCollection(triangles)
+    mesh1.set_edgecolor('none')
+    mesh1.set_alpha(0.3)
+    ax1.add_collection3d(mesh1)
+    
+    pos_liq = pos[liq_in]
+    xyz_liq = np.vstack([pos_liq[::, 0], pos_liq[::, 1], pos_liq[::, 2]])
+    ax1.scatter(xyz_liq[0],xyz_liq[1],xyz_liq[2],color='r')
+    
+    pos_vap = pos[vap_in]
+    xyz_vap = np.vstack([pos_vap[::, 0], pos_vap[::, 1], pos_vap[::, 2]])
+    
+    ax1.scatter(xyz_vap[0],xyz_vap[1],xyz_vap[2],color='w')
+    # ax1.view_init(0, 135)
+    for ii in range(0,360,40):
+        ax1.view_init(elev=10., azim=ii)
+        # plt.savefig("movie%d.png" % ii)   
+    ax1.set_xlabel("x-axis: a")
+    ax1.set_ylabel("y-axis: b")
+    ax1.set_zlabel("z-axis: c")
+   
+    plt.tight_layout()
+    plt.show()
+    
+
+def _average_prox_vs_rho(prox,rho,nbins):
+    prox_new = np.linspace(min(prox),max(prox),nbins)
+    rho_new = np.zeros(nbins-1)
+    for ii in range(nbins-1):
+        rho_new[ii] = np.mean(rho[(prox>prox_new[ii]) & (prox<prox_new[ii+1])])
+    return prox_new[:-1],rho_new
+    
+
+def plot_prox_rho(selected_prox, selected_rho,mean_prox, mean_rho,fitted_result):
+    plt.plot(selected_prox, selected_rho,'.',alpha=0.1)
+    plt.plot(mean_prox,mean_rho,'or')
+    plt.plot(mean_prox,fitted_result.best_fit,'-r')
+    plt.show()
 
     

@@ -1,0 +1,5 @@
+# /Users/jiedeng/GD/papers/paper21_mgofe/npts/8064atoms_cube/5k/ex/iso/tmp/merge.xyz 
+#  nw = 1 
+#  solid liquid interface 
+#  id O           Mg           Fe    chi
+0    12 2003 289    14 1968 322    2590 63 803    0.0074

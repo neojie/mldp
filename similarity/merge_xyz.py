@@ -11,7 +11,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--output", "-o", type=str,default='merge.xyz',help="output file name")
-parser.add_argument("--index", "-i",type=int,default = 10000,help="up to index i will the results be merged")
+parser.add_argument("--index", "-i",type=int,default = 10000,help="up to index i will the results be merged, default: 10000")
 parser.add_argument('--ele',"-e", type=str,nargs="+",default = ['Mg','Si','O','H'],help="elements")
 parser.add_argument('--file',"-f", type=str,nargs="+",
                     default = ['refmg-local.xyz','refsi-local.xyz',
