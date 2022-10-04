@@ -378,12 +378,17 @@ def cal_local_rho(inter):
     # out_prox = []
     for num,pos in enumerate(inter.original_positions):
         try:
-            out_rho.append(fn(pos))
+            out_rho.append(fn(pos)[0])
             selected_indice.append(num)
             # out_prox.append(proximity[num])
         except:
             pass
     out_rho =  np.array(out_rho)
+    # sometimes rho comes with nan due to bad interpolation
+    selected_indice = np.array(selected_indice)
+    selected_indice = selected_indice[~np.isnan(out_rho)]
+    out_rho  = out_rho[~np.isnan(out_rho)]
+    
     return out_rho, selected_indice
 
     
@@ -432,7 +437,7 @@ def _average_prox_vs_rho(prox,rho,nbins):
     prox_new = np.linspace(min(prox),max(prox),nbins)
     rho_new = np.zeros(nbins-1)
     for ii in range(nbins-1):
-        rho_new[ii] = np.mean(rho[(prox>prox_new[ii]) & (prox<prox_new[ii+1])])
+        rho_new[ii] = np.mean(rho[(prox>=prox_new[ii]) & (prox<=prox_new[ii+1])])
     return prox_new[:-1],rho_new
     
 

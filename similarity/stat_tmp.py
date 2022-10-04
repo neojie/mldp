@@ -37,10 +37,10 @@ except:
 
 from gds_analyzer import GDSAnalyzer
 
-xyz = '/Users/jiedeng/GD/papers/paper21_mgofe/npts/8064atoms_cube/5k/ex/iso/tmp/merge.xyz'
+xyz = '/Users/jiedeng/GD/papers/paper21_mgofe/npts/8064atoms_cube/5k/ex/iso/tmp2/merge.xyz'
 
-args.begin=0
-args.end =1
+args.begin=1
+args.end =2
 args.mode='mass'
 args.project_axis=2
 args.num_interface_w=1

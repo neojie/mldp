@@ -93,7 +93,7 @@ class GDSAnalyzer(object):
             dat = np.concatenate((np.array([range(self.begin,self.end)]).T, self.sum_prox),axis=1)
             fmt = '%d ' + '%d %d %d    '*len(self.ele_atomic_number) +'    %.4f'*2 # for each element, we have three phases
             np.savetxt(name,dat,fmt=fmt,
-                        header='{0} \n {3} \n {1} \n {2}'.format(self.xyz,'solid liquid interface','id '+'           '.join(self.ele_chemical_symbol) +' lw      chi', 'nw = {}'.format(self.nw)))   
+                        header='{0} \n {3} \n {1} \n {2}'.format(self.xyz,'solid liquid interface','id '+'           '.join(self.ele_chemical_symbol) +'          lw      chi', 'nw = {}'.format(self.nw)))   
             
     def analyze(self):
         """
@@ -243,9 +243,9 @@ class GDSAnalyzer(object):
             mean_prox,mean_rho = _average_prox_vs_rho(selected_prox,selected_rho,self.inter.ngrid[0])
             result, z0, w = fit_gds_single_sided(mean_prox,mean_rho,vary_z0=False,plot=False,verbose=False)
             
-            phase1 = self.inter.all_atoms.elements[[proximity < -self.lw/2]]
-            phase2 = self.inter.all_atoms.elements[[proximity >self.lw/2]]
-            interface = self.inter.all_atoms.elements[[(proximity <= self.lw/2) & (proximity >= -self.lw/2)]]
+            phase1 = self.inter.all_atoms.elements[tuple([proximity < -self.lw/2])]
+            phase2 = self.inter.all_atoms.elements[tuple([proximity >self.lw/2])]
+            interface = self.inter.all_atoms.elements[tuple([(proximity <= self.lw/2) & (proximity >= -self.lw/2)])]
 
             self.out = []
             for ele in self.ele_chemical_symbol:
