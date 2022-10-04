@@ -109,7 +109,7 @@ try:
         import sys
         sys.exit('length of range is WRONG')
 
-    com = "sed -n '{0},{1}p;{2}q' tail_10.dump > range_{3}_{4}.dump".format((i+1)*beg+1,(i+1)*end,(i+1)*end+1,beg,end)
+    com = "sed -n '{0},{1}p;{2}q' {5} > range_{3}_{4}.dump".format((i+1)*beg+1,(i+1)*end,(i+1)*end+1,beg,end,file)
     # print(com)
     call(com,shell=True)
         
