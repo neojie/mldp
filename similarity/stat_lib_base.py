@@ -438,7 +438,9 @@ def _average_prox_vs_rho(prox,rho,nbins):
     rho_new = np.zeros(nbins-1)
     for ii in range(nbins-1):
         rho_new[ii] = np.mean(rho[(prox>=prox_new[ii]) & (prox<=prox_new[ii+1])])
-    return prox_new[:-1],rho_new
+    prox_new = prox_new[:-1][~np.isnan(rho_new)]
+    rho_new = rho_new[~np.isnan(rho_new)]
+    return prox_new,rho_new
     
 
 def plot_prox_rho(selected_prox, selected_rho,mean_prox, mean_rho,fitted_result):
