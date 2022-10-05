@@ -121,7 +121,7 @@ def mass_density_proj_coarse(inter,project_axis):
 
 
     
-def temporal_mass_density_proj_coarse(inter,project_axis=1,plot=True,level=None):
+def temporal_mass_density_proj_coarse(inter,project_axis=1,plot=False,level=None):
     """
     plot coarse graining mass density profile file of ith step
     """
