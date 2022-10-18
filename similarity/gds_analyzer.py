@@ -243,9 +243,11 @@ class GDSAnalyzer(object):
             mean_prox,mean_rho = _average_prox_vs_rho(selected_prox,selected_rho,self.inter.ngrid[0])
             result, z0, w = fit_gds_single_sided(mean_prox,mean_rho,vary_z0=False,plot=False,verbose=False)
             
-            phase1 = self.inter.all_atoms.elements[tuple([proximity < -self.lw/2])]
-            phase2 = self.inter.all_atoms.elements[tuple([proximity >self.lw/2])]
-            interface = self.inter.all_atoms.elements[tuple([(proximity <= self.lw/2) & (proximity >= -self.lw/2)])]
+            self.proximity_lw = self.nw*w  # this w is different
+            
+            phase1 = self.inter.all_atoms.elements[tuple([proximity < -self.proximity_lw/2])]
+            phase2 = self.inter.all_atoms.elements[tuple([proximity >self.proximity_lw/2])]
+            interface = self.inter.all_atoms.elements[tuple([(proximity <= self.lw/2) & (proximity >= -self.proximity_lw/2)])]
 
             self.out = []
             for ele in self.ele_chemical_symbol:
@@ -253,7 +255,7 @@ class GDSAnalyzer(object):
                 self.out.append(len(phase2[phase2==ele]))
                 self.out.append(len(phase1[phase1==ele]))
                 self.out.append(len(interface[interface==ele]))
-            self.out.append(self.lw)
+            self.out.append(self.proximity_lw)
             self.out.append(result.redchi)
                             
         return sol_liq_inter, ls, ll, self.lw, lx,ly,lz, z0, z1_unpbc, self.result.redchi
