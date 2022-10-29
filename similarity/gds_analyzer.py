@@ -166,7 +166,7 @@ class GDSAnalyzer(object):
         self.k=k
         # build density map and project to target direction
         self.rho_zi,self.zi,rho_av     = temporal_mass_density_proj_coarse(self.inter,project_axis=self.project_axis,plot=self.plot_gds,level=self.level)        
-        # find solid_center
+        # find solid_center, move the 'center' to the center
         if solid_center0 <0: # if solid center is not specified, use the default value
             solid_center0 = self.zi[np.argmax(self.rho_zi)]
         for  solid_center in [solid_center0, solid_center0 -2, solid_center0+2, solid_center0-1, solid_center0+1, solid_center0-3, solid_center0+3]:
@@ -186,13 +186,26 @@ class GDSAnalyzer(object):
         # choose inteface to be w 
         w = self.nw*w1  
         # ensure z0 is close to solid center
-        if (z0 - solid_center) <= (z1 - solid_center):
+        # if (z0 - solid_center) <= (z1 - solid_center):
+        #     pass
+        # else:
+        #     tmp = z0
+        #     z0 = z1
+        #     z1 = tmp
+        dim      = ase_a.get_cell_lengths_and_angles()[self.project_axis]
+
+        if (z0>dim) and (z1>dim):  ## corner case --  when solid center happens to be super close to the edge
+            z0 = z0 - dim
+            z1 = z1 - dim
+        elif (z0<0) and (z1>0):
+            z0 = z0 + dim
+            z1 = z1 + dim    
+        elif (z0 - solid_center) <= (z1 - solid_center):
             pass
         else:
             tmp = z0
             z0 = z1
             z1 = tmp
-        dim      = ase_a.get_cell_lengths_and_angles()[self.project_axis]
 
         z1_unpbc = unpbc_x(z1,dim)
         
@@ -258,7 +271,7 @@ class GDSAnalyzer(object):
             self.out.append(self.proximity_lw)
             self.out.append(result.redchi)
                             
-        return sol_liq_inter, ls, ll, self.lw, lx,ly,lz, z0, z1_unpbc, self.result.redchi
+        return sol_liq_inter, ls, ll, self.lw, lx,ly,lz, self.z0, z1_unpbc, self.result.redchi
 
 
     
