@@ -16,6 +16,8 @@ import datetime
 import argparse
 import sys
 import time
+import dpdata
+
 sys.setrecursionlimit(1000000)
 recal_path = os.path.join(os.getcwd(),'recal')
 try:
@@ -27,17 +29,33 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--max_job","-mj",type=int,help="max job allowed, typically set to be number of frames in the deepmd")
 parser.add_argument("--deepmd","-d",help="deepmd path file")
 parser.add_argument("--inputfile","-if",help="input files for vasp cal, default is cwd+inputs, if input, please input the absolute path")
+parser.add_argument('--qsub',"-q", default=True, action='store_false',help="qsub or sbatch")
+
 args   = parser.parse_args()
+
+ls = dpdata.System(args.deepmd,fmt='deepmd/npy')
+if args.max_job:
+    max_job  = args.max_job
+else:
+    max_job = ls.get_nframes()
+    
 def get_waiting_jobs():
-    call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat -u jd848 | grep qw |wc|awk '{print $1}'>tmp.txt",shell=True)
+    if args.qsub:
+        call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat -u jd848 | grep qw |wc|awk '{print $1}'>tmp.txt",shell=True)
+    else:
+        call("squeue -u jd8033 | grep PD |wc|awk '{print $1}'>tmp.txt",shell=True)
     fp = open('tmp.txt')
-    num_waiting_jobs = fp.readlines()
+    num_waiting_jobs = fp.readlines()    
     fp.close()
-    call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat -u jd848 |wc|awk '{print $1}'>tmp.txt>tmp.txt",shell=True)
+    if args.qsub:
+        call("/u/systems/UGE8.6.4/bin/lx-amd64/qstat -u jd848 |wc|awk '{print $1}'>tmp.txt",shell=True)
+    else:
+        call("squeue -u jd8033 |wc|awk '{print $1}'>tmp.txt",shell=True)
     fp = open('tmp.txt')
     num_tot_jobs = fp.readlines()
     fp.close()
     return int(num_waiting_jobs[0]), int(num_tot_jobs[0])-2
+
 
 def get_max_job_id(path):
     recal=os.path.join(path,'recal')
@@ -57,8 +75,8 @@ def foo():
      
     if num_waiting_jobs < threshold and (num_tot_jobs+next_batch) < job_lim:    
         max_job_id = get_max_job_id(path)
-        if max_job_id+next_batch>args.max_job:
-            end_job = args.max_job+1
+        if max_job_id+next_batch>max_job:
+            end_job = max_job+1
         else:
             end_job = max_job_id+next_batch
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
@@ -75,7 +93,7 @@ def foo():
               num_tot_jobs, job_lim, threshold, num_waiting_jobs,timex))
         time.sleep(threshold)
     max_job_id = get_max_job_id(path)
-    if  max_job_id < args.max_job:          
+    if  max_job_id < max_job:          
         threading.Timer(num_waiting_jobs, foo).start()
     else:
         quit()

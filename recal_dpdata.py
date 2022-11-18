@@ -14,6 +14,19 @@ from shutil import copy
 import dpdata
 #import glob
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--deepmd","-d",help="deepmd path file")
+parser.add_argument("--inputfile","-if",help="input files for vasp cal, default is cwd+inputs, if input, please input the absolute path")
+parser.add_argument("--step","-s",default=1,type=int,help="step")
+parser.add_argument("--range","-r",type=str,help="0-2, means from 0 to 2, default is for all folders")
+parser.add_argument("--run_vasp","-rv",help="run vasp?, default without input is Yes")
+parser.add_argument("--sub_command","-sc", default='/u/systems/UGE8.6.4/bin/lx-amd64/qsub',help="job submission command: default is /u/systems/UGE8.6.4/bin/lx-amd64/qsub")
+
+args   = parser.parse_args()
+
+
+
 def lmp2pos(ls,sel_nsw,copybs=False):
     """
     build POSCAR based on deepmd given in the path
@@ -58,19 +71,10 @@ from subprocess import call
 def run(cwd,target_path):
     os.chdir(target_path)
     sub_file = os.path.join(inputfile,'sub_vasp.sh')
-    call("/u/systems/UGE8.6.4/bin/lx-amd64/qsub {0}".format(sub_file), shell=True)
+    call("{1} {0}".format(sub_file, args.sub_command), shell=True)
 #    call("bash {0}".format(sub_file), shell=True)
     os.chdir(cwd)
     
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--deepmd","-d",help="deepmd path file")
-parser.add_argument("--inputfile","-if",help="input files for vasp cal, default is cwd+inputs, if input, please input the absolute path")
-parser.add_argument("--step","-s",default=1,type=int,help="step")
-parser.add_argument("--range","-r",type=str,help="0-2, means from 0 to 2, default is for all folders")
-parser.add_argument("--run_vasp","-rv",help="run vasp?, default without input is Yes")
-
-args   = parser.parse_args()
 print(args.run_vasp)
 cwd    = os.getcwd()
 if args.deepmd:
