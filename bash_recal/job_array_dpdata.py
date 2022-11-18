@@ -26,7 +26,7 @@ except:
     print('***recal exists in',recal_path)
     
 parser = argparse.ArgumentParser()
-parser.add_argument("--max_job","-mj",type=int,help="max job allowed, typically set to be number of frames in the deepmd")
+# parser.add_argument("--max_job","-mj",type=int,help="max job allowed, typically set to be number of frames in the deepmd")
 parser.add_argument("--deepmd","-d",help="deepmd path file")
 parser.add_argument("--inputfile","-if",help="input files for vasp cal, default is cwd+inputs, if input, please input the absolute path")
 parser.add_argument('--qsub',"-q", default=True, action='store_false',help="qsub or sbatch")
@@ -34,10 +34,10 @@ parser.add_argument('--qsub',"-q", default=True, action='store_false',help="qsub
 args   = parser.parse_args()
 
 ls = dpdata.System(args.deepmd,fmt='deepmd/npy')
-try:
-    max_job  = args.max_job
-except:
-    max_job = ls.get_nframes()
+# try:
+#     max_job  = args.max_job
+# except:
+max_job = ls.get_nframes()
     
 def get_waiting_jobs():
     if args.qsub:
@@ -78,7 +78,7 @@ def foo():
      
     if num_waiting_jobs < threshold and (num_tot_jobs+next_batch) < job_lim:    
         max_job_id = get_max_job_id(path)
-        if max_job_id+next_batch>max_job:
+        if (max_job_id+next_batch)>max_job:
             end_job = max_job+1
         else:
             end_job = max_job_id+next_batch
