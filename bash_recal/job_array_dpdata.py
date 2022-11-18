@@ -34,9 +34,9 @@ parser.add_argument('--qsub',"-q", default=True, action='store_false',help="qsub
 args   = parser.parse_args()
 
 ls = dpdata.System(args.deepmd,fmt='deepmd/npy')
-if args.max_job:
+try:
     max_job  = args.max_job
-else:
+except:
     max_job = ls.get_nframes()
     
 def get_waiting_jobs():
