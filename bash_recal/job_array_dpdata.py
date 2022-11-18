@@ -56,7 +56,10 @@ def get_waiting_jobs():
     fp.close()
     return int(num_waiting_jobs[0]), int(num_tot_jobs[0])-2
 
-
+if args.qsub:
+    run_command = '/u/systems/UGE8.6.4/bin/lx-amd64/qsub'
+else:
+    run_command = 'sbatch'
 def get_max_job_id(path):
     recal=os.path.join(path,'recal')
     dirs=os.listdir(recal)
@@ -82,8 +85,8 @@ def foo():
         print("{4}: # of waiting jobs: {0} < {1}, submit range({2},{3})".format(
               num_waiting_jobs,threshold, max_job_id, max_job_id+next_batch,timex))
         nsw_range = '{0}-{1}'.format(max_job_id,end_job)
-        call("python ~/script/mldp/recal_dpdata.py -r {0} -d {1} -if {2}".format(
-                nsw_range,args.deepmd, args.inputfile),shell=True)
+        call("python ~/script/mldp/recal_dpdata.py -r {0} -d {1} -if {2} -sc {3}".format(
+                nsw_range,args.deepmd, args.inputfile,run_command),shell=True)
     elif num_waiting_jobs > threshold:
         print("{3}: # of waiting jobs: {0} > {1}, wait for {2} sec(s)".format(
               num_waiting_jobs,threshold, num_waiting_jobs, timex))
