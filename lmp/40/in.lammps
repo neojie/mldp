@@ -1,0 +1,58 @@
+variable    T equal 4050   # temperature in K
+variable    P equal 400000.00 # P in bar
+variable    V equal vol
+variable    dt equal 0.001  # ps
+
+variable    NSWeq equal 10000 # equil run step
+
+
+# calculate fparam for deepmd potential
+variable    kBeV equal 8.617333262e-5    # eV/K, Boltzmann
+variable    TeV equal  ${T}*${kBeV}
+
+# convert from LAMMPS metal units to SI
+variable    kB equal 1.3806504e-23       # [J/K] Boltzmann
+variable    ev2j equal 1.60218e-19
+variable    A2m equal 1.0e-10
+variable    ps2s equal 1.0e-12
+variable    convert equal ${ev2j}*${ev2j}/${ps2s}/${A2m}
+
+
+units           metal
+boundary        p p p
+atom_style      atomic
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check no
+
+read_data       conf.lmp
+mass            1 24.305
+mass            2 28.085
+mass            3 15.999
+#mass            4 2.0156
+#read_restart    poly.restart.1140000
+pair_style      deepmd /u/project/ESS/lstixrud/jd848/pv_hf_copy/pvh/m12/v3/pv.pb fparam ${TeV}
+#pair_style      deepmd /u/project/ESS/lstixrud/jd848/pv_hf_copy/pvh/m12/v3/m12v3.comp.pb fparam ${TeV}
+pair_coeff
+
+
+velocity        all create 100 23456789
+fix             1 all npt temp 10 10 0.04 iso $P $P 0.4
+timestep        ${dt}
+#thermo          500
+#thermo_style    custom step pe ke etotal temp press vol pxx pyy pzz pxy pyz pxz
+#dump            2 all custom 500 npt.dump id type x y z
+#restart 10000  poly.restart
+run             200
+unfix           1
+
+
+velocity        all create $T 23456789
+fix             1 all npt temp $T $T 0.04 iso $P $P 0.4
+timestep        ${dt}
+thermo          10
+thermo_style    custom step pe ke etotal temp press vol pxx pyy pzz pxy pyz pxz
+dump            2 all custom 500 npt.dump id type x y z
+restart 10000  poly.restart
+run             ${NSWeq}
+unfix           1

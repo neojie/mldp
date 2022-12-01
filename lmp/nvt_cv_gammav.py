@@ -32,6 +32,7 @@ parser.add_argument("-x", type=str, default="Step", help="Data to plot on the fi
 parser.add_argument("-p", "--plot", default=False, action='store_true', help="Defualt: plot")
 parser.add_argument("-n", "--natoms", default=160, type=int, help="natoms")
 parser.add_argument("-run_num", "--r", default=0, type=int, help="natoms")
+parser.add_argument("--volume", "-v",type=float,help='volume in A3')
 
 
 args = parser.parse_args()
@@ -88,6 +89,32 @@ if not check(Step):
     ys0 = [(y[selected_idx]).astype(float) for y in ys0]
     print('**Fixed**')
 
+if args.volume:
+    volume = args.volume
+else:
+    infile = 'conf.lmp'
+    fp = open(infile)
+    ins = fp.readlines()
+    print("  ?? vol not provided, parse from in conf.lmp") 
+    xhi = False
+    yhi = False
+    zhi = False
+    for line in ins:
+        if 'xlo' in line:
+            xlo = float(line.split()[0])
+            xhi = float(line.split()[1])
+        if 'ylo' in line:
+            ylo = float(line.split()[0])
+            yhi = float(line.split()[1])
+        if 'zlo' in line:
+            zlo = float(line.split()[0])
+            zhi = float(line.split()[1])
+        if xhi and yhi and zhi:
+            break
+        
+    volume = (xhi - xlo)*(yhi - ylo)*(zhi - zlo)
+    print(' ** volume = ', volume)
+
 xlen = len(x)
 xrange = range(xlen//2,xlen)
 x  = x[xrange]
@@ -98,15 +125,22 @@ print_list(average0)
 kb =  8.617e-5 # eV/K
 kb_natoms = kb*args.natoms
 
+TotEng = ys0[1,:]
+#KinEng = 3/2*ys0[-1,:]*kb_natoms
+PotEng = ys0[-2,:]
+# KinEng = TotEng - PotEng
+Temp   = ys0[2,:]
+Press  = ys0[0,:]
+
 tmp = ((ys - np.reshape(average0,(len(average0),1)))**2).mean(axis=1)
 print("TotEng",xrange)
-print(tmp[1]/(average0[2]**2)/kb/kb_natoms)
+print(tmp[1]/(Temp**2)/kb/kb_natoms)
 
 print("KinEng",xrange)
-print(tmp[-1]/(average0[2]**2)/kb/kb_natoms)
+print(tmp[-1]/(Temp**2)/kb/kb_natoms)
 
 print("PotEng",xrange)
-print(tmp[-2]/(average0[2]**2)/kb/kb_natoms)
+print(tmp[-2]/(Temp**2)/kb/kb_natoms)
 
 if args.plot:   
     fig,ax = plt.subplots(3,2,figsize=(10,6),sharex=False,sharey=False)
@@ -123,9 +157,24 @@ def fluct(data):
 pot = np.array(ys0)[-2,:]
 out = []        
 for i in range(len(pot)):
-    cv_i = fluct(pot[i:])/(average0[2]**2)/kb/kb_natoms
+    cv_i = fluct(pot[i:])/(Temp**2)/kb/kb_natoms
     out.append(cv_i)
 
+
+deltaP = Press[xrange] - np.mean(Press[xrange])
+deltaPot = PotEng[xrange] - np.mean(PotEng[xrange])
+
+j2eV = 6.242e18
+
+
+ev_A3_to_Pa = 1/j2eV/(1e-30)
+gamma_v = [] # dP/dT
+for i in range(len(deltaP)):
+
+    term1 = (deltaP[:(i+1)]*1e5*deltaPot[:(i+1)]).mean()/kb/Temp/Temp + args.natom/volume*kb
+    gamma_v.append(term1*ev_A3_to_Pa)
+    
+    
 fig,ax = plt.subplots(2,1,figsize=(6,6),sharex=True,sharey=False)
 ax[0].plot(pot)
 ax[1].plot(out)

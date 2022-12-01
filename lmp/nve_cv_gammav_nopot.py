@@ -2,18 +2,11 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Oct  4 00:21:59 2020
-modified from cmd_interface.py
 
-WARNING message can only be handled if filed is less than lammps fields
-say if I have
-Step TotEng
-then this code cannot handle it. => so I use 'sed' as workaround
+apply when potential energy is not saved 
+PotEng = TotEng - KinEng
+where KinEng  = 3/2*Temp*kb_natoms
 
-
-
-----  modification of log_lmp.py for output specifically
-1- NVT run : pressure,   TotEng, temperature, volume
-2- NVE run : pressure, temperature, , TotEg
 @author: jiedeng
 """
 

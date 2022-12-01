@@ -2,18 +2,26 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Oct  4 00:21:59 2020
+
+
+cv  (eqn 2.89 )
+gamma_v (thermal pressure coefficient) 
+grun (gruneisen param)
+
+
 modified from cmd_interface.py
 
-WARNING message can only be handled if filed is less than lammps fields
-say if I have
-Step TotEng
-then this code cannot handle it. => so I use 'sed' as workaround
+applies when PotEng is saved
 
+KinEng = TotEng - PotEng
 
+KinEng can also be derived using Temp
 
-----  modification of log_lmp.py for output specifically
-1- NVT run : pressure,   TotEng, temperature, volume
-2- NVE run : pressure, temperature, , TotEg
+More info is available in this case and recommended
+
+ref
+Allen & Tildesley 2017 for nve ensemble
+
 @author: jiedeng
 """
 
@@ -163,7 +171,8 @@ pot   = PotEng[xrange]
 temp  = average0[2]
 out = []        
 for i in range(len(pot)):
-    cv_i = 1.5/(1-fluct(pot[i:])/1.5/kb/kb/args.natoms/temp/temp)
+    # eqn 2.89 of Allen & Tildesley 2017 for nve ensemble
+    cv_i = 1.5/(1-fluct(pot[i:])/1.5/kb/kb/args.natoms/temp/temp) 
 #    cv_i = fluct(pot[i:])/(temp**2)/kb/kb_natoms
     out.append(cv_i)
 
@@ -181,16 +190,16 @@ if args.cv_nk:
 else:  
     term2 = 2/3*cv_mean*args.natoms*kb/V
 ev_A3_to_Pa = 1/j2eV/(1e-30)
-gamma = [] # dP/dT
+gamma_v = [] # dP/dT
 for i in range(len(deltaP)):
     
     term1 =(1-(deltaP[:(i+1)]*1e5*deltaPot[:(i+1)]).mean()*V*1e-30*j2eV/args.natoms/kb/kb/temp/temp)    
-    gamma.append(term1*term2*ev_A3_to_Pa)
+    gamma_v.append(term1*term2*ev_A3_to_Pa)
 
 fig,ax = plt.subplots(3,1,figsize=(6,6),sharex=True,sharey=False)
 ax[0].plot(pot)
 ax[1].plot(out)
-ax[2].plot(gamma)
+ax[2].plot(gamma_v)
 ax[0].grid()
 ax[1].grid()
 ax[2].grid()
@@ -198,6 +207,8 @@ ax[0].minorticks_on()
 ax[1].set_xlabel('step')
 ax[0].set_ylabel('PotEng')
 ax[1].set_ylabel('cv_ion')
+ax[2].set_ylabel('(dP/dT)_v')
+
 ax[1].minorticks_on()
 plt.show()
 
