@@ -190,7 +190,8 @@ if ensemble == 'nve':
     print('cv and gamma_v')
     print(cv[0])
     print(gamma_v[0])
-    plot({'cv':cv,'gamma_v':gamma_v})
+    out = {'cv':cv,'gamma_v':gamma_v}
+    plot()
     
 elif ensemble == 'nvt':
     cv      = nvt_cv(dic['PotEng'], dic['Temp'].mean())
@@ -198,7 +199,8 @@ elif ensemble == 'nvt':
     print('cv and gamma_v')
     print(cv[0])
     print(gamma_v[0])
-    plot({'cv':cv,'gamma_v':gamma_v})
+    out = {'cv':cv,'gamma_v':gamma_v}
+
 elif ensemble == 'npt':
     # calculate enthapy
     enthalpy = dic['PotEng'] + dic['Press']*dic['Volume']*kbar_Ang3_to_eV
@@ -209,10 +211,11 @@ elif ensemble == 'npt':
     print('cp and gamma_v')
     print(cp[0])
     print(gamma_v[0])
-    plot({'cp':cp,'gamma_v':gamma_v, 'enthalpy':enthalpy, 'beta_t':beta_t, 'alpha':alpha})
-
+    out = {'cp':cp,'gamma_v':gamma_v, 'enthalpy':enthalpy, 'beta_t':beta_t, 'alpha':alpha}
 else:
     print('No implementation for this ensemble yet')
 
 
+if args.plot:
+    plot(out)
 
