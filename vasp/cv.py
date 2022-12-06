@@ -75,7 +75,7 @@ kb_natoms = kb*args.num
 
 cv_ion = fluct(dat[args.beg:,2])/(t**2)/kb/kb_natoms
 tmp = []
-for i in range(len(dat)):
+for i in range(args.beg,len(dat)):
     cv_i = fluct(dat[i:,2])/(t**2)/kb/kb_natoms
     tmp.append(cv_i)
 
