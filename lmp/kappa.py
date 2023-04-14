@@ -33,6 +33,8 @@ parser.add_argument("--volume", "-v",type=float,help='volume in A3')
 #parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.kappa', help="out file name")
+parser.add_argument("-sfig", "--store_fig", default=False, action='store_true', help="Defualt:  Do not save the figure as outfig")
+parser.add_argument("-ofig", "--outfig",type=str,default='kappa.jpg', help="out figure name")
 
 args = parser.parse_args()
 
@@ -200,6 +202,8 @@ ax[1].set_ylabel('thermal conductivity (W m-1 K-1)')
 ax[1].grid(True)
 ax[1].legend()
 ax[1].set_xscale('log')
+if args.store_fig:
+    plt.savefig(args.outfig, dpi=300)
 plt.show()
 
 #plt.show()
