@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description="Plot contents from lammps log file
 parser.add_argument("--input_file", "-i",type=str, default="log.properties",  help="log_lmp generated file")
 
 #parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
-parser.add_argument("--timestep", "-ts",type=float, default=1,  help=" timestep in fs, default 1fs")
+parser.add_argument("--timestep", "-ts",type=float,  help=" timestep in fs, default 1fs")
 #parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
 parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
 parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
@@ -64,6 +64,22 @@ else:
 #                print('No T found in ', infile)                   
     print('  ** T = ', T)
 
+if args.timestep:
+    timestep = args.timestep*1e-3#1e-3    # in ps this is different from post_corr
+else:
+    infile = glob.glob('in*')[0]
+    print('  Find ', infile)
+    print("  ?? timestep not provided, parse from in file") 
+    fp = open(infile)
+    ins = fp.readlines()
+    for line in ins:
+        line=line.split('#')[0].split()
+        if len(line)>0 and line[0] ==   'variable' and line[1] == 'dt' and line[2] == 'equal':
+            timestep = float(line[3])
+            break
+#            except:
+#                print('No T found in ', infile)                   
+    print('  ** ts = ', timestep)
         
 if args.volume:
     V = args.volume
@@ -98,7 +114,7 @@ ev2j = 1.60218e-19
 A2m  = 1.0e-10
 ps2s = 1.0e-12
 convert     = ev2j*ev2j/ps2s/A2m
-timestep    = args.timestep*1e-3#1e-3    # in ps this is different from post_corr
+
 sample_rate = 1       # for all mgsio3 syste, sample every single step
 
 scale = convert/kB/T/T/V*sample_rate*timestep
@@ -135,8 +151,8 @@ cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_
 cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
 if args.store:
-    header='Step (ps)    autocorr (W/m/K/ps)    kappa(W/m/K)'
-    np.savetxt(args.outfile,np.concatenate(([dt],[JJ*metal2SIps],[cumsum_JJ])).T,fmt='%12.10f',header = header)
+    header='Step (ps)    autocorr (W/m/K/ps)    kappa_x(W/m/K)    kappa_y(W/m/K)    kappa_z(W/m/K)    kappa(W/m/K)'
+    np.savetxt(args.outfile,np.concatenate(([dt],[JxJx*metal2SIps],[JyJy*metal2SIps],[JzJz*metal2SIps],[JJ*metal2SIps],[cumsum_JxJx],[cumsum_JyJy],[cumsum_JzJz],[cumsum_JJ])).T,fmt='%12.10f',header = header)
 
 if args.average:
     window = args.average
