@@ -35,6 +35,7 @@ parser.add_argument("-s", "--store", default=False, action='store_true', help="D
 parser.add_argument("-of", "--outfile",type=str,default='log.kappa', help="out file name")
 parser.add_argument("-sfig", "--store_fig", default=False, action='store_true', help="Defualt:  Do not save the figure as outfig")
 parser.add_argument("-ofig", "--outfig",type=str,default='kappa.jpg', help="out figure name")
+parser.add_argument("-conf", "--configeration", type=str, default='conf.lmp', help="read volume from this file")
 
 args = parser.parse_args()
 
@@ -86,10 +87,10 @@ else:
 if args.volume:
     V = args.volume
 else:
-    infile = 'conf.lmp'
+    infile = args.configeration
     fp = open(infile)
     ins = fp.readlines()
-    print("  ?? vol not provided, parse from in conf.lmp") 
+    print("  ?? vol not provided, parse from the configration file") 
     xhi = False
     yhi = False
     zhi = False
