@@ -32,6 +32,7 @@ parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
 parser.add_argument("--volume", "-v",type=float,help='volume in A3')
 #parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
 parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
+parser.add_argument("-xyz", "--xyz_axes", default=False, action='store_true', help="Defualt:  Do not save xyz data in outfile")
 parser.add_argument("-of", "--outfile",type=str,default='log.kappa', help="out file name")
 parser.add_argument("-sfig", "--store_fig", default=False, action='store_true', help="Defualt:  Do not save the figure as outfig")
 parser.add_argument("-ofig", "--outfig",type=str,default='kappa.jpg', help="out figure name")
@@ -154,8 +155,12 @@ cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_
 cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
 if args.store:
-    header='Step (ps)    autocorr (W/m/K/ps)    kappa_x(W/m/K)    kappa_y(W/m/K)    kappa_z(W/m/K)    kappa(W/m/K)'
-    np.savetxt(args.outfile,np.concatenate(([dt],[JxJx*metal2SIps],[JyJy*metal2SIps],[JzJz*metal2SIps],[JJ*metal2SIps],[cumsum_JxJx],[cumsum_JyJy],[cumsum_JzJz],[cumsum_JJ])).T,fmt='%12.10f',header = header)
+    if args.xyz_axes:
+        header='Step (ps)    autocorr_x (W/m/K/ps)    autocorr_y (W/m/K/ps)    autocorr_z (W/m/K/ps)    autocorr (W/m/K/ps)    kappa_x (W/m/K)    kappa_y (W/m/K)    kappa_z (W/m/K)    kappa(W/m/K)'
+        np.savetxt(args.outfile,np.concatenate(([dt],[JxJx*metal2SIps],[JyJy*metal2SIps],[JzJz*metal2SIps],[JJ*metal2SIps],[cumsum_JxJx],[cumsum_JyJy],[cumsum_JzJz],[cumsum_JJ])).T,fmt='%12.10f',header = header)
+    else:
+        header='Step (ps)    autocorr (W/m/K/ps)    kappa(W/m/K)'
+        np.savetxt(args.outfile,np.concatenate(([dt],[JJ*metal2SIps],[cumsum_JJ])).T,fmt='%12.10f',header = header)
 
 if args.average:
     window = args.average
