@@ -5,11 +5,21 @@ Created on Fri Oct  9 12:25:43 2020
 ## msd direct is wrong with unwrapping
 @author: jiedeng
 """
+
+import time
+start_time = time.time()
+formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
+print('Program starts at: ', formatted_time)
+print("Loading modules ...")
 import numpy as np
 import MDAnalysis as mda
 import matplotlib.pyplot as plt
 import argparse
 import glob
+import multiprocessing
+import os
+module_time = time.time()
+print("End after %.2f s" % (module_time - start_time))
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--file","-f",type=str,help="input file")
@@ -81,6 +91,14 @@ def msd_straight_forward(r):
         msds[i] = sqdist.mean()
 
     return msds
+
+def task(i):
+    r = unwrap(i)
+    msd_tmp = msd_fft(r)
+#   msd_tmp =  msd_straight_forward(r)
+    print(i, end=' ')
+    return msd_tmp
+
 if args.file:
     file = args.file
 else:
@@ -90,8 +108,16 @@ else:
     print("Find {0}; analyze {1}".format(files,file))
 
 #file = '/Users/jiedeng/Documents/ml/deepmd-kit/my_example/6k/tmp/r1/20/mgsio3.dump'
+print("Loading dump file ...")
 u_md = mda.Universe(file,format=args.format)
+loading_time = time.time()
+print("End after %.2f s" % (loading_time - module_time))
+
+print("Transferring to memory ...")
 u_md.transfer_to_memory()
+transfer_time = time.time()
+print("End after %.2f s" % (transfer_time - loading_time))
+
 frames = u_md.trajectory
 box    = frames[0].dimensions[0:3]
 
@@ -101,29 +127,41 @@ for atom in u_md.atoms.types:
         eles.append(atom)
 
 # find unique elements
-msds = []
 if not (args.eles):
     ele_sel = eles
 else:
     ele_sel = args.eles.split('-')
-    
+
+print("Calculating MSD ...")
+cores = int(os.getenv('SLURM_CPUS_PER_TASK'))
+print('Number of CPU cores', cores)
+msds = []
 for ele in ele_sel:
     idx = u_md.select_atoms('type {0}'.format(ele)).indices
-    print(ele)
+    print('Elements:', ele)
+    print('Number of atoms:',len(idx))
     tmp = np.zeros(len(u_md.trajectory))
-    for i in idx:
-        r    = unwrap(i)
-        tmp += msd_fft(r)
-#        tmp += msd_straight_forward(r)
+    with multiprocessing.Pool(cores) as pool:
+        results = pool.map(task, idx)
+    for result in results:
+        tmp += result
     msds.append(tmp/len(idx))
+print()
 print(msds)
-print("start ")
-np.savetxt("msd_fft.txt", np.array(msds).T, header='    '.join(ele_sel), fmt = '%2.6f')
-print("end saving ")
+calc_time = time.time()
+print("End after %.2f s" % (calc_time - transfer_time))
 
+print("Saving to file ...")
+np.savetxt("msd_fft.txt", np.array(msds).T, header='    '.join(ele_sel), fmt = '%2.6f')
+sf_time = time.time()
+print("End after %.2f s" % (sf_time - calc_time))
+
+print("Plotting ...")
 plt.figure()
 for i in range(len(ele_sel)):
     plt.loglog((np.array(list(range(len(msds[i]))))*args.timestep)[1:],msds[i][1:],label=eles[i])
 plt.legend()
 #plt.ylim([1e-1,1e2])
 plt.savefig("msd_fft.png",bbox_inches='tight')
+plot_time = time.time()
+print("End after %.2f s" % (plot_time - sf_time))
