@@ -138,6 +138,7 @@ print('Number of CPU cores', cores)
 msds = []
 for ele in ele_sel:
     idx = u_md.select_atoms('type {0}'.format(ele)).indices
+    print()
     print('Elements:', ele)
     print('Number of atoms:',len(idx))
     tmp = np.zeros(len(u_md.trajectory))
