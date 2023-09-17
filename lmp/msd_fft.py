@@ -133,8 +133,8 @@ else:
     ele_sel = args.eles.split('-')
 
 print("Calculating MSD ...")
-if cores := int(os.getenv('SLURM_CPUS_PER_TASK')):
-    pass
+if cores := os.getenv('SLURM_CPUS_PER_TASK'):
+    cores = int(cores)
 else:
     cores = multiprocessing.cpu_count()
     if cores > 16:
