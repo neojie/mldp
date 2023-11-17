@@ -139,4 +139,4 @@ if os.path.exists('recal/OUTCAR') and os.path.exists('recal/toten.dat') and os.p
 
 
 else:
-    print('***step 9: thermal dynamic pertubation, skip due to lack of files')
+    print('***step 9: thermodynamic perturbation, skip due to lack of files')

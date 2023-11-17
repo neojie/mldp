@@ -178,6 +178,7 @@ class GDSAnalyzer(object):
                 ## store the best fitting params to params
                 params = self.result.params
                 break
+            
         # if params is None:  ## changing solid center is not the key, let us adjust the other initital values
         #     pass
             
@@ -253,14 +254,14 @@ class GDSAnalyzer(object):
             proximity = cal_proximity(self.inter)[0]
             selected_rho, selected_indice =cal_local_rho(self.inter)
             selected_prox = np.array(proximity)[selected_indice]
-            mean_prox,mean_rho = _average_prox_vs_rho(selected_prox,selected_rho,self.inter.ngrid[0])
-            result, z0, w = fit_gds_single_sided(mean_prox,mean_rho,vary_z0=False,plot=False,verbose=False)
+            self.mean_prox,self.mean_rho = _average_prox_vs_rho(selected_prox,selected_rho,self.inter.ngrid[0])
+            result, z0, w = fit_gds_single_sided(self.mean_prox,self.mean_rho,vary_z0=False,plot=False,verbose=False)
             
             self.proximity_lw = self.nw*w  # this w is different
             
-            phase1 = self.inter.all_atoms.elements[tuple([proximity < -self.proximity_lw/2])]
-            phase2 = self.inter.all_atoms.elements[tuple([proximity >self.proximity_lw/2])]
-            interface = self.inter.all_atoms.elements[tuple([(proximity <= self.lw/2) & (proximity >= -self.proximity_lw/2)])]
+            phase1 = self.inter.all_atoms.elements[tuple([proximity <= -self.proximity_lw/2])]
+            phase2 = self.inter.all_atoms.elements[tuple([proximity >=self.proximity_lw/2])]
+            interface = self.inter.all_atoms.elements[tuple([(proximity < self.proximity_lw/2) & (proximity > -self.proximity_lw/2)])]
 
             self.out = []
             for ele in self.ele_chemical_symbol:
@@ -273,7 +274,33 @@ class GDSAnalyzer(object):
                             
         return sol_liq_inter, ls, ll, self.lw, lx,ly,lz, self.z0, z1_unpbc, self.result.redchi
 
+    
+    def plot_prox(self,out='prox.png'):
+        """
+        
 
+        Parameters
+        ----------
+        out : TYPE, optional
+            DESCRIPTION. The default is 'prox.png'.
+
+        Returns
+        -------
+        None.
+
+        """
+        import matplotlib.pyplot as plt
+        result, z0, w = fit_gds_single_sided(self.mean_prox,self.mean_rho,vary_z0=False,plot=True,verbose=True)
+
+        plt.plot(self.mean_prox,self.mean_rho)
+        yrange = [min(self.mean_rho)-.5, max(self.mean_rho)+.5]
+        # xrange = [0,max(self.mean_prox)]
+        
+        plt.fill_between([z0-self.proximity_lw/2,z0+self.proximity_lw/2], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
+        
+        plt.xlabel('proximity')
+        plt.ylabel(r'$\rho$'+' ' + r'$(\mathrm{g}/\mathrm{cm}^{3})$')
+        plt.savefig(out,dpi=300,bbox_inches='tight')
     
     def plot_gds(self,out='gds.png'):
         """
