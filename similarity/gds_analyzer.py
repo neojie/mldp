@@ -251,17 +251,17 @@ class GDSAnalyzer(object):
         self.w = w
         
         if self.analyze_proximity:
-            proximity = cal_proximity(self.inter)[0]
+            self.proximity = cal_proximity(self.inter)[0]
             selected_rho, selected_indice =cal_local_rho(self.inter)
-            selected_prox = np.array(proximity)[selected_indice]
+            selected_prox = np.array(self.proximity)[selected_indice]
             self.mean_prox,self.mean_rho = _average_prox_vs_rho(selected_prox,selected_rho,self.inter.ngrid[0])
             result, z0, w = fit_gds_single_sided(self.mean_prox,self.mean_rho,vary_z0=False,plot=False,verbose=False)
             
             self.proximity_lw = self.nw*w  # this w is different
             
-            phase1 = self.inter.all_atoms.elements[tuple([proximity <= -self.proximity_lw/2])]
-            phase2 = self.inter.all_atoms.elements[tuple([proximity >=self.proximity_lw/2])]
-            interface = self.inter.all_atoms.elements[tuple([(proximity < self.proximity_lw/2) & (proximity > -self.proximity_lw/2)])]
+            phase1 = self.inter.all_atoms.elements[tuple([self.proximity <= -self.proximity_lw/2])]
+            phase2 = self.inter.all_atoms.elements[tuple([self.proximity >=self.proximity_lw/2])]
+            interface = self.inter.all_atoms.elements[tuple([(self.proximity < self.proximity_lw/2) & (self.proximity > -self.proximity_lw/2)])]
 
             self.out = []
             for ele in self.ele_chemical_symbol:
@@ -274,6 +274,48 @@ class GDSAnalyzer(object):
                             
         return sol_liq_inter, ls, ll, self.lw, lx,ly,lz, self.z0, z1_unpbc, self.result.redchi
 
+    def save_prox_xyz(self,outname='prox.xyz'):
+        """
+        
+
+        Parameters
+        ----------
+        out : TYPE, optional
+            DESCRIPTION. The default is 'prox.xyz'.
+
+        Returns
+        -------
+        None.
+
+        """
+        out = open(outname,'w')
+        
+        
+        cell = np.insert(self.inter.box, [1,1,1,2,2,2],[0,0,0,0,0,0])
+        string_with_tabs = 'Lattice=\"' +" ".join(str(item) for item in cell) +'\"'
+        ct = string_with_tabs + " Properties=species:S:1:pos:R:3:k:R:1\n" # k is the similarity kernel
+        
+        out.writelines(str(self.inter.all_atoms.n_atoms)+'\n')
+        out.writelines(ct)
+        
+        lines = [' '.join(map(str, row)) + '\n' for row in self.inter.all_atoms.positions]
+        
+        phase1_array = np.array([int(item) for item in (self.proximity < -self.proximity_lw/2)])
+        phase2_array = np.array([int(item) for item in (self.proximity >  self.proximity_lw/2)])*2
+        phase_array = phase1_array + phase2_array
+        
+        combined_lines = [self.inter.all_atoms.elements[i] + ' ' + line.strip() + ' ' + str(phase_array[i]) + '\n' for i, line in enumerate(lines)]
+        out.writelines(combined_lines)
+        out.close()
+        
+    def load_default_setting(self,fontsize=13,font_family='Arial'):
+        """
+        """
+        import matplotlib as mpl
+        mpl.rc('font',family = font_family)
+        mpl.rc('font',size = fontsize)
+        print("set font family as {0}".format(font_family))
+        print("set font size as {0}".format(fontsize))
     
     def plot_prox(self,out='prox.png'):
         """
@@ -289,17 +331,20 @@ class GDSAnalyzer(object):
         None.
 
         """
+        self.load_default_setting()
         import matplotlib.pyplot as plt
         result, z0, w = fit_gds_single_sided(self.mean_prox,self.mean_rho,vary_z0=False,plot=True,verbose=True)
 
-        plt.plot(self.mean_prox,self.mean_rho)
-        yrange = [min(self.mean_rho)-.5, max(self.mean_rho)+.5]
-        # xrange = [0,max(self.mean_prox)]
+        # plt.plot(self.mean_prox,self.mean_rho)# use clip_on=False if need marker atop axes
+        xrange = [min(self.mean_prox), max(self.mean_prox)]
+        yrange = [min(self.mean_rho), max(self.mean_rho)]
         
         plt.fill_between([z0-self.proximity_lw/2,z0+self.proximity_lw/2], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
-        
-        plt.xlabel('proximity')
+        plt.ylim(yrange)
+        plt.xlim(xrange)
+        plt.xlabel('Proximity' + r'$(\mathrm{\AA})$')
         plt.ylabel(r'$\rho$'+' ' + r'$(\mathrm{g}/\mathrm{cm}^{3})$')
+        plt.minorticks_on()
         plt.savefig(out,dpi=300,bbox_inches='tight')
     
     def plot_gds(self,out='gds.png'):
@@ -307,6 +352,7 @@ class GDSAnalyzer(object):
         Show the density profile, fitted results, and GDS location
         """
         import matplotlib.pyplot as plt
+        self.load_default_setting()
         yrange = [min(self.rho_zi)-.5, max(self.rho_zi)+.5]
         xrange = [0,max(self.zi)]
         dim = xrange[1]
@@ -341,7 +387,6 @@ class GDSAnalyzer(object):
         plt.ylim(yrange)
         plt.xlim(xrange)
         plt.minorticks_on()
-        plt.xlabel('z (A)')
         plt.xlabel('z ' + r'$(\mathrm{\AA})$')
         plt.ylabel(r'$\rho$'+' ' + r'$(\mathrm{g}/\mathrm{cm}^{3})$')
         plt.savefig(out,dpi=300,bbox_inches='tight')
