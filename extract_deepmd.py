@@ -21,7 +21,8 @@ parser.add_argument("--vaspidx","-vid",type = str, help="idx file, vasp idx, idx
 parser.add_argument("--idx","-id",type = str, help="idx file, idx[0] >= 0")
 parser.add_argument('--savetest',"-st", default=True, action='store_false',help="Default: save test as set.001? ")
 parser.add_argument('--force_limit',"-fl", type=float,nargs="+",help="force limit max and min, order does not matter.")
-parser.add_argument('--exclude',"-e", type=int,nargs="+",help="manually exclude indexs")
+parser.add_argument('--exclude',"-ex", type=int,nargs="+",help="manually exclude indexs")
+parser.add_argument('--elements',"-e", type=str,nargs="+",help="impose element list")
 
 args   = parser.parse_args()
 
@@ -77,6 +78,52 @@ def build_deepmd(path,outcar,deepmd):
         build_fparam(path,sigma, deepmd)
     else:
         print("No temperature info")
+
+def update_element_files_with_defaults(type_map_dir='.', type_file_dir='.', new_elements_list=''):
+    """
+    Update the type_map.raw and type.raw files based on the new list of elements with default file paths.
+
+    Parameters:
+    type_map_dir (str): Directory path for type_map.raw. Default is current directory '.'.
+    type_file_dir (str): Directory path for type.raw. Default is current directory '.'.
+    new_elements_list (str): New list of elements (space-separated).
+    """
+    type_map_file_path = os.path.join(type_map_dir, 'type_map.raw')
+    type_file_path = os.path.join(type_file_dir, 'type.raw')
+    new_elements = new_elements_list#.split()
+
+    # Read the current contents of the files
+    with open(type_map_file_path, 'r') as file:
+        current_type_map = file.read().splitlines()
+
+    with open(type_file_path, 'r') as file:
+        current_type = file.read().splitlines()
+
+    # Store the original element list for summary
+    original_element_list = current_type_map.copy()
+
+    # Check if the new elements list is different from the current one
+    if set(new_elements) != set(current_type_map):
+        print("!!! Warning: Element list will be changed. !!!")
+
+        # Update type_map.raw
+        with open(type_map_file_path, 'w') as file:
+            for element in new_elements:
+                file.write(element + '\n')
+
+        # Create a dictionary to map the new element indices
+        element_index_map = {element: str(index) for index, element in enumerate(new_elements)}
+
+        # Update type.raw with elements aligned in a single column
+        updated_type = [element_index_map[current_type_map[int(atom)]] for atom in current_type]
+        with open(type_file_path, 'w') as file:
+            file.write('\n'.join(updated_type) + '\n')
+
+        print(f"!!! Element list changed from {original_element_list} to {new_elements}. !!!")
+    else:
+        print("No changes needed. The element list is the same.")
+
+
 
 def build_deepmd_frames(path,outcar,deepmd):
     """
@@ -150,14 +197,19 @@ def build_deepmd_frames(path,outcar,deepmd):
         ls2.to_deepmd_npy('test_tmp',set_size=1000000)
         shutil.copytree('test_tmp/set.000',os.path.join(deepmd,'set.001'))
         shutil.rmtree('test_tmp')
-
-
-cwd    = os.getcwd()
-if os.path.exists(os.path.join(cwd,args.deepmd)):
-    print("deepmd foler already exist=> skip")
-else:
-    print("Build {0}".format(args.deepmd))
-    build_deepmd(cwd,os.path.join(cwd,args.file), os.path.join(cwd,args.deepmd))
-    if args.format =='dump':
-        print("!!!** May want to modify the {0}/type_map.raw **!!!".format(args.deepmd))
+    
+    ## impose element list
+    ## e.g.: OUTCAR only contains FeW, but the list in json is MgOFeW
+    if args.elements:
+        update_element_files_with_defaults( deepmd, deepmd, new_elements_list=args.elements)
+    
+if __name__ == "__main__":
+    cwd    = os.getcwd()
+    if os.path.exists(os.path.join(cwd,args.deepmd)):
+        print("deepmd foler already exist=> skip")
+    else:
+        print("Build {0}".format(args.deepmd))
+        build_deepmd(cwd,os.path.join(cwd,args.file), os.path.join(cwd,args.deepmd))
+        if args.format =='dump':
+            print("!!!** May want to modify the {0}/type_map.raw **!!!".format(args.deepmd))
 
