@@ -104,6 +104,7 @@ if args.plot:
         for i in range(len(args.y)):
             ax[i].plot(x[args.starting_i:],ys[i][args.starting_i:],label=args.y[i],marker=args.marker, alpha=0.6, linestyle=args.linestyle)
             ax[i].legend();ax[i].grid()
+    fig.savefig('thermo.png', bbox_inches='tight')
     plt.show()
 
 

@@ -45,3 +45,7 @@ else:
     
 ana=GDSAnalyzer(xyz = xyz, begin = args.begin, end = args.end, mode = args.mode, project_axis= args.project_axis, step = args.step,nw=args.num_interface_w)
 
+# plot of prox in the last frame
+ana.plot_prox()
+# xyz of last frame for visualizations
+ana.save_prox_xyz()
