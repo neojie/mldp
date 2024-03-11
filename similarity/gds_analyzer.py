@@ -338,7 +338,9 @@ class GDSAnalyzer(object):
         # plt.plot(self.mean_prox,self.mean_rho)# use clip_on=False if need marker atop axes
         xrange = [min(self.mean_prox), max(self.mean_prox)]
         yrange = [min(self.mean_rho), max(self.mean_rho)]
-        
+        plt.figure()
+        plt.plot(self.mean_prox,self.mean_rho,'o')
+        plt.plot(self.mean_prox,result.best_fit,'-')
         plt.fill_between([z0-self.proximity_lw/2,z0+self.proximity_lw/2], [yrange[0], yrange[0]],[yrange[1], yrange[1]],color='r',alpha=0.3)
         plt.ylim(yrange)
         plt.xlim(xrange)

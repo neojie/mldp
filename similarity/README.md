@@ -2,7 +2,16 @@
 
 Post-processing scripts for the soap similiarity analysis
 
-
+```
+Step 1: prepare extended xyz file (from dump file)
+        For mass density, use dump2xyz.py
+        For density based on k value, e.g., similiarity metric, one needs to run LAMMPS PLUMED simulations and use merge_xyz.py
+Step 2: calculate the density vs. planar surface or proximity
+Step 3: fit density to Gibbs Dividing surface forumula
+Step 4: Count number of atoms in each phase
+        planar: sum_counts*
+        proximity: sum_proximity*
+```
 
 ```
 mkdir soap
@@ -28,11 +37,11 @@ python ~/script/mldp/similarity/bash_sub.py -nw 2 -m mass -p 2 -i 70
 
 ==TODO==
 
-1- merge stat_lib.py and stat_lib_mass.py
+1- merge stat_lib.py and stat_lib_mass.py =>done
 
 weight can be specify by the user
 
-2- any amounts elements 
+2- any amounts elements  => done
 
 3- flexibility of modulate the 
 
