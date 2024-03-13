@@ -49,6 +49,7 @@ weight can be specify by the user
 
 l1 l2 l3 l4 .. s1 s2 s3 s4 ... int1 int2 s3 s4
 
+Testing folder: /Users/jiedeng/GD/papers/zhixue/exsolution/w/md/mgofew/256mgo4096fe16w/4.5k/cont1/soap
 
 
 mass as weight 

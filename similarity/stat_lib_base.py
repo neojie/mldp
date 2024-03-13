@@ -8,13 +8,35 @@ Created on Sun Feb  6 10:47:24 2022
 import numpy as np
 # import ase.io
 # import MDAnalysis as mda
-import pytim
+# import pytim
+# import sys
+# from pathlib import Path
+# sys.path.append(str(Path(__file__).parent.parent))
+
 import matplotlib.pyplot as plt
 from lmfit import Parameters, Model, report_fit
 from scipy.interpolate import RegularGridInterpolator
-
+from william_chandler_revised import WillardChandlerRevised
 
 params_global = None
+
+def _unique_unsorted(array):
+    """
+    return unsorted elements of an array
+
+    Parameters
+    ----------
+    array : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    list
+        DESCRIPTION.
+
+    """
+    indexes = np.unique(array, return_index=True)[1]
+    return [array[index] for index in sorted(indexes)]
 
 def _inter_density_two_end_equal(inter):
     """
@@ -75,23 +97,53 @@ def cal_inter(ase_xyz,mda_xyz,fn,mesh=1.5, alpha=2.5, level=None,mode='mass'):
     ase_a = ase_xyz[fn]
     mda_a = mda_xyz.trajectory[fn]
     mda_a.dimensions= ase_a.get_cell_lengths_and_angles()
-    inter     = pytim.WillardChandler(mda_xyz, mesh=mesh, alpha=alpha,level=level)
+    # inter     = pytim.WillardChandler(mda_xyz, mesh=mesh, alpha=alpha,level=level)
+    inter     = WillardChandlerRevised(mda_xyz, mesh=mesh, alpha=alpha,level=level)
+
+    # Set the mass and recalculate density field
     if mode == 'mass':
         k     = ase_a.get_masses()
     elif mode == 'k':
         k     = ase_a.arrays['k']
         ## re-calculate the density field using the fictious mass k
-        inter.density_field,inter.mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,k) 
-        inter.mass_density_field_reshape = inter.mass_density_field.reshape(
-            tuple(np.array(inter.ngrid).astype(int)))
+        # inter.density_field,inter.mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,k) 
+        # inter.mass_density_field_reshape = inter.mass_density_field.reshape(
+        #     tuple(np.array(inter.ngrid).astype(int)))
     else:
         print('Weighting mode of {} is not supported!'.format(mode))
+    inter.density_field,inter.mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,k) 
+    inter.mass_density_field_reshape = inter.mass_density_field.reshape(
+        tuple(np.array(inter.ngrid).astype(int)))
+
     _inter_density_two_end_equal(inter)
     inter.universe.atoms.masses = k   ## the intital masses for Si is problematic, bug in MDAnalysis
     return inter, k,ase_a,mda_a
 
 
+def cal_mol_frac(inter):
+    """
+    calculate molar fraction of each element of current inteface
 
+    Parameters
+    ----------
+
+    """
+    density_field_i = {}
+    
+    masses = inter.all_atoms.masses
+    # first set every atom as mass 1
+    k = np.ones(masses.shape)
+    # then set individual ones as 1
+    _,density_field_all       = inter.kernel.evaluate_pbc_fast(inter.grid,k)
+    
+    for i in range(len(inter.unique_mass)):
+        k                     = np.array([int(item) for item in (masses==inter.unique_mass[i])])
+        _,density_field_      = inter.kernel.evaluate_pbc_fast(inter.grid,k)
+        density_field_       /= density_field_all
+        density_field_reshape = density_field_.reshape(
+            tuple(np.array(inter.ngrid).astype(int)))
+        density_field_i[inter.unique_ele[i]] = density_field_reshape
+    return density_field_i
     
 # density_field,mass_density_field = inter.kernel.evaluate_pbc_fast(inter.grid,inter.universe.atoms.masses)
 
@@ -147,7 +199,7 @@ def gds_single_sided(z,w,rhol,rhov,z0=0):
     rho = .5*(rhol + rhov) + .5*(rhol-rhov)*np.tanh((z-z0)/w)
     return rho
 
-def fit_gds_single_sided(zi,rho_zi,plot=True,verbose=True,vary_z0=True):
+def fit_gds_single_sided(zi,rho_zi,plot=False,verbose=True,vary_z0=True):
     """
     LS fitting to GDS, usually used for proximity vs. rho
     """
@@ -162,6 +214,7 @@ def fit_gds_single_sided(zi,rho_zi,plot=True,verbose=True,vary_z0=True):
         report_fit(result)
         result.params.pretty_print
     if plot:
+        plt.figure()
         result.plot_fit()
     return result, result.params['z0'].value, result.params['w'].value
 
@@ -366,11 +419,14 @@ def cal_proximity(inter):
     return proximity,tag
 
 
-def cal_local_rho(inter):
+def cal_local_rho(inter, density=None):
     x = np.unique(inter.grid[0])
     y = np.unique(inter.grid[1])
     z = np.unique(inter.grid[2])
-    V = inter.mass_density_field_reshape
+    if density is None:
+        V = inter.mass_density_field_reshape
+    else:
+        V = density
     # mass_density_field_reshape shape is ngrid[0]*ngrid[1]*ngrid[2]
     fn = RegularGridInterpolator([x,y,z], V)
     out_rho = []
@@ -388,7 +444,6 @@ def cal_local_rho(inter):
     selected_indice = np.array(selected_indice)
     selected_indice = selected_indice[~np.isnan(out_rho)]
     out_rho  = out_rho[~np.isnan(out_rho)]
-    
     return out_rho, selected_indice
 
     
