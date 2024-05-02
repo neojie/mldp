@@ -174,7 +174,7 @@ class GDSAnalyzer(object):
             # ith element takes 2*i 2*i+1 col
             mean_prox_i = self.mol_frac[:,2*i]
             mean_rho_i  = self.mol_frac[:,2*i+1]
-            ax[i].plot(mean_prox_i, mean_rho_i,'r.', label=ele,alpha=0.3)
+            ax[i].plot(mean_prox_i, mean_rho_i,'r.', label=ele, alpha=0.3)
             ax[i].legend();ax[i].grid()
             ax[i].set_ylabel('Atomic fraction (%)')
         plt.savefig('atomic_fraction_vs_proximity.png',dpi=300,bbox_inches='tight')

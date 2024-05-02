@@ -8,7 +8,8 @@ Created on Sun Sep 25 20:21:49 2022
 
 import os
 import glob
-dirs=os.listdir('.')
+# dirs=os.listdir('.')
+dirs = [x[0] for x in os.walk('.')]
 train = []
 test = []
 import numpy as np
@@ -36,3 +37,4 @@ for diri in dirs:
     train.append(count - tmp)
 
 
+print(sum(test),sum(train))
