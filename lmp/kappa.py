@@ -7,42 +7,39 @@ https://lammps.sandia.gov/doc/compute_heat_flux.html
 
 directly analyze the log.properties file with Step, Jx, Jy, Jz 
 
-@author: jiedeng
-"""
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  6 22:26:44 2021
-analyze output of ave/correlate
-@author: jiedeng
+On Wed Jan  6 22:26:44 2021
+jiedeng: analyze output of ave/correlate
+
+On Wed May 21, 2025
+Yihang Peng: Improve the visualization
+
+@author: jiedeng, Yihang Peng
 """
 
-
-#from util import reverse_readline
-#import os 
+import os 
 import argparse
-parser = argparse.ArgumentParser(description="Plot contents from lammps log files")
-parser.add_argument("--input_file", "-i",type=str, default="log.properties",  help="log_lmp generated file")
-
-#parser.add_argument("--num", "-n",type=int, default=200,  help=" Nrepeat in ave/correlate Nevery Nrepeat Nfreq")
-parser.add_argument("--timestep", "-ts",type=float,  help=" timestep in fs, default 1fs")
-#parser.add_argument("--scale", "-s",type=float,  help=" scale to SI unit, check the log file for this value, default 1")
-parser.add_argument("--average", "-a",nargs="+",type=int, help=" step window average the thermal conductivity")
-parser.add_argument("--temperature", "-t",type=float,help='temperature in K')
-parser.add_argument("--volume", "-v",type=float,help='volume in A3')
-#parser.add_argument("--sample_rate", "-sr",type=float,help='sample rate')
-parser.add_argument("-s", "--store", default=False, action='store_true', help="Defualt:  Do not save data as outfile")
-parser.add_argument("-xyz", "--xyz_axes", default=False, action='store_true', help="Defualt:  Do not save xyz data in outfile")
-parser.add_argument("-of", "--outfile",type=str,default='log.kappa', help="out file name")
-parser.add_argument("-sfig", "--store_fig", default=False, action='store_true', help="Defualt:  Do not save the figure as outfig")
-parser.add_argument("-ofig", "--outfig",type=str,default='kappa.jpg', help="out figure name")
-parser.add_argument("-conf", "--configeration", type=str, default='conf.lmp', help="read volume from this file")
-
-args = parser.parse_args()
-
 import numpy as np
 import matplotlib.pyplot as plt
 import glob
+import scipy.integrate
+import pickle as pkl
+from matplotlib import rcParams
+
+rcParams['font.size'] = '16'
+
+parser = argparse.ArgumentParser(description="Calculate thermal conductivity from heat current autocorrelation function")
+parser.add_argument("--input_file", "-i", type=str, default="jh.dat",  help="jh output file")
+parser.add_argument("--timestep", "-ts", type=float, help="Timestep in fs, search in in.* if not provided")
+parser.add_argument("--total_time", "-tt", type=float, default=100, help="total time for plotting in ps, default 100 ps")
+parser.add_argument("--temperature", "-t", type=float,help='Temperature in K, search in Temp.txt and then in.* if not provided')
+parser.add_argument("--volume", "-v", type=float,help='Volume in A^3, search in eq.final.lmp if not provided')
+parser.add_argument("--configeration", "-conf", type=str, default='eq.final.lmp', help="read volume from this file")
+parser.add_argument("--avg1", "-a1", type=float, default=0.1, help="average kappa between avg1 and avg2")
+parser.add_argument("--avg2", "-a2", type=float, default=1, help="average kappa between avg1 and avg2")
+parser.add_argument("--outfile", "-o", type=str,default='kappa', help="out file name")
+parser.add_argument("--save_pkl", "-pkl", action='store_true', help="save data in pickle format")
+
+args = parser.parse_args()
 
 def autocorr(a):
     b=np.concatenate((a,np.zeros(len(a))),axis=0)
@@ -53,10 +50,15 @@ def autocorr(a):
 
 if args.temperature:
     T = args.temperature
+elif os.path.exists('Temp.txt'):
+    print("  ?? temperature not provided, parse from Temp.txt") 
+    with open("Temp.txt", "r") as file:
+        T = float(file.read())
+        print('  ** T = ', T)
 else:
     infile = glob.glob('in*')[0]
     print('  Find ', infile)
-    print("  ?? temperature not provided, parse from in file") 
+    print("  ?? temperature not provided, parse from in file. Warning: The results may be not accurate!!!!") 
     fp = open(infile)
     ins = fp.readlines()
     for line in ins:
@@ -84,7 +86,7 @@ else:
 #            except:
 #                print('No T found in ', infile)                   
     print('  ** ts = ', timestep)
-        
+
 if args.volume:
     V = args.volume
 else:
@@ -111,18 +113,13 @@ else:
     V = (xhi - xlo)*(yhi - ylo)*(zhi - zlo)
     print(' ** volume = ', V)
 
-
 # convert from LAMMPS real units to SI
 kB   = 1.3806504e-23   # [J/K] Boltzmann
 ev2j = 1.60218e-19
 A2m  = 1.0e-10
 ps2s = 1.0e-12
 convert     = ev2j*ev2j/ps2s/A2m
-
-sample_rate = 1       # for all mgsio3 syste, sample every single step
-
-scale = convert/kB/T/T/V*sample_rate*timestep
-
+scale = convert/kB/T/T/V*timestep
 metal2SIps = convert/kB/T/T/V
 
 file = args.input_file
@@ -130,137 +127,70 @@ file = args.input_file
 J=np.loadtxt(file) # heat current J is saved, but heat flux (energy x velocity) autocorrelation is saved in J0Jt, heat flux/V = heat flux
 J = J*V
 Jx, Jy, Jz = J[:,1], J[:,2], J[:,3]
+t = np.arange(len(Jx)) * timestep
 
 #correlation time
-dt = np.array(range(len(J)))*timestep # in ps
+tcorr = np.array(range(int(args.total_time/timestep)+1)) * timestep # in ps
+tcorr_len = len(tcorr)
 
 JxJx = autocorr(Jx)
+print('Jx done!')
 JyJy = autocorr(Jy)
+print('Jy done!')
 JzJz = autocorr(Jz)
-JJ = (JxJx + JyJy + JzJz)/3
+print('Jz done!')
 
-k11 = np.trapz(JxJx)*scale
-k22 = np.trapz(JyJy)*scale
-k33 = np.trapz(JzJz)*scale
-
-kappa = (k11+k22+k33)/3.0
-print(' JJ[0 is] {0} (W m-1 K-1 ps-1): '.format( JJ[0]*metal2SIps))
-print(' Last step kappa is {0} (W m-1 K-1): '.format( kappa))
-#print('kappa is 'kappa)
-
-import scipy.integrate
 cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
-cumsum_JJ = (cumsum_JxJx + cumsum_JyJy + cumsum_JzJz)/3
 
-if args.store:
-    if args.xyz_axes:
-        header='Step (ps)    autocorr_x (W/m/K/ps)    autocorr_y (W/m/K/ps)    autocorr_z (W/m/K/ps)    autocorr (W/m/K/ps)    kappa_x (W/m/K)    kappa_y (W/m/K)    kappa_z (W/m/K)    kappa(W/m/K)'
-        np.savetxt(args.outfile,np.concatenate(([dt],[JxJx*metal2SIps],[JyJy*metal2SIps],[JzJz*metal2SIps],[JJ*metal2SIps],[cumsum_JxJx],[cumsum_JyJy],[cumsum_JzJz],[cumsum_JJ])).T,fmt='%12.10f',header = header)
-    else:
-        header='Step (ps)    autocorr (W/m/K/ps)    kappa(W/m/K)'
-        np.savetxt(args.outfile,np.concatenate(([dt],[JJ*metal2SIps],[cumsum_JJ])).T,fmt='%12.10f',header = header)
+jxyz_full = np.array([JxJx, JyJy, JzJz]) * metal2SIps
+kxyz_full = np.array([cumsum_JxJx, cumsum_JyJy, cumsum_JzJz])
 
-if args.average:
-    window = args.average
-    cumsum_JJ_sel = cumsum_JJ[range(window[0],window[1])]
-    cumsum_JJ_selx = cumsum_JxJx[range(window[0],window[1])]
-    cumsum_JJ_sely = cumsum_JyJy[range(window[0],window[1])]
-    cumsum_JJ_selz = cumsum_JzJz[range(window[0],window[1])]
+jxyz = jxyz_full[:,:tcorr_len]
+kxyz = kxyz_full[:,:tcorr_len]
 
-#    window_mean = cumsum_JJ[range(window[0],window[1])].mean()
-    print('mean kappa within {0} ps - {1} ps is {2}   {3}(W m-1 K-1): '.format(
-            dt[window[0]], 
-            dt[window[1]], 
-            min(cumsum_JJ_sel),
-            max(cumsum_JJ_sel)
-            ))
+j = np.mean(jxyz, axis=0)
+k = np.mean(kxyz, axis=0)
 
-    print('mean kappa within {0} ps - {1} ps is {2} +/-  {3}(W m-1 K-1): '.format(
-            dt[window[0]], 
-            dt[window[1]], 
-            np.mean(cumsum_JJ_sel),
-            np.std(cumsum_JJ_sel)
-            ))
-    print('a,b,c')
-    print(np.mean(cumsum_JJ_selx),'\t',np.mean(cumsum_JJ_sely),'\t',np.mean(cumsum_JJ_selz))
-    print(np.std(cumsum_JJ_selx),'\t', np.std(cumsum_JJ_sely),'\t', np.std(cumsum_JJ_selz) )
-    
-fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
-ax[0].plot(dt, JxJx*metal2SIps,label='x') # 
-ax[0].plot(dt, JyJy*metal2SIps,label='y')
-ax[0].plot(dt, JzJz*metal2SIps,label='z')
-ax[0].plot(dt, JJ*metal2SIps,label='average')
-ax[0].set_xlabel('dt (ps)')
-ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
-ax[0].grid(True)
-ax[0].legend()
-ax[0].set_xscale('log')
+k_avg = np.mean(k[(tcorr > args.avg1) & (tcorr < args.avg2)]) # average kappa between 0.1 and 10 ps
 
-ax[1].plot(dt, cumsum_JxJx,label='x') # 
-ax[1].plot(dt, cumsum_JyJy,label='y')
-ax[1].plot(dt, cumsum_JzJz,label='z')
-ax[1].plot(dt, cumsum_JJ,label='average')
+fig,ax = plt.subplots(2,1,figsize=(8,12),sharex=True)
+fig.subplots_adjust(hspace=0.05)
 
-ax[1].set_xlabel('dt (ps)')
-ax[1].set_ylabel('thermal conductivity (W m-1 K-1)')
-ax[1].grid(True)
-ax[1].legend()
-ax[1].set_xscale('log')
-if args.store_fig:
-    plt.savefig(args.outfig, dpi=300)
-plt.show()
+ax[0].plot(tcorr, j, c='k', label=f'Average ({t[-1] / 1000:.1f} ns)')
+ax[0].plot(tcorr, jxyz[0], c='C1', label='x')
+ax[0].plot(tcorr, jxyz[1], c='C2', label='y')
+ax[0].plot(tcorr, jxyz[2], c='C0', label='z')
+ax[0].set_ylabel('C(t)' + ' '+ r'$(\mathrm{W} \mathrm{m}^{-1} \mathrm{K}^{-1} \mathrm{ps}^{-1})$')
+ax[0].plot(tcorr, np.ones(tcorr.shape)*0,'k--')
 
-#plt.show()
+ax[1].plot(tcorr, k, c='k')
+ax[1].plot(tcorr, kxyz[0], c='C1')
+ax[1].plot(tcorr, kxyz[1], c='C2')
+ax[1].plot(tcorr, kxyz[2], c='C0')
+ax[1].axhline(k_avg, c='k', ls='--', alpha=0.7, label=f'{k_avg:.2f} ({args.avg1:.1f} - {args.avg2:.1f} ps)')
 
+ax[1].set_xlabel('t (ps)')
+ax[1].set_ylabel(r'$k $'+' '+ r'$(\mathrm{W} \mathrm{m}^{-1} \mathrm{K}^{-1})$')
 
-"""
-### more straighyforward way
-np.sqrt(J[:,1:])
+for a in ax:
+    a.set_xscale('log')
+    a.legend(fancybox=False, edgecolor='black')
+    a.minorticks_on()
 
-j=np.loadtxt(file)[:,1:]
-j_si = j*ev2j/(ps2s*(A2m**2)) # W/m^2
+plt.savefig(args.outfile + '.jpg', dpi=300, bbox_inches='tight')
 
-jxjx = autocorr(j_si[:,0])
-jyjy = autocorr(j_si[:,1])
-jzjz = autocorr(j_si[:,2])
+with open("Press.txt", "r") as file:
+    P = float(file.read())
 
-deno = 3*kB*(T**2)
-B= V*(A2m**3)/deno
-
-jj = (jxjx + jyjy + jzjz)
-C = B*jj*ps2s
-
-plt.figure()
-plt.plot(C)
-plt.xscale('log')
-plt.grid()
-
-
-
-fig,ax = plt.subplots(2,1,figsize=(6,10),sharex=True)
-#ax[0].plot(dt, JxJx*metal2SIps,label='x') # 
-#ax[0].plot(dt, JyJy*metal2SIps,label='y')
-#ax[0].plot(dt, JzJz*metal2SIps,label='z')
-ax[0].plot(dt, JJ*metal2SIps,label='average')
-ax[0].plot(dt,C,label='C')
-ax[0].set_xlabel('dt (ps)')
-ax[0].set_ylabel('autocorrelation*V/kb/T^2  (W m-1 K-1 ps-1)')
-ax[0].grid(True)
-ax[0].legend()
-ax[0].set_xscale('log')
-
-
-trun = dt[-1]*10*5
-tcorr = 2e-2
-
-
-jj_bracket=(j_si**2).sum().sum()/len(j_si)  # x + y + z 
-
-tmp = tcorr*2/trun*(jj_bracket**2)*len(j_si)
-tmp**.5 *timestep*1e-12*B
-
-
-(tcorr*2/trun)**.5
-"""
+if args.save_pkl:
+    print('Save data in pickle format ...')
+    with open(args.outfile + '.pkl', 'wb') as file:
+        print('Total time for autocorrelation:', t[-1])
+        print('Total time for plotting:', tcorr[-1])
+        data = [T, P, tcorr, jxyz, kxyz]
+        pkl.dump(data, file)
+else:
+    print('Save data in txt format ...')
+    np.savetxt(args.outfile + '.txt', np.array([tcorr, jxyz[0], jxyz[1], jxyz[2], kxyz[0], kxyz[1], kxyz[2]]).T, header=f't (ps) Jx Jy Jz kx ky kz; T = {T:.2f} K, P = {P:.2f} GPa', fmt='%.8f')
