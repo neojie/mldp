@@ -140,9 +140,9 @@ print('Jy done!')
 JzJz = autocorr(Jz)
 print('Jz done!')
 
-cumsum_JxJx = scipy.integrate.cumtrapz(JxJx,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
-cumsum_JyJy = scipy.integrate.cumtrapz(JyJy,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
-cumsum_JzJz = scipy.integrate.cumtrapz(JzJz,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JxJx = scipy.integrate.cumulative_trapezoid(JxJx,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JyJy = scipy.integrate.cumulative_trapezoid(JyJy,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
+cumsum_JzJz = scipy.integrate.cumulative_trapezoid(JzJz,initial=0)*scale; #np.insert(cumsum_JxJx, 0, 0)
 
 jxyz_full = np.array([JxJx, JyJy, JzJz]) * metal2SIps
 kxyz_full = np.array([cumsum_JxJx, cumsum_JyJy, cumsum_JzJz])
